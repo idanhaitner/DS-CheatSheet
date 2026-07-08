@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2 · Sorting + Animator</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/theme.js"></script>
+<script src="assets/mathjax-init.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">DS Cheat Sheet<small>Data Structures · Exam Study Guide</small></div>
+  <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Menu</button>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="01-foundations.html">1 · Foundations</a>
+    <a href="02-sorting.html" class="active">2 · Sorting</a>
+    <a href="03-trees.html">3 · Structures &amp; Trees</a>
+    <a href="04-heaps.html">4 · Heaps &amp; Compression</a>
+    <a href="05-hashing.html">5 · Skip Lists &amp; Hashing</a>
+    <a href="06-graphs.html">6 · Graphs</a>
+    <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
+    <a href="08-exam.html">8 · Exam Reference</a>
+  </nav>
+</aside>
+<main class="content">
+  <div class="pagehead">
+    <div class="crumbs"><a href="index.html">Home</a> › Sorting</div>
+    <h1>2 · Sorting Algorithms</h1>
+    <p>Interactive animators · complexity tables · visual traces</p>
+  </div>
+  <div class="inner">
+
+  <!-- ===== SORTING ANIMATOR ===== -->
+  <h2 class="section" id="animator">2.1 Sorting Visualizer</h2>
+  <div class="card">
+    <p style="margin-top:0">Compare classic <b>sorting</b> algorithms. Press <b>Play</b> or step through one operation at a time.</p>
+    <div class="sort-viz-wrap" data-modes='["bubble","selection","insertion","merge","quick","heap"]' data-default="quick">
+      <div class="viz-controls">
+        <label class="viz-algo-label">Algorithm: <select class="viz-algo"></select></label>
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <button class="viz-btn viz-shuffle">Shuffle</button>
+        <label>Speed: <input type="range" class="viz-speed" min="60" max="1600" value="1250" step="20"></label>
+      </div>
+      <div class="viz-algo-info"></div>
+      <div class="legend">
+        <span><span class="sw" style="background:#4a5aa8;border:1px solid #6b78c8"></span> unsorted</span>
+        <span><span class="sw c-cmp"></span> comparing</span>
+        <span><span class="sw c-active"></span> swap / write</span>
+        <span><span class="sw c-min"></span> key / current min</span>
+        <span><span class="sw c-pivot"></span> pivot</span>
+        <span><span class="sw c-done"></span> sorted</span>
+      </div>
+      <div class="viz-main">
+        <div class="viz-bars"></div>
+        <div class="viz-code"></div>
+      </div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-stats">
+        <span>Step <b class="viz-step">0</b> / <b class="viz-total">0</b></span>
+        <span>Comparisons: <b class="viz-comps">0</b></span>
+        <span>Swaps / writes: <b class="viz-swaps">0</b></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== OVERVIEW TABLE ===== -->
+  <h2 class="section" id="overview">2.2 The One Table to Rule Them All</h2>
+  <div class="card">
+    <table>
+      <tr><th>Algorithm</th><th>Best</th><th>Average</th><th>Worst</th><th>Space</th><th>Stable?</th><th>In-place?</th></tr>
+      <tr><td><b>Insertion</b></td><td><span class="tag b-On">n</span></td><td><span class="tag b-On2">n²</span></td><td><span class="tag b-On2">n²</span></td><td>O(1)</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td><b>Selection</b></td><td><span class="tag b-On2">n²</span></td><td><span class="tag b-On2">n²</span></td><td><span class="tag b-On2">n²</span></td><td>O(1)</td><td>No</td><td>Yes</td></tr>
+      <tr><td><b>Bubble</b></td><td><span class="tag b-On">n</span></td><td><span class="tag b-On2">n²</span></td><td><span class="tag b-On2">n²</span></td><td>O(1)</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td><b>Merge</b></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-Onlog">n log n</span></td><td>O(n)</td><td>Yes</td><td>No</td></tr>
+      <tr><td><b>Quick</b></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-On2">n²</span></td><td>O(log n)</td><td>No</td><td>Yes</td></tr>
+      <tr><td><b>Heap</b></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-Onlog">n log n</span></td><td>O(1)</td><td>No</td><td>Yes</td></tr>
+      <tr><td><b>Counting</b></td><td colspan="3" style="text-align:center"><span class="tag b-On">n + k</span></td><td>O(n+k)</td><td>Yes</td><td>No</td></tr>
+      <tr><td><b>Radix</b></td><td colspan="3" style="text-align:center"><span class="tag b-On">d(n + k)</span></td><td>O(n+k)</td><td>Yes</td><td>No</td></tr>
+      <tr><td><b>Bucket</b></td><td><span class="tag b-On">n</span></td><td><span class="tag b-On">n</span></td><td><span class="tag b-On2">n²</span></td><td>O(n)</td><td>Yes</td><td>No</td></tr>
+    </table>
+    <p style="font-size:12px;color:var(--muted)">k = range of keys, d = number of digits. Quick Sort space is O(log n) expected (recursion stack).</p>
+    <div class="note"><b>Comparison sorts</b> (insertion, selection, bubble, merge, quick, heap) cannot beat <b>Ω(n log n)</b> worst case. <b>Non-comparison sorts</b> (counting, radix, bucket) break this by assuming structure on the input.</div>
+  </div>
+
+  <!-- ===== INSERTION ===== -->
+  <h2 class="section" id="insertion">Insertion Sort <span class="tag b-On2" style="font-size:11px">O(n²)</span></h2>
+  <div class="card">
+    <p><b>Idea.</b> Grow a sorted prefix on the left. Take the next "key" and shift larger sorted elements right until the key lands in place — like sorting cards in your hand.</p>
+    <span class="code-label">pseudocode</span>
+<pre><span class="kw">for</span> j = 1 <span class="kw">to</span> n-1:
+    key = A[j]
+    i   = j - 1
+    <span class="kw">while</span> i &gt;= 0 <span class="kw">and</span> A[i] &gt; key:
+        A[i+1] = A[i]        <span class="cm"># shift right</span>
+        i = i - 1
+    A[i+1] = key             <span class="cm"># drop key into the gap</span></pre>
+    <table>
+      <tr><td>Best (already sorted)</td><td><span class="tag b-On">Θ(n)</span></td></tr>
+      <tr><td>Average / Worst (reverse)</td><td><span class="tag b-On2">Θ(n²)</span></td></tr>
+      <tr><td>Space</td><td>O(1), in-place, <b>stable</b></td></tr>
+    </table>
+    <div class="note"><b>Exam gold:</b> runs in <b>O(n·d)</b> where d = number of inversions, or <b>O(nk)</b> when every element is ≤ k positions from its final spot. Best for <b>nearly-sorted</b> or small arrays.</div>
+  </div>
+
+  <!-- ===== SELECTION ===== -->
+  <h2 class="section" id="selection">Selection Sort <span class="tag b-On2" style="font-size:11px">O(n²)</span></h2>
+  <div class="card">
+    <p><b>Idea.</b> Repeatedly find the minimum of the unsorted suffix and swap it to the front. Always \(\Theta(n^2)\) even if already sorted, but does only n−1 swaps.</p>
+    <span class="code-label">pseudocode</span>
+<pre><span class="kw">for</span> i = 0 <span class="kw">to</span> n-2:
+    min = i
+    <span class="kw">for</span> j = i+1 <span class="kw">to</span> n-1:
+        <span class="kw">if</span> A[j] &lt; A[min]:
+            min = j
+    swap(A[i], A[min])</pre>
+    <div class="note">Useful when <b>writes are expensive</b> (only n−1 swaps total). Not stable.</div>
+  </div>
+
+  <!-- ===== BUBBLE ===== -->
+  <h2 class="section" id="bubble">Bubble Sort <span class="tag b-On2" style="font-size:11px">O(n²)</span></h2>
+  <div class="card">
+    <p><b>Idea.</b> Repeatedly walk the array swapping adjacent out-of-order pairs; the largest element "bubbles" to the end each pass. With an early-exit flag it is \(\Theta(n)\) on sorted input.</p>
+    <span class="code-label">pseudocode</span>
+<pre><span class="kw">for</span> i = 0 <span class="kw">to</span> n-2:
+    swapped = false
+    <span class="kw">for</span> j = 0 <span class="kw">to</span> n-2-i:
+        <span class="kw">if</span> A[j] &gt; A[j+1]:
+            swap(A[j], A[j+1])
+            swapped = true
+    <span class="kw">if</span> not swapped:
+        break                <span class="cm"># already sorted, stop early</span></pre>
+    <p>Best <span class="tag b-On">Θ(n)</span> · Average/Worst <span class="tag b-On2">Θ(n²)</span> · O(1) space, stable.</p>
+  </div>
+
+  <!-- ===== MERGE ===== -->
+  <h2 class="section" id="merge">Merge Sort <span class="tag b-Onlog" style="font-size:11px">O(n log n)</span></h2>
+  <div class="card">
+    <p><b>Idea.</b> Divide the array in half, recursively sort each half, then <b>merge</b> the two sorted halves in linear time. \(T(n)=2T(n/2)+\Theta(n)\Rightarrow \Theta(n\log n)\) in all cases.</p>
+    <span class="code-label">pseudocode</span>
+<pre><span class="kw">MergeSort</span>(A, lo, hi):
+    <span class="kw">if</span> lo &lt; hi:
+        mid = (lo + hi) / 2
+        MergeSort(A, lo, mid)
+        MergeSort(A, mid+1, hi)
+        Merge(A, lo, mid, hi)     <span class="cm"># O(n): two pointers, copy smaller</span></pre>
+    <div class="flow"><div class="box">[5, 2, 4, 6, 1, 3]</div><span class="arrow">split →</span><div class="box">[5,2,4]</div><div class="box">[6,1,3]</div></div>
+    <div class="steprow"><span class="steplabel">merge halves</span>
+      <div class="arr"><div class="cell c-sorted">2</div><div class="cell c-sorted">4</div><div class="cell c-sorted">5</div></div>
+      <span class="arrow">+</span>
+      <div class="arr"><div class="cell c-sorted">1</div><div class="cell c-sorted">3</div><div class="cell c-sorted">6</div></div></div>
+    <div class="steprow"><span class="steplabel">result</span>
+      <div class="arr"><div class="cell c-done">1</div><div class="cell c-done">2</div><div class="cell c-done">3</div><div class="cell c-done">4</div><div class="cell c-done">5</div><div class="cell c-done">6</div></div></div>
+    <div class="note">Preferred when <b>stability</b> or worst-case guarantees matter, and the go-to for <b>linked lists</b> (O(1) extra space there). Needs O(n) aux array for arrays.</div>
+  </div>
+
+  <!-- ===== QUICK ===== -->
+  <h2 class="section" id="quick">Quick Sort <span class="tag b-Onlog" style="font-size:11px">avg n log n</span> <span class="tag b-On2" style="font-size:11px">worst n²</span></h2>
+  <div class="card">
+    <p><b>Idea.</b> Pick a <b>pivot</b>, <b>partition</b> so smaller elements go left and larger go right (pivot lands in its final spot), then recurse on each side. In-place, small constants.</p>
+    <span class="code-label">partition (Lomuto, pivot = last)</span>
+<pre><span class="kw">Partition</span>(A, lo, hi):
+    pivot = A[hi]
+    i = lo - 1
+    <span class="kw">for</span> j = lo <span class="kw">to</span> hi-1:
+        <span class="kw">if</span> A[j] &lt;= pivot:
+            i = i + 1
+            swap(A[i], A[j])
+    swap(A[i+1], A[hi])          <span class="cm"># put pivot in place</span>
+    <span class="kw">return</span> i+1</pre>
+    <table>
+      <tr><td>Best / Average</td><td><span class="tag b-Onlog">Θ(n log n)</span></td></tr>
+      <tr><td>Worst (sorted + last-pivot)</td><td><span class="tag b-On2">Θ(n²)</span></td></tr>
+    </table>
+    <div class="pitfall"><b>Worst case</b> occurs when the pivot is always min/max → splits of size (n−1, 0): \(T(n)=T(n-1)+\Theta(n)=\Theta(n^2)\). A deterministic last-element pivot triggers this on already-sorted input. Fix with a <b>random</b> or median-of-three pivot.</div>
+  </div>
+
+  <!-- ===== HEAP ===== -->
+  <h2 class="section" id="heapsort">Heap Sort <span class="tag b-Onlog" style="font-size:11px">O(n log n)</span></h2>
+  <div class="card">
+    <p><b>Idea.</b> Build a <b>max-heap</b> in O(n). Then repeatedly swap the root (max) with the last element, shrink the heap, and sift the new root down. In-place, guaranteed \(\Theta(n\log n)\).</p>
+    <span class="code-label">pseudocode</span>
+<pre><span class="kw">HeapSort</span>(A):
+    BuildMaxHeap(A)              <span class="cm"># O(n)</span>
+    <span class="kw">for</span> i = n-1 <span class="kw">downto</span> 1:
+        swap(A[0], A[i])         <span class="cm"># move current max to the end</span>
+        heapSize = heapSize - 1
+        MaxHeapify(A, 0)         <span class="cm"># O(log n)</span></pre>
+    <div class="note">Advantage over merge sort: <b>O(1)</b> extra memory. Advantage over quicksort: <b>guaranteed</b> O(n log n). See <a href="04-heaps.html#heap">Heaps</a> for the heapify diagram.</div>
+  </div>
+
+  <!-- ===== COUNTING ===== -->
+  <h2 class="section" id="counting">Counting Sort <span class="tag b-On" style="font-size:11px">O(n + k)</span></h2>
+  <div class="card">
+    <p><b>Idea (non-comparison).</b> For integer keys in \([0,k]\): count occurrences, take prefix sums to know final positions, then place elements <b>right to left</b> (preserves stability).</p>
+    <span class="code-label">pseudocode</span>
+<pre><span class="kw">CountingSort</span>(A, k):
+    C = new int[k+1] filled with 0
+    <span class="kw">for</span> a <span class="kw">in</span> A:          C[a] = C[a] + 1        <span class="cm"># counts</span>
+    <span class="kw">for</span> i = 1 <span class="kw">to</span> k:      C[i] = C[i] + C[i-1]   <span class="cm"># prefix sums</span>
+    <span class="kw">for</span> j = n-1 <span class="kw">downto</span> 0:                       <span class="cm"># right to left = stable</span>
+        C[A[j]] = C[A[j]] - 1
+        B[C[A[j]]] = A[j]</pre>
+    <div class="steprow"><span class="steplabel">counts (k=5)</span><div class="arr"><div class="cell">1</div><div class="cell">0</div><div class="cell">2</div><div class="cell">2</div><div class="cell">0</div><div class="cell">1</div></div></div>
+    <div class="steprow"><span class="steplabel">prefix sums</span><div class="arr"><div class="cell c-active">1</div><div class="cell c-active">1</div><div class="cell c-active">3</div><div class="cell c-active">5</div><div class="cell c-active">5</div><div class="cell c-active">6</div></div></div>
+    <div class="steprow"><span class="steplabel">output</span><div class="arr"><div class="cell c-done">0</div><div class="cell c-done">2</div><div class="cell c-done">2</div><div class="cell c-done">3</div><div class="cell c-done">3</div><div class="cell c-done">5</div></div></div>
+    <div class="pitfall">Only <b>Θ(n)</b> when \(k=O(n)\). If \(k=n^2\) it degrades to \(\Theta(n^2)\).</div>
+  </div>
+
+  <!-- ===== RADIX ===== -->
+  <h2 class="section" id="radix">Radix Sort <span class="tag b-On" style="font-size:11px">O(d(n + k))</span></h2>
+  <div class="card">
+    <p><b>Idea.</b> Sort digit-by-digit with a <b>stable</b> sort (counting sort), from the <b>least</b> significant digit up. Stability is essential so earlier digit order survives.</p>
+    <span class="code-label">pseudocode</span>
+<pre><span class="kw">RadixSort</span>(A, d):
+    <span class="kw">for</span> i = 1 <span class="kw">to</span> d:                 <span class="cm"># least significant digit first</span>
+        stable-sort A on digit i</pre>
+    <div class="steprow"><span class="steplabel">by 1's</span><div class="arr"><div class="cell">720</div><div class="cell">355</div><div class="cell">436</div><div class="cell">457</div><div class="cell">657</div><div class="cell">329</div></div></div>
+    <div class="steprow"><span class="steplabel">by 10's</span><div class="arr"><div class="cell">720</div><div class="cell">329</div><div class="cell">436</div><div class="cell">355</div><div class="cell">457</div><div class="cell">657</div></div></div>
+    <div class="steprow"><span class="steplabel">by 100's</span><div class="arr"><div class="cell c-done">329</div><div class="cell c-done">355</div><div class="cell c-done">436</div><div class="cell c-done">457</div><div class="cell c-done">657</div><div class="cell c-done">720</div></div></div>
+  </div>
+
+  <!-- ===== BUCKET ===== -->
+  <h2 class="section" id="bucket">Bucket Sort <span class="tag b-On" style="font-size:11px">avg O(n)</span></h2>
+  <div class="card">
+    <p><b>Idea.</b> For inputs uniform over \([0,1)\): split into n equal buckets, drop each element into bucket \(\lfloor n\cdot x\rfloor\), sort each bucket (insertion sort), then concatenate.</p>
+    <span class="code-label">pseudocode</span>
+<pre><span class="kw">BucketSort</span>(A):
+    create n empty lists B[0..n-1]
+    <span class="kw">for</span> x <span class="kw">in</span> A:
+        append x to B[floor(n * x)]
+    <span class="kw">for</span> i = 0 <span class="kw">to</span> n-1:
+        insertionSort(B[i])
+    <span class="kw">return</span> concat(B[0..n-1])</pre>
+    <p>Average <span class="tag b-On">Θ(n)</span> (uniform input) · Worst <span class="tag b-On2">Θ(n²)</span> (all in one bucket).</p>
+  </div>
+
+  <!-- ===== LOWER BOUND ===== -->
+  <h2 class="section" id="lowerbound">The Comparison-Sort Lower Bound</h2>
+  <div class="card">
+    <p>Any comparison-only sort is a <b>decision tree</b>: internal nodes are comparisons, leaves are permutations. There are \(n!\) orderings, so \(\ge n!\) leaves. A binary tree with \(L\) leaves has height \(\ge \log_2 L\), so worst-case comparisons \(\ge \log_2(n!) = \Theta(n\log n)\).</p>
+    <div class="note"><b>Conclusion:</b> Merge/Heap sort are asymptotically <b>optimal</b> comparison sorts. Counting/Radix/Bucket beat this only by not being comparison-based.</div>
+  </div>
+
+  <!-- ===== MEDIAN / SELECTION ANIMATOR ===== -->
+  <h2 class="section" id="median-viz">2.12 Median &amp; Order Statistics Visualizer</h2>
+  <div class="card">
+    <p style="margin-top:0">Find the <b>median</b> (or i-th smallest) in <b>linear time</b> — without fully sorting. Eliminated regions fade out as the algorithm narrows the search.</p>
+    <div class="sort-viz-wrap median-viz-wrap" data-modes='["quickselect","mom"]' data-default="quickselect">
+      <div class="viz-controls">
+        <label class="viz-algo-label">Algorithm: <select class="viz-algo"></select></label>
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <button class="viz-btn viz-shuffle">Shuffle</button>
+        <label>Speed: <input type="range" class="viz-speed" min="60" max="1600" value="1250" step="20"></label>
+      </div>
+      <div class="viz-algo-info"></div>
+      <div class="legend">
+        <span><span class="sw" style="background:#4a5aa8;border:1px solid #6b78c8"></span> active range</span>
+        <span><span class="sw c-cmp"></span> comparing</span>
+        <span><span class="sw c-active"></span> swap</span>
+        <span><span class="sw c-min"></span> group median</span>
+        <span><span class="sw c-pivot"></span> pivot</span>
+        <span><span class="sw c-done"></span> answer found</span>
+        <span><span class="sw" style="opacity:.32;background:#4a5aa8;border:1px solid #6b78c8"></span> eliminated</span>
+      </div>
+      <div class="viz-main">
+        <div class="viz-bars"></div>
+        <div class="viz-code"></div>
+      </div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-stats">
+        <span>Step <b class="viz-step">0</b> / <b class="viz-total">0</b></span>
+        <span>Comparisons: <b class="viz-comps">0</b></span>
+        <span>Swaps / writes: <b class="viz-swaps">0</b></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SELECTION / MEDIAN THEORY ===== -->
+  <h2 class="section" id="selection-median">Selection &amp; Median (order statistics)</h2>
+  <div class="card">
+    <p>Find the \(i\)-th smallest element (the <b>median</b> is \(i=\lfloor n/2\rfloor\)). Sorting takes \(O(n\log n)\), but selection can be done in <b>linear time</b>. Use the <a href="#median-viz">visualizer above</a> to watch Quickselect and Median-of-Medians.</p>
+    <h4>Randomized Select (Quickselect) — expected O(n)</h4>
+    <p>Like quicksort but recurse into <b>only one side</b>.</p>
+    <span class="code-label">pseudocode</span>
+<pre><span class="kw">RandSelect</span>(A, lo, hi, i):
+    <span class="kw">if</span> lo == hi:
+        <span class="kw">return</span> A[lo]
+    q = RandPartition(A, lo, hi)
+    k = q - lo + 1               <span class="cm"># rank of pivot within range</span>
+    <span class="kw">if</span>   i == k: <span class="kw">return</span> A[q]
+    <span class="kw">elif</span> i &lt; k:  <span class="kw">return</span> RandSelect(A, lo,  q-1, i)
+    <span class="kw">else</span>:       <span class="kw">return</span> RandSelect(A, q+1, hi,  i-k)</pre>
+    <p>Expected <span class="tag b-On">O(n)</span> from \(T(n)\le T(3n/4)+O(n)\); worst <span class="tag b-On2">O(n²)</span>.</p>
+    <h4>Deterministic Select — median of medians — worst-case O(n)</h4>
+    <ol>
+      <li>Divide into groups of <b>5</b>; find each group's median (O(n) total).</li>
+      <li><b>Recursively</b> find the median \(x\) of those \(\lceil n/5\rceil\) medians.</li>
+      <li>Partition around \(x\); recurse into the correct side.</li>
+    </ol>
+    <p style="text-align:center">\(T(n) \le T(n/5) + T(7n/10) + O(n) \Rightarrow T(n)=O(n)\) &nbsp; (since \(\tfrac15+\tfrac{7}{10}&lt;1\))</p>
+    <div class="warn"><b>Why groups of 5?</b> Odd size gives a clean median and keeps the two recursion fractions summing below 1. Groups of 3 give \(T(n/3)+T(2n/3)+O(n)=O(n\log n)\) — fails.</div>
+  </div>
+
+  </div>
+</main>
+</div>
+<script src="assets/viz-code-helper.js"></script>
+<script src="assets/sorting.js" defer></script>
+</body>
+</html>

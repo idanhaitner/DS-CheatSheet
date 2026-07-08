@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4 · Heaps &amp; Compression</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/theme.js"></script>
+<script src="assets/mathjax-init.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">DS Cheat Sheet<small>Data Structures · Exam Study Guide</small></div>
+  <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Menu</button>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="01-foundations.html">1 · Foundations</a>
+    <a href="02-sorting.html">2 · Sorting</a>
+    <a href="03-trees.html">3 · Structures &amp; Trees</a>
+    <a href="04-heaps.html" class="active">4 · Heaps &amp; Compression</a>
+    <a href="05-hashing.html">5 · Skip Lists &amp; Hashing</a>
+    <a href="06-graphs.html">6 · Graphs</a>
+    <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
+    <a href="08-exam.html">8 · Exam Reference</a>
+  </nav>
+</aside>
+<main class="content">
+  <div class="pagehead">
+    <div class="crumbs"><a href="index.html">Home</a> › Heaps &amp; Compression</div>
+    <h1>4 · Heaps &amp; Compression</h1>
+    <p>Binary heap · Huffman · Lempel-Ziv</p>
+  </div>
+  <div class="inner">
+
+  <h2 class="section" id="heap">4.1 Binary Heap (Priority Queue)</h2>
+  <div class="card heap-card">
+    <div class="heap-about">
+      <div class="heap-section-label">About the heap</div>
+      <p class="heap-lead">A <b>complete binary tree</b> in an <b>array</b>. <b>Max-heap:</b> parent ≥ children. Root = max. Height \(\Theta(\log n)\).</p>
+      <div class="heap-ref">
+        <div class="heap-ref-formulas">
+          <span class="code-label">Index math (0-based)</span>
+<pre>parent(i) = (i - 1) / 2
+left(i)   = 2*i + 1
+right(i)  = 2*i + 2</pre>
+        </div>
+        <table class="heap-ref-table">
+          <tr><th>Operation</th><th>Time</th></tr>
+          <tr><td><code>findMax</code></td><td><span class="tag b-O1">O(1)</span></td></tr>
+          <tr><td><code>insert</code> / <code>extractMax</code></td><td><span class="tag b-Olog">O(log n)</span></td></tr>
+          <tr><td><code>increaseKey</code> / <code>maxHeapify</code></td><td><span class="tag b-Olog">O(log n)</span></td></tr>
+          <tr><td><code>buildHeap</code></td><td><span class="tag b-On">O(n)</span></td></tr>
+        </table>
+      </div>
+      <div class="note heap-note"><b>buildHeap is O(n):</b> most nodes sit near leaves — not \(O(n\log n)\). <b>Exam:</b> no O(log n) search for an arbitrary key (that's O(n)).</div>
+    </div>
+
+    <div class="heap-viz-wrap">
+      <div class="viz-controls viz-controls--heap">
+        <div class="viz-control-group">
+          <span class="viz-control-label">Operation</span>
+          <select class="viz-op viz-select">
+            <option value="build" selected>BuildMaxHeap</option>
+            <option value="insert">Insert</option>
+            <option value="extract">ExtractMax</option>
+            <option value="heapify">MaxHeapify</option>
+            <option value="increase">IncreaseKey</option>
+          </select>
+        </div>
+        <div class="viz-control-group viz-playback-group">
+          <button class="viz-btn viz-primary viz-play" title="Play / Pause">▶ Play</button>
+          <button class="viz-btn viz-replay" title="Replay from start">↺ Replay</button>
+          <button class="viz-btn viz-prev" title="Step back">◀</button>
+          <button class="viz-btn viz-next" title="Step forward">▶</button>
+        </div>
+        <div class="viz-control-group viz-speed-group">
+          <span class="viz-control-label">Speed</span>
+          <input type="range" class="viz-speed" min="100" max="1800" value="1500" step="20">
+        </div>
+      </div>
+
+      <div class="heap-viz-stage-wrap">
+        <div class="heap-section-label">Animation</div>
+        <div class="heap-stage"></div>
+      </div>
+
+      <div class="heap-viz-explain">
+        <div class="heap-section-label">Current algorithm step</div>
+        <div class="viz-desc">Loading…</div>
+        <div class="viz-panel"></div>
+        <div class="viz-stats">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section" id="huffman">4.2 Huffman Coding</h2>
+  <div class="card">
+    <p>Optimal <b>prefix-free</b> code for <b>data compression</b>: frequent characters get shorter codes. Build a binary tree bottom-up with a <b>min-heap</b>.</p>
+    <ol>
+      <li>Make a leaf for each character with its frequency; put all in a min-heap.</li>
+      <li>Repeatedly <code>extractMin</code> the two smallest, create a parent with their summed frequency, <code>insert</code> it back.</li>
+      <li>Repeat until one tree remains. Left edge = 0, right edge = 1; a character's code = path from root.</li>
+    </ol>
+    <table>
+      <tr><th>Phase</th><th>Time</th><th>Why</th></tr>
+      <tr><td>Build tree (n distinct symbols)</td><td><span class="tag b-Onlog">O(n log n)</span></td><td>n−1 merges; each merge = 2 <code>extractMin</code> + 1 <code>insert</code> on a min-heap of size O(n)</td></tr>
+      <tr><td>Build code table</td><td><span class="tag b-On">O(n)</span></td><td>One DFS/BFS from root to label each leaf with its 0/1 path</td></tr>
+      <tr><td>Encode message (length N)</td><td><span class="tag b-On">O(N)</span></td><td>Look up each character's code in O(1) (hash table / array)</td></tr>
+      <tr><td>Decode message</td><td><span class="tag b-On">O(N)</span></td><td>Walk the tree one bit at a time; each source symbol read once</td></tr>
+      <tr><td>Space</td><td><span class="tag b-On">O(n)</span></td><td>Tree has 2n−1 nodes; code table has n entries</td></tr>
+    </table>
+    <p><b>Expected code length:</b> \(\sum_c freq(c)\cdot depth(c)\) — weighted path length; Huffman minimizes this among all prefix codes. An optimal Huffman tree is a <b>full</b> binary tree; the two least-frequent symbols are <b>siblings</b> at the deepest level.</p>
+
+    <h4>Interactive animator</h4>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Preset demo: <b>A=5, B=2, C=1, D=1, E=3</b> — watch repeated <code>extractMin</code> merges build the tree. Left edge = <b>0</b>, right = <b>1</b>.</p>
+    <div class="comp-viz-wrap" data-mode="huffman">
+      <div class="viz-controls viz-controls--comp">
+        <div class="viz-control-group viz-playback-group">
+          <button class="viz-btn viz-primary viz-play" title="Play / Pause">▶ Play</button>
+          <button class="viz-btn viz-replay" title="Replay from start">↺ Replay</button>
+          <button class="viz-btn viz-prev" title="Step back">◀</button>
+          <button class="viz-btn viz-next" title="Step forward">▶</button>
+        </div>
+        <div class="viz-control-group viz-speed-group">
+          <span class="viz-control-label">Speed</span>
+          <input type="range" class="viz-speed" min="100" max="1800" value="1400" step="20">
+        </div>
+      </div>
+      <div class="comp-viz-stage-wrap">
+        <div class="comp-stage"></div>
+      </div>
+      <div class="comp-viz-explain">
+        <div class="viz-desc">Loading…</div>
+        <div class="viz-panel"></div>
+        <div class="viz-stats">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section" id="lz">4.3 Lempel-Ziv Compression</h2>
+  <div class="card">
+    <p>Unlike Huffman (which needs frequencies in advance), Lempel-Ziv is a <b>dictionary-based</b> method that learns repeated substrings <b>on the fly</b>, replacing repeats with short references. Behind <code>gzip</code>, <code>ZIP</code>, <code>PNG</code>.</p>
+    <ul>
+      <li>Maintain a growing <b>dictionary</b> of substrings seen so far.</li>
+      <li>Find the <b>longest prefix</b> already in the dictionary; output its index, then add (prefix + next char) as a new entry.</li>
+      <li>Later repetitions become a single compact index instead of raw characters.</li>
+    </ul>
+    <h4>Example — encode <code>A B A B A B A</code></h4>
+    <table>
+      <tr><th>Step</th><th>Output token</th><th>New dictionary entry</th></tr>
+      <tr><td>read <code>A</code> (new)</td><td>(0, A)</td><td>1 = "A"</td></tr>
+      <tr><td>read <code>B</code> (new)</td><td>(0, B)</td><td>2 = "B"</td></tr>
+      <tr><td>read <code>AB</code> (A known)</td><td>(1, B)</td><td>3 = "AB"</td></tr>
+      <tr><td>read <code>ABA</code> (AB known)</td><td>(3, A)</td><td>4 = "ABA"</td></tr>
+    </table>
+    <h4>Time complexity</h4>
+    <table>
+      <tr><th>Phase</th><th>Time</th><th>Why</th></tr>
+      <tr><td>Encode (naive dictionary scan)</td><td><span class="tag b-On2">O(N²)</span></td><td>≤ N steps; each step may scan all O(N) dictionary entries and compare prefixes</td></tr>
+      <tr><td>Encode (with trie / efficient match)</td><td><span class="tag b-On">O(N)</span></td><td>One left-to-right pass; trie lookup per step is O(match length), totals O(N)</td></tr>
+      <tr><td>Decode</td><td><span class="tag b-On">O(N)</span></td><td>One pass; each token outputs ≥ 1 new character and adds one dictionary entry</td></tr>
+      <tr><td>Space</td><td><span class="tag b-On">O(N)</span></td><td>Dictionary grows to O(N) phrases in the worst case</td></tr>
+    </table>
+    <div class="note">
+      <b>Huffman vs Lempel-Ziv:</b>
+      <ul style="margin:4px 0">
+        <li><b>Huffman</b> — statistical, per-symbol, needs frequencies, optimal prefix code for a known distribution. Build: <span class="tag b-Onlog">O(n log n)</span>.</li>
+        <li><b>Lempel-Ziv</b> — dictionary, exploits repeated substrings, adaptive/online (one pass), decoder rebuilds the same dictionary. Encode: <span class="tag b-On2">O(N²)</span> naive / <span class="tag b-On">O(N)</span> with trie; decode: <span class="tag b-On">O(N)</span>.</li>
+      </ul>
+      Both are <b>lossless</b>. Real tools (DEFLATE in gzip/PNG) combine LZ + Huffman.
+    </div>
+
+    <h4>Interactive animator</h4>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Preset demo: encode <b>A B A B A B A</b> — watch the dictionary grow and tokens <b>(index, char)</b> appear.</p>
+    <div class="comp-viz-wrap" data-mode="lz">
+      <div class="viz-controls viz-controls--comp">
+        <div class="viz-control-group viz-playback-group">
+          <button class="viz-btn viz-primary viz-play" title="Play / Pause">▶ Play</button>
+          <button class="viz-btn viz-replay" title="Replay from start">↺ Replay</button>
+          <button class="viz-btn viz-prev" title="Step back">◀</button>
+          <button class="viz-btn viz-next" title="Step forward">▶</button>
+        </div>
+        <div class="viz-control-group viz-speed-group">
+          <span class="viz-control-label">Speed</span>
+          <input type="range" class="viz-speed" min="100" max="1800" value="1400" step="20">
+        </div>
+      </div>
+      <div class="comp-viz-stage-wrap">
+        <div class="comp-stage"></div>
+      </div>
+      <div class="comp-viz-explain">
+        <div class="viz-desc">Loading…</div>
+        <div class="viz-panel"></div>
+        <div class="viz-stats">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+</main>
+</div>
+<script src="assets/heap.js" defer></script>
+<script src="assets/compression.js" defer></script>
+</body>
+</html>

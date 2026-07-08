@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7 · Amortized &amp; Union-Find</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/theme.js"></script>
+<script src="assets/mathjax-init.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">DS Cheat Sheet<small>Data Structures · Exam Study Guide</small></div>
+  <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Menu</button>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="01-foundations.html">1 · Foundations</a>
+    <a href="02-sorting.html">2 · Sorting</a>
+    <a href="03-trees.html">3 · Structures &amp; Trees</a>
+    <a href="04-heaps.html">4 · Heaps &amp; Compression</a>
+    <a href="05-hashing.html">5 · Skip Lists &amp; Hashing</a>
+    <a href="06-graphs.html">6 · Graphs</a>
+    <a href="07-advanced.html" class="active">7 · Amortized &amp; Union-Find</a>
+    <a href="08-exam.html">8 · Exam Reference</a>
+  </nav>
+</aside>
+<main class="content">
+  <div class="pagehead">
+    <div class="crumbs"><a href="index.html">Home</a> › Amortized &amp; Union-Find</div>
+    <h1>7 · Advanced Analysis</h1>
+    <p>Amortized analysis · disjoint sets (union-find)</p>
+  </div>
+  <div class="inner">
+
+  <h2 class="section" id="amortized">7.1 Amortized Analysis</h2>
+  <div class="card">
+    <p>Average cost <b>per operation over a worst-case sequence</b> — not a probabilistic average. Guarantees any sequence of \(m\) operations costs at most \(m\times(\text{amortized cost})\).</p>
+    <table>
+      <tr><th>Method</th><th>Idea</th><th>Example</th></tr>
+      <tr><td><b>Aggregate</b></td><td>Total cost of m ops is \(T(m)\); amortized = \(T(m)/m\).</td><td><b>Dynamic array (doubling):</b> n insertions copy at most n + n/2 + n/4 + … &lt; 2n elements total → \(T(n)=O(n)\) ⟹ <span class="tag b-O1">O(1)</span> amortized per insert.</td></tr>
+      <tr><td><b>Accounting</b></td><td>Assign each op a charge \(\hat c_i\); cheap ops overpay to bank credit. Require bank ≥ 0: \(\sum\hat c_i\ge\sum c_i\).</td><td><b>Same dynamic array:</b> charge <b>3 coins</b> per insert — 1 pays the insert, 2 go to the bank. When the array doubles (cost n), pay from the bank (each of the n/2 elements since last resize saved 2 coins). Bank never goes negative ⟹ <span class="tag b-O1">O(1)</span> amortized.</td></tr>
+    </table>
+    <h4>Classic results</h4>
+    <ul>
+      <li><b>Dynamic array (doubling):</b> n insertions cost O(n) total ⟹ <b>O(1) amortized</b> per insert.</li>
+      <li><b>Stack with Multipop:</b> any sequence of push/pop/multipop on n elements is O(n) total ⟹ <b>O(1) amortized</b> (each element pushed once, popped at most once).</li>
+      <li><b>Binary counter increment:</b> n increments flip O(n) bits total ⟹ <b>O(1) amortized</b> per increment.</li>
+    </ul>
+  </div>
+
+  <h2 class="section" id="unionfind">7.2 Union-Find (Disjoint Sets)</h2>
+  <div class="card">
+    <p>Maintains a partition into disjoint sets, each with a representative. Backbone of Kruskal's MST and connectivity queries.</p>
+    <table>
+      <tr><th>Operation</th><th>Meaning</th></tr>
+      <tr><td><code>MakeSet(x)</code></td><td>new singleton set {x}</td></tr>
+      <tr><td><code>Find(x)</code></td><td>return representative of x's set</td></tr>
+      <tr><td><code>Union(x,y)</code></td><td>merge the two sets</td></tr>
+    </table>
+    <h4>Forest implementation + two optimizations</h4>
+    <ul>
+      <li><b>Union by rank/size:</b> attach the smaller tree under the larger root → height O(log n).</li>
+      <li><b>Path compression:</b> during <code>Find</code>, point every node on the path directly to the root.</li>
+    </ul>
+    <table>
+      <tr><th>Configuration</th><th>Cost of m operations</th></tr>
+      <tr><td>Linked list + weighted union</td><td>O(m + n log n)</td></tr>
+      <tr><td>Forest, no optimization</td><td>O(m·n) worst</td></tr>
+      <tr><td><b>Both optimizations</b></td><td><span class="tag b-O1">O(m·α(n))</span> ≈ O(m) — α = inverse Ackermann, ≤ 4 in practice</td></tr>
+    </table>
+    <div class="note"><b>Application:</b> connected components — MakeSet each vertex, then for each edge (u,v) Union their sets. Two vertices are connected ⟺ same Find.</div>
+  </div>
+
+  </div>
+</main>
+</div>
+</body>
+</html>

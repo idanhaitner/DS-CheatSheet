@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3 · Structures &amp; Trees</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/theme.js"></script>
+<script src="assets/mathjax-init.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">DS Cheat Sheet<small>Data Structures · Exam Study Guide</small></div>
+  <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Menu</button>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="01-foundations.html">1 · Foundations</a>
+    <a href="02-sorting.html">2 · Sorting</a>
+    <a href="03-trees.html" class="active">3 · Structures &amp; Trees</a>
+    <a href="04-heaps.html">4 · Heaps &amp; Compression</a>
+    <a href="05-hashing.html">5 · Skip Lists &amp; Hashing</a>
+    <a href="06-graphs.html">6 · Graphs</a>
+    <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
+    <a href="08-exam.html">8 · Exam Reference</a>
+  </nav>
+</aside>
+<main class="content">
+  <div class="pagehead">
+    <div class="crumbs"><a href="index.html">Home</a> › Structures &amp; Trees</div>
+    <h1>3 · Elementary Structures &amp; Trees</h1>
+    <p>Stacks · queues · lists · BST · AVL · B-trees</p>
+  </div>
+  <div class="inner">
+
+  <h2 class="section" id="stackqueue">3.1 Stack &amp; Queue</h2>
+  <div class="grid2">
+    <div class="card">
+      <h4>Stack — LIFO (Last In, First Out)</h4>
+      <div class="flow"><div class="box">push →</div><div class="box">[ a b c ]</div><div class="box">← pop (c)</div></div>
+      <p>All ops <span class="tag b-O1">O(1)</span>: <code>push</code>, <code>pop</code>, <code>peek</code>, <code>isEmpty</code>.</p>
+      <p style="font-size:13px">Uses: call stack, DFS, expression evaluation, backtracking, undo.</p>
+    </div>
+    <div class="card">
+      <h4>Queue — FIFO (First In, First Out)</h4>
+      <div class="flow"><div class="box">enqueue →</div><div class="box">[ a b c ]</div><div class="box">→ dequeue (a)</div></div>
+      <p>All ops <span class="tag b-O1">O(1)</span>: <code>enqueue</code>, <code>dequeue</code>, <code>front</code>, <code>isEmpty</code>.</p>
+      <p style="font-size:13px">Uses: BFS, scheduling, buffering. A <b>deque</b> gives O(1) at both ends.</p>
+    </div>
+  </div>
+
+  <h2 class="section" id="linkedlist">3.2 Arrays vs Linked Lists</h2>
+  <div class="card">
+    <table>
+      <tr><th>Operation</th><th>Array</th><th>Dynamic array</th><th>Singly LL</th><th>Doubly LL</th></tr>
+      <tr><td>Access by index</td><td><span class="tag b-O1">O(1)</span></td><td><span class="tag b-O1">O(1)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td></tr>
+      <tr><td>Search</td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td></tr>
+      <tr><td>Insert at head</td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-O1">O(1)</span></td><td><span class="tag b-O1">O(1)</span></td></tr>
+      <tr><td>Insert at tail</td><td>—</td><td><span class="tag b-O1">O(1)*</span></td><td><span class="tag b-O1">O(1)</span></td><td><span class="tag b-O1">O(1)</span></td></tr>
+      <tr><td>Delete given node</td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-O1">O(1)</span></td></tr>
+    </table>
+    <div class="note"><b>Dynamic array (doubling):</b> when full, allocate a 2× array and copy. A single insert can cost O(n) but <b>amortized</b> cost is <b>O(1)</b> (see <a href="07-advanced.html#amortized">Amortized</a>).</div>
+  </div>
+
+  <h2 class="section" id="tree-defs">3.3 Tree Definitions &amp; Traversals</h2>
+  <div class="card two-col" style="font-size:13.5px">
+    <p><b>Root</b> — node with no parent.</p>
+    <p><b>Leaf</b> — node with no children.</p>
+    <p><b>Depth</b> — # edges from root to node.</p>
+    <p><b>Height</b> — # edges on longest path to a leaf below.</p>
+    <p><b>Tree height</b> — height of root (empty = −1).</p>
+    <p><b>Degree</b> — number of children.</p>
+    <p><b>Binary tree</b> — each node ≤ 2 children.</p>
+    <p><b>Full</b> — every internal node has exactly 2 children.</p>
+    <p><b>Perfect</b> — full + all leaves same depth (\(2^{h+1}-1\) nodes).</p>
+    <p><b>Complete</b> — all levels full except last, filled left→right (heaps).</p>
+  </div>
+  <div class="card">
+    <h4>Traversals — all O(n)</h4>
+    <table>
+      <tr><th>Traversal</th><th>Order</th><th>On a BST gives</th></tr>
+      <tr><td><b>In-order</b></td><td>Left → Root → Right</td><td><b>sorted</b> order</td></tr>
+      <tr><td><b>Pre-order</b></td><td>Root → Left → Right</td><td>copy / serialize</td></tr>
+      <tr><td><b>Post-order</b></td><td>Left → Right → Root</td><td>delete tree, compute heights</td></tr>
+    </table>
+  </div>
+
+  <h2 class="section" id="bst">3.4 Binary Search Tree (BST)</h2>
+  <div class="card">
+    <p><b>BST property:</b> for every node, all left-subtree keys are &lt; node, all right-subtree keys are &gt; node. Operations follow one root-to-leaf path → <b>O(h)</b>.</p>
+    <div class="grid2">
+      <div>
+        <svg viewBox="0 0 320 190" width="100%" height="180">
+          <line x1="160" y1="30" x2="90" y2="80" stroke="#5c6bc0" stroke-width="2"/>
+          <line x1="160" y1="30" x2="230" y2="80" stroke="#5c6bc0" stroke-width="2"/>
+          <line x1="90" y1="80" x2="55" y2="130" stroke="#5c6bc0" stroke-width="2"/>
+          <line x1="90" y1="80" x2="125" y2="130" stroke="#5c6bc0" stroke-width="2"/>
+          <line x1="230" y1="80" x2="265" y2="130" stroke="#5c6bc0" stroke-width="2"/>
+          <g font-size="14" font-weight="700" text-anchor="middle">
+            <circle cx="160" cy="30" r="18" fill="#3f51b5"/><text x="160" y="35" fill="#fff">8</text>
+            <circle cx="90" cy="80" r="18" fill="#3f51b5"/><text x="90" y="85" fill="#fff">3</text>
+            <circle cx="230" cy="80" r="18" fill="#3f51b5"/><text x="230" y="85" fill="#fff">10</text>
+            <circle cx="55" cy="130" r="18" fill="#3f51b5"/><text x="55" y="135" fill="#fff">1</text>
+            <circle cx="125" cy="130" r="18" fill="#3f51b5"/><text x="125" y="135" fill="#fff">6</text>
+            <circle cx="265" cy="130" r="18" fill="#3f51b5"/><text x="265" y="135" fill="#fff">14</text>
+          </g>
+        </svg>
+        <div class="caption">In-order → 1, 3, 6, 8, 10, 14 (sorted)</div>
+      </div>
+      <div>
+        <table>
+          <tr><th>Operation</th><th>Time</th></tr>
+          <tr><td>Search / Insert / Delete</td><td><span class="tag b-On">O(h)</span></td></tr>
+          <tr><td>Min / Max</td><td><span class="tag b-On">O(h)</span></td></tr>
+          <tr><td>Successor / Predecessor</td><td><span class="tag b-On">O(h)</span></td></tr>
+          <tr><td>In-order traversal</td><td><span class="tag b-On">O(n)</span></td></tr>
+        </table>
+        <div class="pitfall"><b>h ranges from log n (balanced) to n (a "stick").</b> Inserting sorted data into a plain BST builds a stick → O(n) per op. Hence AVL.</div>
+      </div>
+    </div>
+    <h4>Successor / Predecessor</h4>
+    <ul>
+      <li><b>Successor:</b> if right child exists → min of right subtree; else → lowest ancestor whose left child is also an ancestor of x.</li>
+      <li><b>Predecessor:</b> if left child exists → max of left subtree; else → lowest ancestor whose right child is also an ancestor of x.</li>
+    </ul>
+    <h4>Deletion — 3 cases</h4>
+    <ol>
+      <li><b>No children:</b> remove it.</li>
+      <li><b>One child:</b> splice it out (connect parent to child).</li>
+      <li><b>Two children:</b> replace with <b>successor</b> (min of right subtree, has no left child), then delete the successor.</li>
+    </ol>
+  </div>
+
+  <h2 class="section" id="avl">3.5 AVL Tree — self-balancing BST</h2>
+  <div class="card">
+    <p><b>Invariant:</b> for every node, \(|h_{left}-h_{right}|\le 1\). Forces height \(h=\Theta(\log n)\) → all ops <b>O(log n)</b> worst case. Each node stores its height.</p>
+    <table>
+      <tr><th>Operation</th><th>Time</th></tr>
+      <tr><td>Search</td><td><span class="tag b-Olog">O(log n)</span></td></tr>
+      <tr><td>Insert</td><td><span class="tag b-Olog">O(log n)</span> — at most <b>1</b> (single/double) rotation</td></tr>
+      <tr><td>Delete</td><td><span class="tag b-Olog">O(log n)</span> — up to <b>O(log n)</b> rotations to the root</td></tr>
+    </table>
+    <h4>The 4 rotation cases</h4>
+    <table>
+      <tr><th>Case</th><th>Shape</th><th>Fix</th></tr>
+      <tr><td><b>LL</b></td><td>left subtree of left child</td><td>single <b>Right</b>-Rotate</td></tr>
+      <tr><td><b>RR</b></td><td>right subtree of right child</td><td>single <b>Left</b>-Rotate</td></tr>
+      <tr><td><b>LR</b></td><td>right subtree of left child</td><td>Left-Rotate(child) then Right-Rotate</td></tr>
+      <tr><td><b>RL</b></td><td>left subtree of right child</td><td>Right-Rotate(child) then Left-Rotate</td></tr>
+    </table>
+    <h4>Left-Rotation (fixes RR)</h4>
+    <div class="grid2">
+      <div>
+        <svg viewBox="0 0 300 200" width="100%" height="180">
+          <line x1="90" y1="35" x2="60" y2="80" stroke="#5c6bc0" stroke-width="2"/>
+          <line x1="105" y1="35" x2="180" y2="80" stroke="#5c6bc0" stroke-width="2"/>
+          <line x1="185" y1="90" x2="150" y2="140" stroke="#5c6bc0" stroke-width="2"/>
+          <line x1="195" y1="90" x2="240" y2="140" stroke="#5c6bc0" stroke-width="2"/>
+          <g font-size="14" font-weight="700" text-anchor="middle">
+            <circle cx="95" cy="30" r="17" fill="#c0533f"/><text x="95" y="35" fill="#fff">z</text>
+            <circle cx="55" cy="85" r="15" fill="#455a9e"/><text x="55" y="90" fill="#fff">T1</text>
+            <circle cx="190" cy="85" r="17" fill="#3f51b5"/><text x="190" y="90" fill="#fff">y</text>
+            <circle cx="145" cy="145" r="15" fill="#455a9e"/><text x="145" y="150" fill="#fff">T2</text>
+            <circle cx="245" cy="145" r="17" fill="#6366f1"/><text x="245" y="150" fill="#fff">x</text>
+          </g>
+        </svg>
+        <div class="caption">Before: right-heavy (RR)</div>
+      </div>
+      <div>
+        <svg viewBox="0 0 300 200" width="100%" height="180">
+          <line x1="140" y1="35" x2="90" y2="90" stroke="#57e0c0" stroke-width="2"/>
+          <line x1="160" y1="35" x2="215" y2="90" stroke="#57e0c0" stroke-width="2"/>
+          <line x1="85" y1="95" x2="55" y2="145" stroke="#57e0c0" stroke-width="2"/>
+          <line x1="95" y1="95" x2="130" y2="145" stroke="#57e0c0" stroke-width="2"/>
+          <g font-size="14" font-weight="700" text-anchor="middle">
+            <circle cx="150" cy="30" r="17" fill="#2f8f5f"/><text x="150" y="35" fill="#fff">y</text>
+            <circle cx="85" cy="90" r="17" fill="#3f51b5"/><text x="85" y="95" fill="#fff">z</text>
+            <circle cx="220" cy="90" r="17" fill="#6366f1"/><text x="220" y="95" fill="#fff">x</text>
+            <circle cx="55" cy="150" r="15" fill="#455a9e"/><text x="55" y="155" fill="#fff">T1</text>
+            <circle cx="130" cy="150" r="15" fill="#455a9e"/><text x="130" y="155" fill="#fff">T2</text>
+          </g>
+        </svg>
+        <div class="caption">After Left-Rotate(z): balanced</div>
+      </div>
+    </div>
+    <div class="note"><b>Mnemonic:</b> the rotation is the <b>opposite</b> of the heavy side. Right-heavy → rotate left; left-heavy → rotate right. Double cases first rotate the child to reduce to a single case.</div>
+
+    <h4>Interactive animator</h4>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Insert or delete a key — watch rotations in slow-mo. Large trees auto-shrink; use <b>Fit</b> / <b>+/−</b> or Ctrl+scroll to zoom. <span style="color:#ff6b81"><b>Red</b></span> = pivot · <span style="color:#a78bfa"><b>Purple</b></span> = rotating subtree · <span style="color:#57e0c0"><b>Teal</b></span> = promoted root · <span style="color:#7c4dff"><b>Violet</b></span> = inserted / deleted.</p>
+    <div class="tree-viz-wrap avl-viz-wrap">
+      <div class="viz-controls">
+        <label>Key: <input type="number" class="viz-key" min="1" max="99" value="25" style="width:56px"></label>
+        <button class="viz-btn viz-primary viz-insert">Insert</button>
+        <button class="viz-btn viz-delete">Delete</button>
+        <button class="viz-btn viz-reset">Reset</button>
+        <button class="viz-btn viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1600" step="20"></label>
+      </div>
+      <div class="tree-stage"></div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-panel"></div>
+      <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+    </div>
+  </div>
+
+  <h2 class="section" id="btree">3.6 B-Tree (minimum degree t)</h2>
+  <div class="card">
+    <p>Balanced search tree optimized for <b>disk</b> (minimize block reads). Each node holds many keys, so the tree is very <b>shallow</b>. Every node except root has between <b>t−1</b> and <b>2t−1</b> keys; an internal node with k keys has k+1 children.</p>
+    <table>
+      <tr><th>Property / Op</th><th>Value</th></tr>
+      <tr><td>Height</td><td><span class="tag b-Olog">\(O(\log_t n)\)</span></td></tr>
+      <tr><td>Search / Insert / Delete</td><td><span class="tag b-Olog">\(O(\log_t n)\)</span></td></tr>
+      <tr><td>Split child</td><td><span class="tag b-O1">O(t)</span></td></tr>
+    </table>
+    <ul>
+      <li><b>Insert:</b> descend; if a node is <b>full (2t−1)</b>, split it first (median goes up) so you never descend into a full node.</li>
+      <li><b>Delete:</b> ensure the node you descend into has <b>≥ t</b> keys — borrow from a sibling or merge if needed.</li>
+    </ul>
+    <div class="note">A "2-3-4 tree" is a B-tree with t = 2. Best answer when the exam says "data on disk" or "minimize block accesses."</div>
+
+    <h4>Interactive animator</h4>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">B-tree with <b>t = 2</b> (max 3 keys/node). Insert or delete — watch <b>splits</b>, <b>borrows</b>, and <b>merges</b>. Use <b>Fit</b> / <b>+/−</b> when the tree grows wide.</p>
+    <div class="tree-viz-wrap btree-viz-wrap">
+      <div class="viz-controls">
+        <label>Key: <input type="number" class="viz-key" min="1" max="99" value="25" style="width:56px"></label>
+        <button class="viz-btn viz-primary viz-insert">Insert</button>
+        <button class="viz-btn viz-delete">Delete</button>
+        <button class="viz-btn viz-reset">Reset</button>
+        <button class="viz-btn viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1600" step="20"></label>
+      </div>
+      <div class="tree-stage"></div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-panel"></div>
+      <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+    </div>
+  </div>
+
+  </div>
+</main>
+</div>
+<script src="assets/trees.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6 · Graphs + Animator</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/theme.js"></script>
+<script src="assets/mathjax-init.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">DS Cheat Sheet<small>Data Structures · Exam Study Guide</small></div>
+  <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Menu</button>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="01-foundations.html">1 · Foundations</a>
+    <a href="02-sorting.html">2 · Sorting</a>
+    <a href="03-trees.html">3 · Structures &amp; Trees</a>
+    <a href="04-heaps.html">4 · Heaps &amp; Compression</a>
+    <a href="05-hashing.html">5 · Skip Lists &amp; Hashing</a>
+    <a href="06-graphs.html" class="active">6 · Graphs</a>
+    <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
+    <a href="08-exam.html">8 · Exam Reference</a>
+  </nav>
+</aside>
+<main class="content">
+  <div class="pagehead">
+    <div class="crumbs"><a href="index.html">Home</a> › Graphs</div>
+    <h1>6 · Graphs</h1>
+    <p>Interactive animators per algorithm · representations · MST · shortest paths</p>
+  </div>
+  <div class="inner">
+
+  <h2 class="section" id="graph-defs">6.1 Definitions &amp; Representations</h2>
+  <div class="card two-col">
+    <p><b>Graph</b> \(G=(V,E)\): vertices + edges. <b>Directed</b> or <b>undirected</b>.</p>
+    <p><b>Degree</b> — # incident edges.</p>
+    <p><b>Path</b> — sequence of connected vertices; <b>simple</b> if no repeats.</p>
+    <p><b>Cycle</b> — path returning to start.</p>
+    <p><b>Connected</b> — path between every pair (undirected).</p>
+    <p><b>Connected component</b> — maximal connected subgraph.</p>
+    <p><b>Tree</b> — connected, acyclic, undirected (\(|E|=|V|-1\)).</p>
+    <p><b>DAG</b> — directed acyclic graph.</p>
+  </div>
+  <div class="card">
+    <h4>Adjacency List vs Matrix</h4>
+    <table>
+      <tr><th>Operation</th><th>Adjacency List</th><th>Adjacency Matrix</th></tr>
+      <tr><td>Space</td><td><span class="tag b-On">O(V + E)</span></td><td><span class="tag b-On2">O(V²)</span></td></tr>
+      <tr><td>Edge exists (u,v)?</td><td>O(deg(u))</td><td><span class="tag b-O1">O(1)</span></td></tr>
+      <tr><td>Iterate neighbors of u</td><td>O(deg(u))</td><td><span class="tag b-On">O(V)</span></td></tr>
+      <tr><td>Add edge</td><td><span class="tag b-O1">O(1)</span></td><td><span class="tag b-O1">O(1)</span></td></tr>
+      <tr><td>Best for</td><td><b>sparse</b> (E ≪ V²)</td><td><b>dense</b> / fast edge queries</td></tr>
+    </table>
+  </div>
+
+  <h2 class="section" id="bfs">6.2 BFS — Breadth-First Search</h2>
+  <div class="card">
+    <p><b>Idea:</b> explore the graph in <b>layers</b> from source \(s\) — all vertices at distance 1, then distance 2, and so on. Uses a <b>FIFO queue</b> (first discovered, first explored).</p>
+
+    <h4>What BFS is good for</h4>
+    <table>
+      <tr><th>Problem</th><th>Why BFS?</th></tr>
+      <tr><td><b>Unweighted shortest path</b> from \(s\)</td><td>First time you reach \(v\), you used the fewest edges. \(dist[v]\) = hop count.</td></tr>
+      <tr><td><b>Reachability / connectivity</b></td><td>Visits exactly the vertices reachable from \(s\). Run from each unvisited vertex to list all components.</td></tr>
+      <tr><td><b>Bipartite test</b> (2-coloring)</td><td>BFS levels alternate — if an edge connects same color, graph is not bipartite.</td></tr>
+      <tr><td><b>Level-order traversal</b></td><td>Same wave idea as BFS on trees — process by depth from root.</td></tr>
+    </table>
+
+    <h4>When <em>not</em> to use BFS</h4>
+    <ul>
+      <li><b>Weighted</b> shortest path → use <b>Dijkstra</b> (non-negative) or Bellman-Ford (negative OK).</li>
+      <li><b>Cycle detection in directed graphs</b> → prefer <b>DFS</b> (back edge is easier to spot).</li>
+      <li><b>Topological order</b> → DFS on a DAG, not BFS.</li>
+    </ul>
+
+    <div class="note"><b>Exam mnemonic:</b> “shortest path, all edges cost 1” → <b>BFS</b>. Complexity always <span class="tag b-On">O(V + E)</span> with adjacency list — each vertex and edge touched once.</div>
+    <div class="graph-viz-wrap" data-modes='["bfs"]' data-default="bfs">
+      <div class="viz-controls">
+        <label class="viz-algo-label" style="display:none">Algorithm: <select class="viz-algo"></select></label>
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1450" step="20"></label>
+      </div>
+      <div class="gviz-legend-compact">
+        <span class="leg-wgb"><span class="sw" style="background:#ffffff;border:1px solid #94a3b8"></span><span class="sw" style="background:#9ca3af;border:1px solid #6b7280"></span><span class="sw" style="background:#1a1a1a;border:1px solid #000"></span> white → gray → black</span>
+        <span class="leg-tree"><span class="sw" style="background:#57e0c0"></span> tree edge</span>
+        <span class="leg-back" style="display:none"><span class="sw" style="background:#ff6b81"></span> back edge</span>
+        <span class="leg-reject" style="display:none"><span class="sw" style="background:#ff6b81"></span> rejected</span>
+      </div>
+      <p class="gviz-legend-note"></p>
+      <div class="graph-stage"></div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-panel"></div>
+      <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+    </div>
+    <span class="code-label">pseudocode</span>
+<pre><span class="kw">BFS</span>(G, s):
+    color all white, dist = infinity
+    dist[s] = 0
+    enqueue(s)
+    <span class="kw">while</span> Q not empty:
+        u = dequeue()
+        <span class="kw">for</span> v <span class="kw">in</span> Adj[u]:
+            <span class="kw">if</span> color[v] == white:
+                dist[v]   = dist[u] + 1
+                parent[v] = u
+                enqueue(v)</pre>
+    <p>Time <span class="tag b-On">O(V + E)</span> · Space <span class="tag b-On">O(V)</span> (queue + color/dist arrays).</p>
+    <div class="note"><b>BFS tree:</b> edges used when first discovering a white vertex form a tree. <b>Not every shortest path</b> is a tree edge — but tree distance equals shortest distance. Exams sometimes ask how many <b>distinct BFS trees</b> exist (depends on tie-breaking when enqueueing neighbors).</div>
+  </div>
+
+  <h2 class="section" id="dfs">6.3 DFS — Depth-First Search</h2>
+  <div class="card">
+    <p><b>Idea:</b> from a vertex, go as <b>deep</b> as possible along one path, then <b>backtrack</b>. Uses a <b>stack</b> (explicit) or <b>recursion</b> (call stack). Records <b>discovery</b> \(d[v]\) and <b>finish</b> \(f[v]\) timestamps.</p>
+
+    <h4>What DFS is good for</h4>
+    <table>
+      <tr><th>Problem</th><th>Why DFS?</th></tr>
+      <tr><td><b>Cycle detection</b> (directed)</td><td>A <b>back edge</b> to a <b>gray</b> (active) ancestor means a cycle exists.</td></tr>
+      <tr><td><b>Topological sort</b></td><td>On a DAG: output vertices in <b>decreasing finish time</b> (or prepend when finished).</td></tr>
+      <tr><td><b>Connected components</b></td><td>Each DFS tree in the forest = one component (undirected).</td></tr>
+      <tr><td><b>Strongly connected components</b></td><td>Two-pass DFS (Kosaraju) or Tarjan — advanced, same \(O(V+E)\) spirit.</td></tr>
+      <tr><td><b>Path existence / maze</b></td><td>Explores all reachable vertices; does <b>not</b> guarantee shortest path.</td></tr>
+      <tr><td><b>Parenthesis theorem / intervals</b></td><td>Nested \( [d[v], f[v]] \) intervals classify edge types — common proof question.</td></tr>
+    </table>
+
+    <h4>Edge types (directed graph)</h4>
+    <table>
+      <tr><th>Edge (u → v)</th><th>Meaning</th></tr>
+      <tr><td><b>Tree</b></td><td>\(v\) white when explored from \(u\) — discovery edge in DFS forest.</td></tr>
+      <tr><td><b>Back</b></td><td>\(v\) is gray (ancestor of \(u\)) — <b>cycle</b> in directed graph.</td></tr>
+      <tr><td><b>Forward</b></td><td>\(v\) black, \(v\) descendant of \(u\), not a tree edge.</td></tr>
+      <tr><td><b>Cross</b></td><td>\(v\) black, not ancestor/descendant — between different branches.</td></tr>
+    </table>
+    <p class="case-hint">In an <b>undirected</b> graph DFS only has <b>tree</b> and <b>back</b> edges (back = to an already discovered ancestor).</p>
+
+    <div class="note"><b>Exam mnemonic:</b> “cycles, topo sort, finish times, components” → <b>DFS</b>. Same <span class="tag b-On">O(V + E)</span> time as BFS with adjacency list.</div>
+    <div class="graph-viz-wrap" data-modes='["dfs"]' data-default="dfs">
+      <div class="viz-controls">
+        <label class="viz-algo-label" style="display:none">Algorithm: <select class="viz-algo"></select></label>
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1450" step="20"></label>
+      </div>
+      <div class="gviz-legend-compact">
+        <span class="leg-wgb"><span class="sw" style="background:#ffffff;border:1px solid #94a3b8"></span><span class="sw" style="background:#9ca3af;border:1px solid #6b7280"></span><span class="sw" style="background:#1a1a1a;border:1px solid #000"></span> white → gray → black</span>
+        <span class="leg-tree"><span class="sw" style="background:#57e0c0"></span> tree edge</span>
+        <span class="leg-back" style="display:none"><span class="sw" style="background:#ff6b81"></span> back edge</span>
+        <span class="leg-reject" style="display:none"><span class="sw" style="background:#ff6b81"></span> rejected</span>
+      </div>
+      <p class="gviz-legend-note"></p>
+      <div class="graph-stage"></div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-panel"></div>
+      <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+    </div>
+    <span class="code-label">pseudocode</span>
+<pre><span class="kw">DFS-Visit</span>(u):
+    color[u] = gray
+    d[u] = ++time
+    <span class="kw">for</span> v <span class="kw">in</span> Adj[u]:
+        <span class="kw">if</span> color[v] == white:
+            parent[v] = u
+            DFS-Visit(v)
+    color[u] = black
+    f[u] = ++time</pre>
+    <p>Time <span class="tag b-On">O(V + E)</span> · Space <span class="tag b-On">O(V)</span> (recursion/stack depth up to \(O(V)\)).</p>
+    <div class="warn"><b>Cycle detection:</b> in a <b>directed</b> graph, a <b>back edge</b> (to a gray node) ⟺ cycle. In undirected graphs, back edge to parent’s ancestor also indicates a cycle.</div>
+    <div class="note"><b>White-path theorem:</b> \(v\) is a descendant of \(u\) in the DFS forest ⟺ at time \(d[u]\) there is an all-<b>white</b> path \(u\rightsquigarrow v\).</div>
+
+    <h4>BFS vs DFS — exam quick compare</h4>
+    <table>
+      <tr><th></th><th>BFS</th><th>DFS</th></tr>
+      <tr><td>Structure</td><td><b>Queue</b> (FIFO)</td><td><b>Stack</b> / recursion (LIFO)</td></tr>
+      <tr><td>Exploration order</td><td>By <b>distance layers</b></td><td>Deep path, then backtrack</td></tr>
+      <tr><td>Shortest path (unweighted)</td><td><b>Yes</b></td><td>No — finds <em>a</em> path, not necessarily shortest</td></tr>
+      <tr><td>Typical exam uses</td><td>Shortest hops, bipartite, connectivity</td><td>Cycles, topo sort, \(d/f\) times, components</td></tr>
+      <tr><td>Time</td><td colspan="2"><span class="tag b-On">O(V + E)</span> both (adjacency list)</td></tr>
+    </table>
+  </div>
+
+  <h2 class="section" id="toposort">6.4 Topological Sort</h2>
+  <div class="card">
+    <p>Linear ordering of a <b>DAG</b>'s vertices so every edge \((u,v)\) goes left→right. Run DFS; output vertices in <b>decreasing finish time</b>.</p>
+    <div class="graph-viz-wrap" data-modes='["topo"]' data-default="topo">
+      <div class="viz-controls">
+        <label class="viz-algo-label" style="display:none">Algorithm: <select class="viz-algo"></select></label>
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1450" step="20"></label>
+      </div>
+      <div class="gviz-legend-compact">
+        <span class="leg-wgb"><span class="sw" style="background:#ffffff;border:1px solid #94a3b8"></span><span class="sw" style="background:#9ca3af;border:1px solid #6b7280"></span><span class="sw" style="background:#1a1a1a;border:1px solid #000"></span> white → gray → black</span>
+        <span class="leg-tree"><span class="sw" style="background:#57e0c0"></span> tree edge</span>
+        <span class="leg-back" style="display:none"><span class="sw" style="background:#ff6b81"></span> back edge</span>
+        <span class="leg-reject" style="display:none"><span class="sw" style="background:#ff6b81"></span> rejected</span>
+      </div>
+      <p class="gviz-legend-note"></p>
+      <div class="graph-stage"></div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-panel"></div>
+      <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+    </div>
+    <div class="flow"><div class="box">shirt</div><span class="arrow">→</span><div class="box">tie</div><span class="arrow">→</span><div class="box">jacket</div></div>
+    <p>Time <span class="tag b-On">O(V + E)</span>.</p>
+    <div class="note">Uses: task scheduling, build systems, course prerequisites.</div>
+  </div>
+
+  <h2 class="section" id="mst">6.5 Minimum Spanning Tree (MST)</h2>
+  <div class="card">
+    <p>For a connected, weighted, undirected graph: a spanning tree (\(|V|-1\) edges) of <b>minimum total weight</b>. Both algorithms are <b>greedy</b>.</p>
+    <div class="graph-viz-wrap" data-modes='["kruskal","prim"]' data-default="kruskal">
+      <div class="viz-controls">
+        <label class="viz-algo-label">Algorithm: <select class="viz-algo"></select></label>
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1450" step="20"></label>
+      </div>
+      <div class="gviz-legend-compact">
+        <span class="leg-wgb" style="display:none"><span class="sw" style="background:#ffffff;border:1px solid #94a3b8"></span><span class="sw" style="background:#9ca3af"></span><span class="sw" style="background:#1a1a1a"></span> white → gray → black</span>
+        <span class="leg-tree"><span class="sw" style="background:#57e0c0"></span> MST edge</span>
+        <span class="leg-back" style="display:none"><span class="sw" style="background:#ff6b81"></span> back edge</span>
+        <span class="leg-reject" style="display:none"><span class="sw" style="background:#ff6b81"></span> rejected (cycle)</span>
+      </div>
+      <p class="gviz-legend-note"></p>
+      <div class="graph-stage"></div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-panel"></div>
+      <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+    </div>
+    <div class="grid2">
+      <div>
+        <h4>Kruskal</h4>
+        <ol>
+          <li>Sort all edges by weight ascending.</li>
+          <li>Add the next edge if it connects two <b>different components</b> (no cycle) — checked with <b>Union-Find</b>.</li>
+          <li>Stop after \(|V|-1\) edges.</li>
+        </ol>
+        <p>Time <span class="tag b-Onlog">O(E log E) = O(E log V)</span>. Edge-centric; great for sparse graphs.</p>
+      </div>
+      <div>
+        <h4>Prim</h4>
+        <ol>
+          <li>Grow one tree from an arbitrary root.</li>
+          <li>Each vertex has <code>key</code> = min edge weight to the tree.</li>
+          <li>Repeatedly <b>extract-min</b> vertex, add it, update neighbor <code>key</code> values.</li>
+        </ol>
+        <p>Time <span class="tag b-Onlog">O(E log V)</span> (binary heap).</p>
+      </div>
+    </div>
+    <div class="note"><b>Cut property:</b> for any cut, the min-weight crossing edge is safe to add. <b>Cycle property:</b> the max-weight edge in any cycle is never in an MST.</div>
+  </div>
+
+  <h2 class="section" id="dijkstra">6.6 Dijkstra — Single-Source Shortest Paths</h2>
+  <div class="card">
+    <p>Shortest paths from \(s\) with <b>non-negative</b> weights. Greedy: repeatedly finalize the closest unvisited vertex, then <b>relax</b> each outgoing edge \((u,v)\) — if \(dist[u]+w(u,v) &lt; dist[v]\), update \(dist[v]\).</p>
+    <div class="graph-viz-wrap" data-modes='["dijkstra"]' data-default="dijkstra">
+      <div class="viz-controls">
+        <label class="viz-algo-label" style="display:none">Algorithm: <select class="viz-algo"></select></label>
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1450" step="20"></label>
+      </div>
+      <div class="gviz-legend-compact">
+        <span class="leg-wgb"><span class="sw" style="background:#ffffff;border:1px solid #94a3b8"></span><span class="sw" style="background:#9ca3af;border:1px solid #6b7280"></span><span class="sw" style="background:#1a1a1a;border:1px solid #000"></span> white → gray → black</span>
+        <span class="leg-tree"><span class="sw" style="background:#57e0c0"></span> relaxed edge</span>
+        <span class="leg-back" style="display:none"><span class="sw" style="background:#ff6b81"></span> back edge</span>
+        <span class="leg-reject" style="display:none"><span class="sw" style="background:#ff6b81"></span> rejected</span>
+      </div>
+      <p class="gviz-legend-note"></p>
+      <div class="graph-stage"></div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-panel"></div>
+      <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+    </div>
+    <span class="code-label">pseudocode</span>
+<pre><span class="kw">Dijkstra</span>(G, w, s):
+    dist[s] = 0, others = infinity
+    PQ = all vertices
+    <span class="kw">while</span> PQ not empty:
+        u = extractMin(PQ)
+        <span class="kw">for</span> v <span class="kw">in</span> Adj[u]:
+            <span class="kw">if</span> dist[u] + w(u,v) &lt; dist[v]:
+                dist[v] = dist[u] + w(u,v)
+                decreaseKey(v)</pre>
+    <table>
+      <tr><td>Binary heap</td><td><span class="tag b-Onlog">O((V+E) log V)</span></td></tr>
+      <tr><td>Fibonacci heap</td><td>O(E + V log V)</td></tr>
+    </table>
+    <div class="pitfall"><b>Fails with negative edges!</b> Once a vertex is finalized it's never revisited. Use <b>Bellman-Ford</b> (O(VE)) for negative weights.</div>
+    <div class="note"><b>BFS vs Dijkstra:</b> BFS = Dijkstra with all weights 1. On unweighted graphs, prefer BFS.</div>
+  </div>
+
+  </div>
+</main>
+</div>
+<script src="assets/graph.js" defer></script>
+</body>
+</html>

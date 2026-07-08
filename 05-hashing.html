@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5 · Skip Lists &amp; Hashing</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/theme.js"></script>
+<script src="assets/mathjax-init.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">DS Cheat Sheet<small>Data Structures · Exam Study Guide</small></div>
+  <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Menu</button>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="01-foundations.html">1 · Foundations</a>
+    <a href="02-sorting.html">2 · Sorting</a>
+    <a href="03-trees.html">3 · Structures &amp; Trees</a>
+    <a href="04-heaps.html">4 · Heaps &amp; Compression</a>
+    <a href="05-hashing.html" class="active">5 · Skip Lists &amp; Hashing</a>
+    <a href="06-graphs.html">6 · Graphs</a>
+    <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
+    <a href="08-exam.html">8 · Exam Reference</a>
+  </nav>
+</aside>
+<main class="content">
+  <div class="pagehead">
+    <div class="crumbs"><a href="index.html">Home</a> › Skip Lists &amp; Hashing</div>
+    <h1>5 · Skip Lists &amp; Hashing</h1>
+    <p>Skip lists · hash tables · open addressing · Bloom filters</p>
+  </div>
+  <div class="inner">
+
+  <h2 class="section" id="skiplist">5.1 Skip List</h2>
+  <div class="card">
+    <p>A <b>randomized</b> dictionary: stacked sorted linked lists. The bottom list has all elements; each higher list keeps each element with probability ½, giving \(\Theta(\log n)\) levels <b>with high probability</b>. Search drops down and moves right, skipping big gaps.</p>
+
+    <h3 id="sl-animator">Interactive Skip List Animator</h3>
+    <p style="margin-top:0">Watch <b>search</b> (move right, then down) or <b>build</b> (insert keys one-by-one with coin-flip tower heights). Use <b>Play</b> or <b>Step</b> like the sorting visualizer.</p>
+    <div class="viz-controls">
+      <label>Mode:
+        <select id="sl-viz-mode">
+          <option value="search">Search for a key</option>
+          <option value="build">Build a skip list</option>
+        </select>
+      </label>
+      <label id="sl-viz-target-wrap">Target:
+        <select id="sl-viz-target">
+          <option value="7" selected>7 (present)</option>
+          <option value="9">9 (tall tower)</option>
+          <option value="4">4 (absent)</option>
+          <option value="12">12 (present)</option>
+        </select>
+      </label>
+      <button id="sl-viz-play" class="viz-btn viz-primary">▶ Play</button>
+      <button id="sl-viz-prev" class="viz-btn">◀ Step</button>
+      <button id="sl-viz-next" class="viz-btn">Step ▶</button>
+      <label>Speed:
+        <input type="range" id="sl-viz-speed" min="100" max="1600" value="1200" step="20">
+      </label>
+    </div>
+    <div id="sl-viz-algo-info" class="viz-algo-info"></div>
+    <div class="legend">
+      <span><span class="sw" style="background:#455a9e"></span> sentinel (-inf / +inf)</span>
+      <span><span class="sw" style="background:#4a5aa8;border:1px solid #6b78c8"></span> data node</span>
+      <span><span class="sw c-active"></span> current node (search cursor)</span>
+      <span><span class="sw c-done"></span> found / just inserted</span>
+      <span><span class="sw" style="background:#0d9488;border:1px solid #57e0c0"></span> new tower</span>
+    </div>
+    <div class="sl-viz-main">
+      <div id="sl-viz-stage" class="sl-stage">Loading…</div>
+      <div id="sl-viz-code" class="viz-code"></div>
+    </div>
+    <div id="sl-viz-desc" class="viz-desc">Loading…</div>
+    <div class="viz-stats">
+      <span>Step <b id="sl-viz-step">0</b> / <b id="sl-viz-total">0</b></span>
+    </div>
+
+    <h4 style="margin-top:28px">Static structure (same example as search animation)</h4>
+    <svg viewBox="0 0 500 150" width="100%" height="140" class="sl-static-svg" font-family="Segoe UI, Roboto, Arial, sans-serif">
+      <!-- level labels + guide lines (behind everything) -->
+      <text x="14" y="23" fill="var(--muted)" font-size="13" font-weight="700" dominant-baseline="central">L2</text>
+      <text x="14" y="63" fill="var(--muted)" font-size="13" font-weight="700" dominant-baseline="central">L1</text>
+      <text x="14" y="103" fill="var(--muted)" font-size="13" font-weight="700" dominant-baseline="central">L0</text>
+      <line x1="44" y1="23" x2="470" y2="23" stroke="var(--line)" stroke-width="1.5"/>
+      <line x1="44" y1="63" x2="470" y2="63" stroke="var(--line)" stroke-width="1.5"/>
+      <line x1="44" y1="103" x2="470" y2="103" stroke="var(--line)" stroke-width="1.5"/>
+
+      <!-- horizontal links (between nodes, not through them) -->
+      <g stroke="#3a4278" stroke-width="2.5" fill="none">
+        <line x1="70" y1="23" x2="286" y2="23"/>
+        <line x1="318" y1="23" x2="410" y2="23"/>
+        <line x1="70" y1="63" x2="162" y2="63"/>
+        <line x1="194" y1="63" x2="286" y2="63"/>
+        <line x1="318" y1="63" x2="410" y2="63"/>
+        <line x1="70" y1="103" x2="100" y2="103"/>
+        <line x1="132" y1="103" x2="162" y2="103"/>
+        <line x1="194" y1="103" x2="224" y2="103"/>
+        <line x1="256" y1="103" x2="286" y2="103"/>
+        <line x1="318" y1="103" x2="348" y2="103"/>
+        <line x1="380" y1="103" x2="410" y2="103"/>
+      </g>
+
+      <!-- vertical towers -->
+      <g stroke="#5a6a9e" stroke-width="2.5">
+        <line x1="54" y1="34" x2="54" y2="92"/>
+        <line x1="178" y1="74" x2="178" y2="92"/>
+        <line x1="302" y1="34" x2="302" y2="92"/>
+        <line x1="426" y1="34" x2="426" y2="92"/>
+      </g>
+
+      <!-- nodes (on top of lines) -->
+      <g font-size="13" font-weight="800" text-anchor="middle" dominant-baseline="central">
+        <rect x="38" y="12" width="32" height="22" rx="5" fill="#455a9e"/>
+        <text x="54" y="23" fill="#eaf0ff" font-size="11">-inf</text>
+        <rect x="38" y="52" width="32" height="22" rx="5" fill="#455a9e"/>
+        <text x="54" y="63" fill="#eaf0ff" font-size="11">-inf</text>
+        <rect x="38" y="92" width="32" height="22" rx="5" fill="#455a9e"/>
+        <text x="54" y="103" fill="#eaf0ff" font-size="11">-inf</text>
+
+        <rect x="100" y="92" width="32" height="22" rx="5" fill="#4a5aa8" stroke="#6b78c8" stroke-width="1.5"/>
+        <text x="116" y="103" fill="#fff">2</text>
+
+        <rect x="162" y="52" width="32" height="22" rx="5" fill="#4a5aa8" stroke="#6b78c8" stroke-width="1.5"/>
+        <text x="178" y="63" fill="#fff">5</text>
+        <rect x="162" y="92" width="32" height="22" rx="5" fill="#4a5aa8" stroke="#6b78c8" stroke-width="1.5"/>
+        <text x="178" y="103" fill="#fff">5</text>
+
+        <rect x="224" y="92" width="32" height="22" rx="5" fill="#4a5aa8" stroke="#6b78c8" stroke-width="1.5"/>
+        <text x="240" y="103" fill="#fff">7</text>
+
+        <rect x="286" y="12" width="32" height="22" rx="5" fill="#4a5aa8" stroke="#6b78c8" stroke-width="1.5"/>
+        <text x="302" y="23" fill="#fff">9</text>
+        <rect x="286" y="52" width="32" height="22" rx="5" fill="#4a5aa8" stroke="#6b78c8" stroke-width="1.5"/>
+        <text x="302" y="63" fill="#fff">9</text>
+        <rect x="286" y="92" width="32" height="22" rx="5" fill="#4a5aa8" stroke="#6b78c8" stroke-width="1.5"/>
+        <text x="302" y="103" fill="#fff">9</text>
+
+        <rect x="348" y="92" width="32" height="22" rx="5" fill="#4a5aa8" stroke="#6b78c8" stroke-width="1.5"/>
+        <text x="364" y="103" fill="#fff">12</text>
+
+        <rect x="410" y="12" width="32" height="22" rx="5" fill="#455a9e"/>
+        <text x="426" y="23" fill="#eaf0ff" font-size="11">+inf</text>
+        <rect x="410" y="52" width="32" height="22" rx="5" fill="#455a9e"/>
+        <text x="426" y="63" fill="#eaf0ff" font-size="11">+inf</text>
+        <rect x="410" y="92" width="32" height="22" rx="5" fill="#455a9e"/>
+        <text x="426" y="103" fill="#eaf0ff" font-size="11">+inf</text>
+      </g>
+    </svg>
+    <div class="caption">Higher levels are express lanes. Keys 2, 5, 7, 9, 12 — node 9 promoted to L2 (three levels).</div>
+
+    <table>
+      <tr><th>Operation</th><th>Expected</th><th>Worst</th></tr>
+      <tr><td>Search / Insert / Delete</td><td><span class="tag b-Olog">O(log n)</span></td><td><span class="tag b-On">O(n)</span></td></tr>
+      <tr><td>Space</td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-Onlog">O(n log n)</span></td></tr>
+    </table>
+    <div class="note"><b>Expected</b> bounds are over the random coin flips (not over input order). <b>Worst-case time O(n)</b> happens if every node stays on the bottom level only — the structure becomes a sorted linked list and you scan up to n keys. Yes, the list <b>grows forever</b> as you insert, but we always measure cost in terms of the <b>current n</b>: one operation costs at most Θ(n), not worse (not O(n²) per search).</div>
+    <div class="pitfall"><b>Not unbounded per operation:</b> worst case is O(n), not infinite. What grows without bound is <b>n itself</b> as you keep inserting — so absolute time can get arbitrarily large, but it stays <b>linear in the current size</b>. Real implementations also cap tower height at about O(log n), which keeps space near O(n) in practice.</div>
+  </div>
+
+  <h2 class="section" id="hashing">5.2 Hash Tables — the Dictionary ADT</h2>
+  <div class="card">
+    <p>Maps keys to array slots via a <b>hash function</b> \(h:U\to\{0,\ldots,m-1\}\). <b>Load factor</b> \(\alpha=n/m\) (items ÷ table size). Under <b>simple uniform hashing</b>, both strategies are fast on average when \(\alpha\) stays reasonable — but <b>worst case</b> is always O(n) if every key collides.</p>
+    <div class="note" style="margin-top:10px"><b>Load factor</b> \(\alpha=n/m\). <b>Chaining</b> can use any \(\alpha\). <b>Probing</b> needs \(\alpha&lt;1\) (empty slots required).</div>
+
+    <div class="grid2">
+      <table class="dual-table">
+        <caption>Chaining</caption>
+        <tr><th>Operation</th><th>Expected</th><th>Worst</th></tr>
+        <tr><td>Insert</td><td><span class="tag b-O1">O(1)</span></td><td><span class="tag b-O1">O(1)</span></td></tr>
+        <tr><td>Search</td><td><span class="tag b-O1">Θ(1+α)</span></td><td><span class="tag b-On">O(n)</span></td></tr>
+        <tr><td>Delete</td><td><span class="tag b-O1">Θ(1+α)</span> (search chain, then unlink)</td><td><span class="tag b-On">O(n)</span></td></tr>
+        <tr><td>Rehash (table doubles)</td><td colspan="2"><span class="tag b-On">O(n)</span> one-time — re-insert all n keys into new table of size 2m</td></tr>
+      </table>
+      <table class="dual-table">
+        <caption>Open addressing (probing)</caption>
+        <tr><th>Operation</th><th>Expected</th><th>Worst</th></tr>
+        <tr><td>Insert</td><td><span class="tag b-O1">O(1)</span> probes</td><td><span class="tag b-On">O(n)</span></td></tr>
+        <tr><td>Search</td><td><span class="tag b-O1">O(1)</span> probes</td><td><span class="tag b-On">O(n)</span></td></tr>
+        <tr><td>Delete</td><td><span class="tag b-O1">O(1)</span> probes + tombstone</td><td><span class="tag b-On">O(n)</span></td></tr>
+        <tr><td>Rehash (table doubles)</td><td colspan="2"><span class="tag b-On">O(n)</span> one-time — re-insert all n keys into new table of size 2m</td></tr>
+      </table>
+    </div>
+    <p class="case-hint"><b>Expected</b> = simple uniform hashing. <b>Worst</b> = every key collides. Probing averages are in probes (each probe is O(1)). Delete in chaining is <span class="tag b-O1">Θ(1+α)</span> without a node pointer (must search the chain first). <b>Rehash:</b> a single rehash costs <span class="tag b-On">O(n)</span>, but with doubling strategy it is <span class="tag b-O1">O(1) amortized</span> per insert (same idea as dynamic array).</p>
+
+    <h4>Collision resolution: Chaining</h4>
+    <p>Each slot points to a linked list. Insert at the head of the list.</p>
+
+    <h4>Chaining animator</h4>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Insert, search, or delete a key — watch hash + chain walk step by step. Set <b>max α</b> to trigger rehash (table doubles). <span style="color:#6366f1"><b>Purple</b></span> = probing bucket · <span style="color:#57e0c0"><b>Teal</b></span> = found/inserted.</p>
+    <div class="hash-viz-wrap" data-mode="chaining">
+      <div class="viz-controls">
+        <label>Key: <input type="number" class="viz-key" min="1" max="99" value="22" style="width:56px"></label>
+        <button class="viz-btn viz-primary viz-insert">Insert</button>
+        <button class="viz-btn viz-search">Search</button>
+        <button class="viz-btn viz-delete">Delete</button>
+        <button class="viz-btn viz-reset">Reset</button>
+        <button class="viz-btn viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <label>Max α: <input type="number" class="viz-alpha" min="0.3" max="2" step="0.05" value="1.0" style="width:56px"></label>
+        <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1700" step="20"></label>
+      </div>
+      <div class="hash-stage"></div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-panel"></div>
+      <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+    </div>
+
+    <h4>Hash functions</h4>
+    <ul>
+      <li><b>Division:</b> \(h(k)=k \bmod m\). Pick \(m\) a <b>prime</b> not near a power of 2.</li>
+      <li><b>Multiplication:</b> \(h(k)=\lfloor m\,(kA\bmod 1)\rfloor\), \(A\approx(\sqrt5-1)/2\). \(m\) can be a power of 2.</li>
+    </ul>
+  </div>
+
+  <h2 class="section" id="openaddr">5.3 Open Addressing (Probing)</h2>
+  <div class="card">
+    <p>All items live <b>in the table</b> (no lists). Requires \(\alpha&lt;1\). On collision, probe until an empty (or tombstone) slot is found.</p>
+    <table>
+      <tr><th>Scheme</th><th>Probe \(h(k,i)\)</th><th>Issue</th></tr>
+      <tr><td><b>Linear</b></td><td>\((h'(k)+i)\bmod m\)</td><td><b>Primary clustering</b></td></tr>
+      <tr><td><b>Quadratic</b></td><td>\((h'(k)+c_1 i+c_2 i^2)\bmod m\)</td><td><b>Secondary clustering</b>; fewer probes</td></tr>
+      <tr><td><b>Double hashing</b></td><td>\((h_1(k)+i\,h_2(k))\bmod m\)</td><td>Best spread; \(h_2\) coprime with \(m\)</td></tr>
+    </table>
+
+    <h4>Operation costs (probing)</h4>
+    <table>
+      <tr><th>Operation</th><th>Expected</th><th>Worst</th></tr>
+      <tr><td>Insert</td><td><span class="tag b-O1">O(1)</span> probes</td><td><span class="tag b-On">O(n)</span></td></tr>
+      <tr><td>Search</td><td><span class="tag b-O1">O(1)</span> probes</td><td><span class="tag b-On">O(n)</span></td></tr>
+      <tr><td>Delete</td><td><span class="tag b-O1">O(1)</span> probes + tombstone</td><td><span class="tag b-On">O(n)</span></td></tr>
+      <tr><td>Rehash (table doubles)</td><td colspan="2"><span class="tag b-On">O(n)</span> one-time — re-insert all n keys into new table of size 2m</td></tr>
+    </table>
+    <p class="case-hint">Exact probe bounds (exam detail): unsuccessful ≤ \(\frac{1}{1-\alpha}\); successful ≤ \(\frac{1}{\alpha}\ln\frac{1}{1-\alpha}\). Delete probes the chain like search, then marks a tombstone in O(1). <b>Rehash</b> costs <span class="tag b-On">O(n)</span> per event; with doubling, <span class="tag b-O1">O(1) amortized</span> per insert.</p>
+    <div class="pitfall"><b>Deletion is tricky:</b> you can't just empty a slot (breaks probe chains). Use a <b>"deleted"</b> tombstone marker. Tombstones raise probe lengths over time — rehash periodically if many deletes.</div>
+
+    <h4>Probing animator</h4>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Linear probing with dynamic <b>h(k) = k mod m</b> (starts at m=11, doubles on rehash). Watch numbered probe steps and tombstones on delete. <span style="color:#6366f1"><b>Purple</b></span> = current probe · <span style="color:#ff6b81"><b>Red ✗</b></span> = tombstone.</p>
+    <div class="hash-viz-wrap" data-mode="probing">
+      <div class="viz-controls">
+        <label>Key: <input type="number" class="viz-key" min="1" max="99" value="36" style="width:56px"></label>
+        <button class="viz-btn viz-primary viz-insert">Insert</button>
+        <button class="viz-btn viz-search">Search</button>
+        <button class="viz-btn viz-delete">Delete</button>
+        <button class="viz-btn viz-reset">Reset</button>
+        <button class="viz-btn viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <label>Max α: <input type="number" class="viz-alpha" min="0.3" max="0.95" step="0.05" value="0.7" style="width:56px"></label>
+        <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1700" step="20"></label>
+      </div>
+      <div class="hash-stage"></div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-panel"></div>
+      <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+    </div>
+  </div>
+
+  <h2 class="section" id="bloom">5.4 Bloom Filter</h2>
+  <div class="card">
+    <p>Space-efficient <b>probabilistic</b> membership test. Bit-array of size \(m\) + \(k\) hash functions. <b>Insert:</b> set bits \(h_1(x)\ldots h_k(x)\). <b>Query:</b> all k bits 1 → "probably present"; any bit 0 → <b>definitely absent</b>.</p>
+    <ul>
+      <li><b>No false negatives</b>, but possible <b>false positives</b>.</li>
+      <li>False-positive rate after n inserts ≈ \(\left(1-e^{-kn/m}\right)^k\).</li>
+      <li><b>Cannot delete</b>. Query/insert are O(k) = O(1).</li>
+    </ul>
+  </div>
+
+  </div>
+</main>
+</div>
+<script src="assets/viz-code-helper.js"></script>
+<script src="assets/hash.js" defer></script>
+<script src="assets/skip-list.js" defer></script>
+</body>
+</html>

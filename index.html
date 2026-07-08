@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DS Cheat Sheet — Home</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/theme.js"></script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">DS Cheat Sheet<small>Data Structures · Exam Study Guide</small></div>
+  <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Menu</button>
+  <nav>
+    <a href="index.html" class="active">Home</a>
+    <a href="01-foundations.html">1 · Foundations</a>
+    <a href="02-sorting.html">2 · Sorting</a>
+    <a href="03-trees.html">3 · Structures &amp; Trees</a>
+    <a href="04-heaps.html">4 · Heaps &amp; Compression</a>
+    <a href="05-hashing.html">5 · Skip Lists &amp; Hashing</a>
+    <a href="06-graphs.html">6 · Graphs</a>
+    <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
+    <a href="08-exam.html">8 · Exam Reference</a>
+  </nav>
+</aside>
+<main class="content">
+  <div class="pagehead">
+    <h1>Data Structures — Master Exam Cheat Sheet</h1>
+    <p>A complete, visual study guide with interactive slow-motion animations.</p>
+  </div>
+  <div class="inner">
+    <div class="note">
+      <b>How to use this site.</b> Navigate with the sidebar on the left. Each page is self-contained.
+      Two pages have <b>interactive animations</b> you can play, pause, and step through:
+      the <a href="02-sorting.html">Sorting Animator</a> and the <a href="06-graphs.html">Graph (BFS/DFS) Animator</a>.
+    </div>
+
+    <h2 class="section">Complexity color key</h2>
+    <div class="card">
+      <p>Throughout the site, running times use these color tags:</p>
+      <p>
+        <span class="tag b-O1">O(1)</span>
+        <span class="tag b-Olog">O(log n)</span>
+        <span class="tag b-On">O(n)</span>
+        <span class="tag b-Onlog">O(n log n)</span>
+        <span class="tag b-On2">O(n²)</span>
+        <span class="tag b-bad">worst / bad</span>
+      </p>
+    </div>
+
+    <h2 class="section">Full topic index</h2>
+    <div class="grid2">
+      <div class="card">
+        <h4><a href="01-foundations.html">1 · Foundations</a></h4>
+        <ul>
+          <li>Asymptotic notation (O, Ω, Θ, o, ω)</li>
+          <li>Recurrences &amp; the Master Theorem</li>
+          <li>Useful sums &amp; identities</li>
+          <li>Probability basics (expectation, indicators)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4><a href="02-sorting.html">2 · Sorting</a></h4>
+        <ul>
+          <li>Interactive animated visualizer</li>
+          <li>Insertion, Selection, Bubble</li>
+          <li>Merge, Quick, Heap</li>
+          <li>Counting, Radix, Bucket</li>
+          <li>Comparison lower bound; Selection &amp; Median</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4><a href="03-trees.html">3 · Structures &amp; Trees</a></h4>
+        <ul>
+          <li>Stacks, queues, lists vs arrays</li>
+          <li>Tree definitions &amp; traversals</li>
+          <li>Binary Search Trees</li>
+          <li>AVL trees (rotations)</li>
+          <li>B-trees</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4><a href="04-heaps.html">4 · Heaps &amp; Compression</a></h4>
+        <ul>
+          <li>Binary heap / priority queue</li>
+          <li>Huffman coding</li>
+          <li>Lempel-Ziv compression</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4><a href="05-hashing.html">5 · Skip Lists &amp; Hashing</a></h4>
+        <ul>
+          <li>Skip lists</li>
+          <li>Hash tables &amp; chaining</li>
+          <li>Open addressing (probing)</li>
+          <li>Bloom filters</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4><a href="06-graphs.html">6 · Graphs</a></h4>
+        <ul>
+          <li>Interactive BFS/DFS animator</li>
+          <li>Representations &amp; definitions</li>
+          <li>BFS, DFS, topological sort</li>
+          <li>MST (Kruskal, Prim), Dijkstra</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4><a href="07-advanced.html">7 · Amortized &amp; Union-Find</a></h4>
+        <ul>
+          <li>Amortized analysis (2 methods)</li>
+          <li>Disjoint sets / union-find</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4><a href="08-exam.html">8 · Exam Reference</a></h4>
+        <ul>
+          <li>Master complexity tables</li>
+          <li>"Which structure?" decision guide</li>
+          <li>Common pitfalls &amp; exam tips</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note" style="text-align:center">
+      Tip: use your browser's <b>Print → Save as PDF</b> on any page for an offline copy (styles are print-optimized).
+    </div>
+  </div>
+</main>
+</div>
+</body>
+</html>

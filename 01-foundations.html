@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1 · Foundations</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/theme.js"></script>
+<script src="assets/mathjax-init.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">DS Cheat Sheet<small>Data Structures · Exam Study Guide</small></div>
+  <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Menu</button>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="01-foundations.html" class="active">1 · Foundations</a>
+    <a href="02-sorting.html">2 · Sorting</a>
+    <a href="03-trees.html">3 · Structures &amp; Trees</a>
+    <a href="04-heaps.html">4 · Heaps &amp; Compression</a>
+    <a href="05-hashing.html">5 · Skip Lists &amp; Hashing</a>
+    <a href="06-graphs.html">6 · Graphs</a>
+    <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
+    <a href="08-exam.html">8 · Exam Reference</a>
+  </nav>
+</aside>
+<main class="content">
+  <div class="pagehead">
+    <div class="crumbs"><a href="index.html">Home</a> › Foundations</div>
+    <h1>1 · Foundations</h1>
+    <p>Asymptotics · recurrences · sums · probability</p>
+  </div>
+  <div class="inner">
+
+  <h2 class="section" id="asymptotics">1.1 Asymptotic Notation</h2>
+  <div class="card">
+    <p>We describe the <b>growth rate</b> of a running-time function \(T(n)\), ignoring constants and low-order terms.</p>
+    <table>
+      <tr><th>Notation</th><th>Meaning</th><th>Formal definition</th><th>Analogy</th></tr>
+      <tr><td><span class="tag b-On">O(g)</span></td><td>Upper bound (≤)</td><td>\(0 \le f(n) \le c\,g(n)\) for \(n \ge n_0\)</td><td>\(f \le g\)</td></tr>
+      <tr><td><span class="tag b-Olog">Ω(g)</span></td><td>Lower bound (≥)</td><td>\(0 \le c\,g(n) \le f(n)\) for \(n \ge n_0\)</td><td>\(f \ge g\)</td></tr>
+      <tr><td><span class="tag b-Onlog">Θ(g)</span></td><td>Tight bound (=)</td><td>\(f = O(g)\) <b>and</b> \(f = \Omega(g)\)</td><td>\(f = g\)</td></tr>
+      <tr><td>o(g)</td><td>Strictly smaller (&lt;)</td><td>\(\forall c\,\exists n_0: f(n) &lt; c\,g(n)\)</td><td>\(f \ll g\)</td></tr>
+      <tr><td>ω(g)</td><td>Strictly larger (&gt;)</td><td>\(\forall c\,\exists n_0: f(n) &gt; c\,g(n)\)</td><td>\(f \gg g\)</td></tr>
+    </table>
+    <div class="note">
+      <b>Growth hierarchy (memorize):</b>
+      <div class="math-scroll">
+        <p class="math-hierarchy">\(O(1) &lt; O(\log\log n) &lt; O(\log n) &lt; O(\sqrt{n}) &lt; O(n) &lt; O(n\log n)\)</p>
+        <p class="math-hierarchy">\(O(n^2) &lt; O(n^3) &lt; O(2^n) &lt; O(n!) &lt; O(n^n)\)</p>
+      </div>
+    </div>
+    <h4>Key facts &amp; tricks</h4>
+    <ul>
+      <li><b>Transitivity:</b> if \(f=O(g)\) and \(g=O(h)\) then \(f=O(h)\).</li>
+      <li><b>Sum rule:</b> \(O(f)+O(g)=O(\max(f,g))\) — the dominant term wins.</li>
+      <li><b>Logs:</b> \(\log_a n = O(\log_b n)\) — base doesn't matter in \(O\).</li>
+      <li><b>Polynomial vs log:</b> \(\log^k n = O(n^\epsilon)\) for any \(k,\epsilon&gt;0\).</li>
+      <li><b>Polynomial vs exponential:</b> \(n^k = O(c^n)\) for \(c&gt;1\).</li>
+      <li><b>Limit test:</b> \(\lim f/g = 0 \Rightarrow f=O(g)\); \(=\infty \Rightarrow g=O(f)\); constant \(\Rightarrow f=O(g)\) and \(g=O(f)\).</li>
+      <li>\(\log(n!) = O(n\log n)\) (Stirling) — gives the comparison-sort lower bound.</li>
+    </ul>
+    <div class="pitfall"><b>Pitfall:</b> \(O\) is an <b>upper</b> bound, so "worst case is \(O(n^2)\)" and "worst case is \(O(n^3)\)" can both be true. If asked for a <b>tight</b> bound, use \(\Theta\).</div>
+  </div>
+
+  <h2 class="section" id="recurrences">1.2 Recurrences &amp; the Master Theorem</h2>
+  <div class="card">
+    <h4>Master Theorem</h4>
+    <p>For \(T(n) = a\,T(n/b) + f(n)\) with \(a\ge 1,\ b&gt;1\). Compare \(f(n)\) with the "watershed" \(n^{\log_b a}\):</p>
+    <table>
+      <tr><th>Case</th><th>Condition</th><th>Solution</th></tr>
+      <tr><td>1</td><td>\(f(n) = O(n^{\log_b a - \epsilon})\) — \(f\) polynomially <b>smaller</b></td><td>\(T(n)=\Theta(n^{\log_b a})\)</td></tr>
+      <tr><td>2</td><td>\(f(n) = \Theta(n^{\log_b a})\) — <b>same</b> order</td><td>\(T(n)=\Theta(n^{\log_b a}\log n)\)</td></tr>
+      <tr><td>3</td><td>\(f(n) = \Omega(n^{\log_b a + \epsilon})\), + regularity \(a f(n/b) \le c f(n),\ c&lt;1\)</td><td>\(T(n)=\Theta(f(n))\)</td></tr>
+    </table>
+    <div class="warn"><b>Gap trap:</b> if \(f\) is larger only by a <i>logarithmic</i> factor (e.g. \(f=n^{\log_b a}\log n\)), the Master Theorem <b>does not apply</b>. Use the recursion-tree method.</div>
+    <h4>Worked examples</h4>
+    <table>
+      <tr><th>Recurrence</th><th>\(n^{\log_b a}\)</th><th>Case</th><th>Result</th></tr>
+      <tr><td>Merge Sort: \(2T(n/2)+n\)</td><td>\(n^1\)</td><td>2</td><td>\(\Theta(n\log n)\)</td></tr>
+      <tr><td>Binary Search: \(T(n/2)+1\)</td><td>\(n^0\)</td><td>2</td><td>\(\Theta(\log n)\)</td></tr>
+      <tr><td>\(2T(n/2)+n^2\)</td><td>\(n^1\)</td><td>3</td><td>\(\Theta(n^2)\)</td></tr>
+      <tr><td>\(4T(n/2)+n\)</td><td>\(n^2\)</td><td>1</td><td>\(\Theta(n^2)\)</td></tr>
+      <tr><td>\(3T(n/4)+n\log n\)</td><td>\(n^{0.79}\)</td><td>3</td><td>\(\Theta(n\log n)\)</td></tr>
+      <tr><td>\(T(n-1)+n\)</td><td>—</td><td>iterate</td><td>\(\Theta(n^2)\)</td></tr>
+    </table>
+    <h4>Other methods</h4>
+    <ul>
+      <li><b>Substitution:</b> guess the form, prove by induction (verify base case and inductive step separately).</li>
+      <li><b>Recursion tree:</b> sum work per level × number of levels; great for guessing.</li>
+      <li><b>Iteration:</b> unfold the recurrence to the base case, count levels.</li>
+    </ul>
+  </div>
+
+  <h2 class="section" id="summations">1.3 Useful Sums &amp; Identities</h2>
+  <div class="card two-col">
+    <p>Arithmetic: \(\sum_{i=1}^{n} i = \dfrac{n(n+1)}{2} = \Theta(n^2)\)</p>
+    <p>Squares: \(\sum_{i=1}^{n} i^2 = \dfrac{n(n+1)(2n+1)}{6} = \Theta(n^3)\)</p>
+    <p>Geometric (\(x\ne1\)): \(\sum_{i=0}^{n} x^i = \dfrac{x^{n+1}-1}{x-1}\)</p>
+    <p>Convergent (\(|x|&lt;1\)): \(\sum_{i=0}^{\infty} x^i = \dfrac{1}{1-x}\)</p>
+    <p>Harmonic: \(\sum_{i=1}^{n}\dfrac1i = \Theta(\log n)\)</p>
+    <p>Logs: \(\sum_{i=1}^{n}\log i = \log(n!) = \Theta(n\log n)\)</p>
+    <p>Powers of two: \(\sum_{i=0}^{k} 2^i = 2^{k+1}-1\)</p>
+    <p>Perfect binary tree of height \(h\): \(2^{h+1}-1\) nodes, \(2^h\) leaves.</p>
+  </div>
+
+  <h2 class="section" id="probability">1.4 Probability Basics</h2>
+  <div class="card">
+    <p>Randomized structures (skip lists, hashing, randomized quicksort/select) use <b>expected-time</b> analysis, averaged over the algorithm's coin flips — not over inputs.</p>
+    <table>
+      <tr><th>Concept</th><th>Definition / formula</th></tr>
+      <tr><td>Probability</td><td>\(P(A)\in[0,1]\); \(P(\Omega)=1\); \(P(\emptyset)=0\)</td></tr>
+      <tr><td>Union</td><td>\(P(A\cup B)=P(A)+P(B)-P(A\cap B)\)</td></tr>
+      <tr><td>Independence</td><td>\(P(A\cap B)=P(A)\cdot P(B)\)</td></tr>
+      <tr><td>Conditional</td><td>\(P(A\mid B)=\dfrac{P(A\cap B)}{P(B)}\)</td></tr>
+      <tr><td><b>Expectation</b></td><td>\(E[X]=\sum_i x_i\,P(X=x_i)\)</td></tr>
+      <tr><td><b>Linearity</b></td><td>\(E[X+Y]=E[X]+E[Y]\) — always, even if dependent</td></tr>
+      <tr><td>Indicator</td><td>\(X_A=1\) if A occurs else 0; then \(E[X_A]=P(A)\)</td></tr>
+    </table>
+    <div class="note"><b>The key exam technique — indicators + linearity:</b> to count expected occurrences of many events, define an indicator \(X_i\) per event, then \(E[\text{total}]=\sum_i P(\text{event }i)\). This proves randomized quicksort/select bounds and skip-list height \(O(\log n)\).</div>
+    <ul>
+      <li><b>Bernoulli(p):</b> \(E[X]=p\). Trials until first success (Geometric): \(E=1/p\) (skip-list level: \(p=\tfrac12\Rightarrow\) expected 2 flips).</li>
+      <li><b>Uniform over m outcomes:</b> each has probability \(1/m\) (basis of simple uniform hashing).</li>
+    </ul>
+  </div>
+
+  </div>
+</main>
+</div>
+</body>
+</html>
