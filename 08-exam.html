@@ -126,7 +126,12 @@
       <tr><td>Ordered ops (successor, range, median) O(log n)</td><td>AVL / balanced BST / skip list</td></tr>
       <tr><td>Fast min/max + insert</td><td>Binary heap</td></tr>
       <tr><td>Fast lookup <b>and</b> order/range</td><td>Hash + AVL (combine)</td></tr>
-      <tr><td>Sort integers in small range</td><td>Counting / Radix sort</td></tr>
+      <tr><td>Sort integers in small range \([0, O(n)]\)</td><td><a href="02-sorting.html#counting">Counting sort</a></td></tr>
+      <tr><td>Sort integers with \(d = o(\log n)\) digits</td><td><a href="02-sorting.html#radix">Radix sort</a> (stable digit sort per pass)</td></tr>
+      <tr><td>Sort floats uniformly in \([0,1)\)</td><td><a href="02-sorting.html#bucket">Bucket sort</a></td></tr>
+      <tr><td>\(L = n\) binary digits — pick best worst-case sort</td><td>Merge sort \(\Theta(n\log n)\) — radix is \(\Theta(n^2)\)</td></tr>
+      <tr><td>\(L = o(\log n)\) binary digits — pick best worst-case sort</td><td>Radix sort — beats merge</td></tr>
+      <tr><td>Sort list in \(\Theta(N)\) but <b>no bound on max key \(K\)</b></td><td>Do <b>not</b> use counting/radix — use AVL + hash</td></tr>
       <tr><td>Guaranteed O(n log n) + stable</td><td>Merge sort</td></tr>
       <tr><td>In-place fast average sort</td><td>Quick sort (randomized)</td></tr>
       <tr><td>i-th smallest / median in O(n)</td><td>Quickselect / median-of-medians</td></tr>
@@ -145,7 +150,8 @@
     <h4>How the exam asks questions (from past papers)</h4>
     <ul>
       <li><b>"Best time to implement operation X on structure Y"</b> — know each structure's operation costs cold. E.g. <i>DeleteLast</i> is O(1) on a hash chain but O(log n) worst on a skip list.</li>
-      <li><b>Sorting best/worst fill-ins</b> — given constraints (e.g. each element within \(n^{0.4}\) of its index), work out Insertion/Merge/Quick/Counting behavior. Insertion is O(n·shift-distance); deterministic Quick's worst is on sorted input.</li>
+        <li><b>Sorting best/worst fill-ins</b> — given constraints (e.g. each element within \(n^{0.4}\) of its index), work out Insertion/Merge/Quick/Counting behavior. Insertion is O(n·shift-distance); deterministic Quick's worst is on sorted input. For <b>linear sorts</b>, check whether \(k=O(n)\) or \(d=o(\log n)\) — see <a href="02-sorting.html#linear-sorting">§2.3 decision guide</a>.</li>
+        <li><b>"Best algorithm to sort \(n\) integers with \(L\) binary digits"</b> — compare Radix \(\Theta(L\cdot n)\) vs Merge \(\Theta(n\log n)\). Radix when \(L=o(\log n)\); Merge when \(L=\Omega(\log n)\).</li>
       <li><b>Design a structure meeting target complexities</b> — combine primitives: hash table (O(1) contains) + sorted array/AVL (order/median) + auxiliary arrays. State fields, describe each op, analyze.</li>
       <li><b>Graph counting / proof</b> — e.g. "# distinct BFS trees" — reason about tie-breaking and structure.</li>
     </ul>
@@ -154,7 +160,9 @@
       <ul style="margin:0">
         <li><b>buildHeap is O(n)</b>, not O(n log n). Heapsort overall is O(n log n).</li>
         <li><b>Quicksort worst = O(n²)</b> (deterministic pivot on sorted input); average = O(n log n).</li>
-        <li><b>Counting sort is O(n+k)</b> — only linear when k = O(n); it is <b>stable</b>, radix depends on that.</li>
+        <li><b>Counting sort is O(n+k)</b> — only linear when <b>\(k = O(n)\)</b>; it is <b>stable</b>, radix depends on that. Without a bound on max key \(K\), you cannot sort in \(\Theta(N)\) with counting/radix.</li>
+        <li><b>Radix sort is \(\Theta(d(n+b))\)</b> — needs stable digit sort. With \(L\) binary digits and 1-bit passes: \(\Theta(L\cdot n)\). Compare to merge before answering "best sort".</li>
+        <li><b>Bucket sort average = O(n)</b> but <b>worst = O(n²)</b> when all elements fall in one bucket.</li>
         <li><b>Dijkstra breaks on negative edges.</b></li>
         <li><b>Plain BST is O(n) worst</b> — only AVL/balanced guarantees O(log n).</li>
         <li><b>Hash chaining:</b> insert always O(1); search Θ(1+α) expected, O(n) worst. <b>Probing:</b> expected O(1) probes, worst O(n); needs α&lt;1.</li>

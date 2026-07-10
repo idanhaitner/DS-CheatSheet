@@ -30,7 +30,7 @@
   <div class="pagehead">
     <div class="crumbs"><a href="index.html">Home</a> › Amortized &amp; Union-Find</div>
     <h1>7 · Advanced Analysis</h1>
-    <p>Amortized analysis · disjoint sets (union-find)</p>
+    <p>Amortized analysis · deamortization · union-find</p>
   </div>
   <div class="inner">
 
@@ -71,6 +71,108 @@
       <tr><td><b>Both optimizations</b></td><td><span class="tag b-O1">O(m·α(n))</span> ≈ O(m) — α = inverse Ackermann, ≤ 4 in practice</td></tr>
     </table>
     <div class="note"><b>Application:</b> connected components — MakeSet each vertex, then for each edge (u,v) Union their sets. Two vertices are connected ⟺ same Find.</div>
+  </div>
+
+  <h2 class="section" id="deamortization">7.3 Deamortization</h2>
+  <div class="card">
+    <p><b>Deamortization</b> spreads an expensive periodic operation across many cheap steps so that <b>every single operation costs O(1) in the worst case</b> — not just amortized O(1).</p>
+    <table>
+      <tr><th></th><th>Amortized</th><th>Deamortized</th></tr>
+      <tr><td>Rehash cost</td><td>\(\Theta(n)\) once, but <span class="tag b-O1">O(1)</span> amortized per insert</td><td><span class="tag b-O1">O(1)</span> worst-case per insert <b>and</b> per rehash step</td></tr>
+      <tr><td>When it spikes</td><td>One insert pays \(\Theta(n)\)</td><td>Work is spread — no spike</td></tr>
+    </table>
+
+    <h4>Problem: rehashing in a hash table (chaining)</h4>
+    <p>Goal: keep \(n/m \in \Theta(1)\) for \(\Theta(1)\) search and \(\Theta(n)\) space.</p>
+    <ul>
+      <li>Maintain load factor in \((1/4,\, 1)\).</li>
+      <li>When table has <b>\(m\) elements</b> → create new table of size <b>\(2m\)</b> and copy all elements.</li>
+      <li>When table has <b>\(m/4\) elements</b> → shrink to size <b>\(m/2\)</b> (deletions; lecture focuses on insertions).</li>
+    </ul>
+    <p>Naive rehash costs \(\Theta(n)\) at once. Amortized analysis gives O(1) per insert, but one operation can still be \(\Theta(n)\). <b>Deamortization</b> fixes that.</p>
+
+    <h4>Naive rehash algorithm (2m steps total)</h4>
+    <span class="code-label">pseudocode</span>
+<pre><span class="cm"># T = old table (size m), T' = new table (size 2m)</span>
+<span class="kw">for</span> i = 0 <span class="kw">to</span> m-1:
+    p = T[i]
+    <span class="kw">while</span> p != NULL:
+        Insert(T', p)       <span class="cm"># one element into new table</span>
+        p = p.next          <span class="cm"># advance chain</span>
+<span class="cm"># Total: m cell-scans + m element-inserts = 2m steps</span></pre>
+    <p>Each "step" = scan one cell <b>or</b> insert one element into \(T'\). Full rehash = <b>\(2m\) steps</b>.</p>
+
+    <h4>Deamortized insert — two tables</h4>
+    <p>Always maintain two tables: <b>\(T\)</b> (size \(m\)) and <b>\(T'\)</b> (size \(2m\)). When \(T\) has exactly \(m/2\) elements, \(T'\) is empty. Over the next <b>\(m/2\) insertions</b>, gradually rebuild into \(T'\):</p>
+    <span class="code-label">pseudocode — insert with deamortized rehash</span>
+<pre><span class="cm"># Invariant: |T| starts at m/2, grows to m over m/2 inserts</span>
+<span class="kw">Insert</span>(x):
+    insert x into T (normal chaining insert)
+
+    <span class="kw">if</span> x was inserted <span class="kw">after</span> current rehash scan position:
+        perform <b>4 steps</b> of the rehash algorithm
+    <span class="kw">else</span>:
+        insert x into T' as well
+        perform <b>3 steps</b> of the rehash algorithm
+
+    <span class="kw">when</span> |T| = m:
+        T ← T'
+        create new empty T' of size 4m   <span class="cm"># smart array: Θ(1) alloc</span></pre>
+
+    <table>
+      <tr><th>Component</th><th>Cost per insert</th></tr>
+      <tr><td>Normal insert into \(T\)</td><td>\(\Theta(1)\)</td></tr>
+      <tr><td>Rehash work (3 or 4 steps)</td><td>\(\Theta(1)\) — constant steps only</td></tr>
+      <tr><td>Swap \(T \leftarrow T'\) when full</td><td>\(\Theta(1)\) pointer swap</td></tr>
+    </table>
+    <div class="note"><b>Key idea:</b> \(2m\) rehash steps spread over \(m/2\) inserts \(\Rightarrow\) at most 4 steps/insert. Each insert does only <b>constant</b> rehash work, so worst-case insert = <span class="tag b-O1">O(1)</span>. Total for \(n\) inserts remains <span class="tag b-On">O(n)</span>.</div>
+    <div class="warn"><b>Requires a smart array:</b> allocating a table of size \(4m\) without initializing every cell costs \(\Theta(1)\) (same assumption as in assignments). Standard RAM model would charge \(\Theta(m)\) for initialization.</div>
+  </div>
+
+  <h2 class="section" id="btree-amortized">7.4 B-Tree Amortized Analysis</h2>
+  <div class="card">
+    <p>For a B-tree with <b>2-pass insertion/deletion</b>, split/merge/shift operations can be charged to individual inserts/deletes.</p>
+    <h4>Theorem</h4>
+    <p>Starting from an empty tree, in any sequence of \(m\) insertions and deletions, the number of merge, split, and shift operations is at most <b>\(\frac{3}{2}m\)</b>.</p>
+    <h4>Accounting method</h4>
+    <ul>
+      <li>Cost of each merge / split / shift = <b>1</b>.</li>
+      <li>Charge per insert or delete = <b>\(3/2\)</b>.</li>
+    </ul>
+    <p><b>Invariant (dollar storage on nodes):</b></p>
+    <ul>
+      <li>Non-root node with \(t-1\) keys stores <b>\(1/2\)</b> dollar.</li>
+      <li>Node with \(2t-1\) keys stores <b>\(3/2\)</b> dollars.</li>
+    </ul>
+    <p><b>Insertion:</b> when node \(v_i\) splits (had \(2t-1\) keys), use its \(3/2\) dollars to pay for the split and put \(1/2\) on each child. If parent \(w\) reaches \(2t-1\) keys, take \(3/2\) from the operation's charge.</p>
+    <p><b>Deletion:</b> when two siblings merge, use \(1/2\) dollar from each to pay the merge. Shifts funded from the \(3/2\) charge.</p>
+    <div class="note">Amortized cost per insert/delete = <span class="tag b-O1">O(1)</span> for structural ops (tree height still \(O(\log n)\) per search). See <a href="03-trees.html#btree">B-trees</a> for the structure itself.</div>
+  </div>
+
+  <h2 class="section" id="bb-tree">7.5 BB[\(\alpha\)] Trees</h2>
+  <div class="card">
+    <p>A <b>BB[\(\alpha\)] tree</b> (\(\alpha < 1/2\)) is a BST where every node \(v\) has <b>bounded balance</b>:</p>
+    <p style="text-align:center">\(\text{size}(v.\text{left}) \ge \lfloor \alpha \cdot \text{size}(v) \rfloor\) &nbsp;and&nbsp; \(\text{size}(v.\text{right}) \ge \lfloor \alpha \cdot \text{size}(v) \rfloor\)</p>
+    <p>Height bound: \(h \le \log_{1/(1-\alpha)} |T|\). For \(\alpha = 1/3\): \(h \le \log_{3/2} n = O(\log n)\).</p>
+
+    <h4>Insert / Delete</h4>
+    <ol>
+      <li>Insert or delete as in a regular BST.</li>
+      <li>Let \(w\) = highest node that violates bounded balance \(\alpha\).</li>
+      <li>If \(w\) exists → replace the subtree at \(w\) with a <b>perfectly balanced</b> tree on the same keys.</li>
+    </ol>
+    <p>Single operation cost: \(\Theta(\text{height}(T) + \text{size}(w))\) — worst case <span class="tag b-On">Θ(n)</span> when rebalancing a large subtree.</p>
+
+    <h4>Amortized analysis (\(\alpha = 1/3\), inserts only)</h4>
+    <ul>
+      <li>Real cost of insert = \((\text{height}(T)+1) + \text{size}(w)\).</li>
+      <li>Charge per insert = <b>\(4(\text{height}(T)+1)\)</b>.</li>
+      <li>Pay \(\text{height}(T)+1\) from the charge for the BST walk.</li>
+      <li>Deposit <b>3 dollars</b> at each internal node on the root-to-leaf path (≤ \(3(\text{height}(T)+1)\)).</li>
+      <li>When \(w\) is rebalanced (subtree size \(M\)): at least \(M/3\) inserts happened into \(w\)'s subtree since last rebalance, each adding 3 dollars → \(w\) holds ≥ \(M\) dollars to pay for rebuilding.</li>
+    </ul>
+    <p>Charge \(4(\text{height}(T)+1) \in O(\log n)\) ⟹ \(n\) insertions cost <span class="tag b-Onlog">O(n log n)</span> total, <span class="tag b-Olog">O(log n)</span> amortized per insert — despite \(\Theta(n)\) worst-case single rebalance.</p>
+    <div class="pitfall"><b>BB[\(\alpha\)] vs AVL:</b> both rebalance, but BB[\(\alpha\)] may rebuild an entire subtree (expensive single op, cheap amortized). AVL does local rotations (O(1) per rotation, O(log n) per insert worst-case).</div>
   </div>
 
   </div>

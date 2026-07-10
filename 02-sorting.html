@@ -80,12 +80,13 @@
       <tr><td><b>Merge</b></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-Onlog">n log n</span></td><td>O(n)</td><td>Yes</td><td>No</td></tr>
       <tr><td><b>Quick</b></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-On2">n²</span></td><td>O(log n)</td><td>No</td><td>Yes</td></tr>
       <tr><td><b>Heap</b></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-Onlog">n log n</span></td><td>O(1)</td><td>No</td><td>Yes</td></tr>
+      <tr style="background:var(--row-alt)"><td colspan="7" style="text-align:center;color:var(--accent2);font-weight:600">↓ Linear (non-comparison) sorts — see <a href="#linear-sorting">§2.3 decision guide</a></td></tr>
       <tr><td><b>Counting</b></td><td colspan="3" style="text-align:center"><span class="tag b-On">n + k</span></td><td>O(n+k)</td><td>Yes</td><td>No</td></tr>
-      <tr><td><b>Radix</b></td><td colspan="3" style="text-align:center"><span class="tag b-On">d(n + k)</span></td><td>O(n+k)</td><td>Yes</td><td>No</td></tr>
+      <tr><td><b>Radix</b></td><td colspan="3" style="text-align:center"><span class="tag b-On">d(n + b)</span></td><td>O(n+b)</td><td>Yes</td><td>No</td></tr>
       <tr><td><b>Bucket</b></td><td><span class="tag b-On">n</span></td><td><span class="tag b-On">n</span></td><td><span class="tag b-On2">n²</span></td><td>O(n)</td><td>Yes</td><td>No</td></tr>
     </table>
-    <p style="font-size:12px;color:var(--muted)">k = range of keys, d = number of digits. Quick Sort space is O(log n) expected (recursion stack).</p>
-    <div class="note"><b>Comparison sorts</b> (insertion, selection, bubble, merge, quick, heap) cannot beat <b>Ω(n log n)</b> worst case. <b>Non-comparison sorts</b> (counting, radix, bucket) break this by assuming structure on the input.</div>
+    <p style="font-size:12px;color:var(--muted)">\(k\) = key range, \(d\) = digits, \(b\) = radix base. Quick Sort space is O(log n) expected (recursion stack).</p>
+    <div class="note"><b>Comparison sorts</b> cannot beat <b>Ω(n log n)</b> worst case. <b>Linear sorts</b> (counting, radix, bucket) break this only when key structure is bounded — use the <a href="#linear-sorting">§2.3 decision guide</a> to pick one.</div>
   </div>
 
   <!-- ===== INSERTION ===== -->
@@ -194,8 +195,118 @@
     <div class="note">Advantage over merge sort: <b>O(1)</b> extra memory. Advantage over quicksort: <b>guaranteed</b> O(n log n). See <a href="04-heaps.html#heap">Heaps</a> for the heapify diagram.</div>
   </div>
 
+  <!-- ===== LINEAR SORTING (NON-COMPARISON) ===== -->
+  <h2 class="section" id="linear-sorting">2.3 Linear Sorting Algorithms</h2>
+  <div class="card">
+    <p style="margin-top:0"><b>Linear sorting</b> = non-comparison sorts that can beat the \(\Omega(n\log n)\) lower bound by exploiting <b>structure on the keys</b> (bounded integer range, fixed digits, uniform distribution). They are <b>not</b> comparison-based.</p>
+
+    <h4>Quick comparison</h4>
+    <table>
+      <tr><th>Algorithm</th><th>Time</th><th>When it is truly \(\Theta(n)\)</th><th>Key requirement</th><th>Stable?</th><th>Extra space</th></tr>
+      <tr>
+        <td><b><a href="#counting">Counting</a></b></td>
+        <td><span class="tag b-On">Θ(n + k)</span></td>
+        <td>\(k = O(n)\)</td>
+        <td>Integers in \([0, k]\)</td>
+        <td>Yes</td>
+        <td>O(n + k)</td>
+      </tr>
+      <tr>
+        <td><b><a href="#radix">Radix</a></b></td>
+        <td><span class="tag b-On">Θ(d(n + b))</span></td>
+        <td>\(d = O(1)\), or \(d\cdot b = O(n)\)</td>
+        <td>\(d\) digits in base \(b\); digit sort must be <b>stable</b></td>
+        <td>Yes</td>
+        <td>O(n + b)</td>
+      </tr>
+      <tr>
+        <td><b><a href="#bucket">Bucket</a></b></td>
+        <td><span class="tag b-On">Θ(n)</span> avg</td>
+        <td>Uniform on \([0,1)\), ~1 element per bucket</td>
+        <td>Inputs uniformly distributed in \([0,1)\)</td>
+        <td>Yes</td>
+        <td>O(n)</td>
+      </tr>
+    </table>
+    <p style="font-size:12px;color:var(--muted)">\(k\) = key range upper bound · \(d\) = number of digits · \(b\) = radix base (often 10 or 256; for single-bit passes \(b=2\)).</p>
+
+    <h4>Which linear sort to choose?</h4>
+    <table>
+      <tr><th>Condition</th><th>Pick</th><th>Why</th></tr>
+      <tr>
+        <td>Integers in \([0, 2N]\) or \([0, cN]\) for constant \(c\)</td>
+        <td><b>Counting sort</b></td>
+        <td>\(k = O(N)\) ⇒ \(\Theta(N + k) = \Theta(N)\). Direct-address table of size \(2N+1\) is enough.</td>
+      </tr>
+      <tr>
+        <td>Integers in \([0, N^2]\), need <b>time</b> \(\Theta(N)\)</td>
+        <td><b>Counting sort</b></td>
+        <td>Still \(\Theta(N)\) time, but <b>space</b> jumps to \(\Theta(N^2)\) — mention both!</td>
+      </tr>
+      <tr>
+        <td>Each \(A[i]\) is within \(n^{0.4}\) of its sorted index (\(i \le A[i] \le i + n^{0.4}\))</td>
+        <td><b>Counting sort</b> \(\Theta(n)\)</td>
+        <td>Max key \(\le n + n^{0.4} = O(n)\), so \(k = O(n)\). Insertion is only \(\Theta(n^{1.4})\) here.</td>
+      </tr>
+      <tr>
+        <td>Each number has exactly \(L\) binary digits; \(L = n\)</td>
+        <td><b>Merge sort</b> \(\Theta(n\log n)\)</td>
+        <td>Radix with 1-bit passes costs \(\Theta(L\cdot n) = \Theta(n^2)\) — worse than merge.</td>
+      </tr>
+      <tr>
+        <td>Each number has exactly \(L\) binary digits; \(L = (\log n)^{1/2}\)</td>
+        <td><b>Radix sort</b> \(\Theta(n)\)</td>
+        <td>\(L\cdot n = n(\log n)^{1/2} = o(n\log n)\). Radix beats merge.</td>
+      </tr>
+      <tr>
+        <td>Each number has exactly \(L\) binary digits; \(L = (\log n)^{3/2}\)</td>
+        <td><b>Radix sort</b> \(\Theta(n(\log n)^{1/2})\)</td>
+        <td>Still beats merge \(\Theta(n\log n)\) because \(L = o(\log n)\).</td>
+      </tr>
+      <tr>
+        <td>Each number has exactly \(L\) binary digits; \(L = (\log n)^3\)</td>
+        <td><b>Merge sort</b> \(\Theta(n\log n)\)</td>
+        <td>\(L\cdot n = n(\log n)^3 \gg n\log n\). Comparison sort wins.</td>
+      </tr>
+      <tr>
+        <td>Salaries / weights with fixed digit representation (e.g. 10 digits, base 10)</td>
+        <td><b>Radix sort</b></td>
+        <td>\(d\) and \(b\) are constants ⇒ \(\Theta(d(n+b)) = \Theta(n)\). Use counting sort per digit.</td>
+      </tr>
+      <tr>
+        <td>Keys uniformly distributed in \([0, 1)\)</td>
+        <td><b>Bucket sort</b></td>
+        <td>\(n\) buckets, insertion sort each ⇒ \(\Theta(n)\) expected. Worst \(\Theta(n^2)\) if all land in one bucket.</td>
+      </tr>
+      <tr>
+        <td>Need to sort list \(L\) in \(\Theta(N)\) but <b>no bound on \(K\)</b> (max key)</td>
+        <td><b>Do NOT use counting/radix</b></td>
+        <td>Without \(K = O(N)\), linear sorts are not \(\Theta(N)\). Use AVL + hash instead.</td>
+      </tr>
+    </table>
+
+    <h4>Radix vs Merge — the one comparison to memorize</h4>
+    <p>Radix (with counting per digit, base \(b\)): <b>\(\Theta(d\cdot(n+b))\)</b>. Merge: <b>\(\Theta(n\log n)\)</b>.</p>
+    <ul>
+      <li><b>Radix wins</b> when \(d\cdot n = o(n\log n)\), i.e. \(d = o(\log n)\).</li>
+      <li><b>Merge wins</b> when \(d = \Omega(\log n)\) (e.g. \(d = n\) or \(d = (\log n)^3\)).</li>
+      <li><b>Counting wins</b> over radix when there is a <b>single digit</b> (one pass) and \(k = O(n)\).</li>
+    </ul>
+
+    <div class="pitfall">
+      <b>Top traps for linear sorts:</b>
+      <ul style="margin:0">
+        <li>Counting is only \(\Theta(n)\) when <b>\(k = O(n)\)</b>. If \(k = n^2\), time is still \(\Theta(n)\) but space is \(\Theta(n^2)\) — and some graders treat it as not "linear" overall.</li>
+        <li>Radix <b>requires a stable</b> digit sort (counting sort works). Without stability, radix breaks.</li>
+        <li>Bucket sort worst case is \(\Theta(n^2)\) — never claim worst-case \(\Theta(n)\) without the uniform-distribution assumption.</li>
+        <li>Don't confuse <b>linear probing</b> (hashing) with <b>linear sorting</b> (counting/radix/bucket).</li>
+      </ul>
+    </div>
+    <div class="note"><b>Design pattern:</b> bounded range \([0,cN]\) ⇒ counting sort + direct-address array; fixed digits ⇒ radix; uniform floats ⇒ bucket; unbounded keys ⇒ comparison sort or AVL, never counting/radix alone.</div>
+  </div>
+
   <!-- ===== COUNTING ===== -->
-  <h2 class="section" id="counting">Counting Sort <span class="tag b-On" style="font-size:11px">O(n + k)</span></h2>
+  <h2 class="section" id="counting">2.3.1 Counting Sort <span class="tag b-On" style="font-size:11px">O(n + k)</span></h2>
   <div class="card">
     <p><b>Idea (non-comparison).</b> For integer keys in \([0,k]\): count occurrences, take prefix sums to know final positions, then place elements <b>right to left</b> (preserves stability).</p>
     <span class="code-label">pseudocode</span>
@@ -213,7 +324,7 @@
   </div>
 
   <!-- ===== RADIX ===== -->
-  <h2 class="section" id="radix">Radix Sort <span class="tag b-On" style="font-size:11px">O(d(n + k))</span></h2>
+  <h2 class="section" id="radix">2.3.2 Radix Sort <span class="tag b-On" style="font-size:11px">O(d(n + k))</span></h2>
   <div class="card">
     <p><b>Idea.</b> Sort digit-by-digit with a <b>stable</b> sort (counting sort), from the <b>least</b> significant digit up. Stability is essential so earlier digit order survives.</p>
     <span class="code-label">pseudocode</span>
@@ -226,7 +337,7 @@
   </div>
 
   <!-- ===== BUCKET ===== -->
-  <h2 class="section" id="bucket">Bucket Sort <span class="tag b-On" style="font-size:11px">avg O(n)</span></h2>
+  <h2 class="section" id="bucket">2.3.3 Bucket Sort <span class="tag b-On" style="font-size:11px">avg O(n)</span></h2>
   <div class="card">
     <p><b>Idea.</b> For inputs uniform over \([0,1)\): split into n equal buckets, drop each element into bucket \(\lfloor n\cdot x\rfloor\), sort each bucket (insertion sort), then concatenate.</p>
     <span class="code-label">pseudocode</span>

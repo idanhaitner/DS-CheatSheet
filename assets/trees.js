@@ -59,6 +59,7 @@
     rotate[z.key] = true;
     if (y) {
       rotate[y.key] = true;
+      if (y.left) Object.assign(rotate, avlCollectSubtreeKeys(y.left));
       if (y.right) Object.assign(rotate, avlCollectSubtreeKeys(y.right));
     }
     return { pivot: z.key, newroot: y ? y.key : z.key, rotate: rotate };
@@ -70,6 +71,7 @@
     if (y) {
       rotate[y.key] = true;
       if (y.left) Object.assign(rotate, avlCollectSubtreeKeys(y.left));
+      if (y.right) Object.assign(rotate, avlCollectSubtreeKeys(y.right));
     }
     return { pivot: z.key, newroot: y ? y.key : z.key, rotate: rotate };
   }
@@ -118,7 +120,7 @@
     if (!pivotNode) return {};
     var zp = beforePos[pivotNode.key];
     if (!zp) return {};
-    var targets = {}, y, yp;
+    var targets = {}, y, yp, dx, dy;
 
     if (dir === 'right') {
       y = pivotNode.left;
@@ -127,6 +129,11 @@
       if (!yp) return {};
       targets[y.key] = { x: zp.x, y: zp.y };
       targets[pivotNode.key] = { x: yp.x, y: yp.y };
+      dx = zp.x - yp.x;
+      dy = zp.y - yp.y;
+      if (y.left) {
+        Object.assign(targets, avlSubtreeDelta(y.left, beforePos, yp.x + dx, yp.y + dy));
+      }
       if (y.right) {
         Object.assign(targets, avlSubtreeDelta(y.right, beforePos, yp.x - 40, yp.y + ROW_DY));
       }
@@ -137,6 +144,11 @@
       if (!yp) return {};
       targets[y.key] = { x: zp.x, y: zp.y };
       targets[pivotNode.key] = { x: yp.x, y: yp.y };
+      dx = zp.x - yp.x;
+      dy = zp.y - yp.y;
+      if (y.right) {
+        Object.assign(targets, avlSubtreeDelta(y.right, beforePos, yp.x + dx, yp.y + dy));
+      }
       if (y.left) {
         Object.assign(targets, avlSubtreeDelta(y.left, beforePos, yp.x + 40, yp.y + ROW_DY));
       }
@@ -164,7 +176,7 @@
       if (t >= 1 && after.pos[k]) {
         x = after.pos[k].x;
         y = after.pos[k].y;
-      } else if (geomTargets[ki] && isMoving(ki)) {
+      } else if (geomTargets[ki]) {
         x = b.x + (geomTargets[ki].x - b.x) * ease;
         y = b.y + (geomTargets[ki].y - b.y) * ease;
       } else {
@@ -178,7 +190,7 @@
       });
     });
 
-    var edges = t <= 0 ? before.edges : after.edges;
+    var edges = t >= 1 ? after.edges : before.edges;
     return { kind: 'avl', desc: desc, panel: panel || '', nodes: nodes, edges: edges, pivotRing: t > 0 && t < 1 ? before.pos[roles.pivot] : null };
   }
 
@@ -1046,6 +1058,25 @@
       render();
     }
 
+    function playToEnd() {
+      if (frames.length <= 1) return;
+      if (idx >= frames.length - 1) return;
+      playing = true;
+      var btn = $('.viz-play');
+      if (btn) btn.textContent = '\u23F8 Pause';
+      var speed = 900 - parseInt($('.viz-speed').value, 10) * 0.45;
+      if (speed < 80) speed = 80;
+      if (timer) clearInterval(timer);
+      timer = setInterval(function () {
+        if (idx >= frames.length - 1) {
+          stop();
+          return;
+        }
+        idx++;
+        render();
+      }, speed);
+    }
+
     function play() {
       if (playing) { stop(); return; }
       if (idx >= frames.length - 1) { idx = 0; render(); }
@@ -1089,6 +1120,7 @@
       panX = 0;
       panY = 0;
       render();
+      if (kind === 'avl') playToEnd();
     }
 
     function reset() {
