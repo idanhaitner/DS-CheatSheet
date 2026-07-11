@@ -54,7 +54,7 @@ right(i)  = 2*i + 2</pre>
           <tr><td><code>buildHeap</code></td><td><span class="tag b-On">O(n)</span></td></tr>
         </table>
       </div>
-      <div class="note heap-note"><b>buildHeap is O(n):</b> most nodes sit near leaves — not \(O(n\log n)\). <b>Exam:</b> no O(log n) search for an arbitrary key (that's O(n)).</div>
+      <div class="note heap-note"><b>buildHeap is O(n):</b> most nodes sit near leaves: not \(O(n\log n)\). <b>Exam:</b> no O(log n) search for an arbitrary key (that's O(n)).</div>
     </div>
 
     <div class="heap-viz-wrap">
@@ -111,10 +111,10 @@ right(i)  = 2*i + 2</pre>
       <tr><td>Decode message</td><td><span class="tag b-On">O(N)</span></td><td>Walk the tree one bit at a time; each source symbol read once</td></tr>
       <tr><td>Space</td><td><span class="tag b-On">O(n)</span></td><td>Tree has 2n−1 nodes; code table has n entries</td></tr>
     </table>
-    <p><b>Expected code length:</b> \(\sum_c freq(c)\cdot depth(c)\) — weighted path length; Huffman minimizes this among all prefix codes. An optimal Huffman tree is a <b>full</b> binary tree; the two least-frequent symbols are <b>siblings</b> at the deepest level.</p>
+    <p><b>Expected code length:</b> \(\sum_c freq(c)\cdot depth(c)\): weighted path length; Huffman minimizes this among all prefix codes. An optimal Huffman tree is a <b>full</b> binary tree; the two least-frequent symbols are <b>siblings</b> at the deepest level.</p>
 
     <h4>Interactive animator</h4>
-    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Preset demo: <b>A=5, B=2, C=1, D=1, E=3</b> — watch repeated <code>extractMin</code> merges build the tree. Left edge = <b>0</b>, right = <b>1</b>.</p>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Preset demo: <b>A=5, B=2, C=1, D=1, E=3</b>: watch repeated <code>extractMin</code> merges build the tree. Left edge = <b>0</b>, right = <b>1</b>.</p>
     <div class="comp-viz-wrap" data-mode="huffman">
       <div class="viz-controls viz-controls--comp">
         <div class="viz-control-group viz-playback-group">
@@ -147,7 +147,7 @@ right(i)  = 2*i + 2</pre>
       <li>Find the <b>longest prefix</b> already in the dictionary; output its index, then add (prefix + next char) as a new entry.</li>
       <li>Later repetitions become a single compact index instead of raw characters.</li>
     </ul>
-    <h4>Example — encode <code>A B A B A B A</code></h4>
+    <h4>Example: encode <code>A B A B A B A</code></h4>
     <table>
       <tr><th>Step</th><th>Output token</th><th>New dictionary entry</th></tr>
       <tr><td>read <code>A</code> (new)</td><td>(0, A)</td><td>1 = "A"</td></tr>
@@ -166,14 +166,14 @@ right(i)  = 2*i + 2</pre>
     <div class="note">
       <b>Huffman vs Lempel-Ziv:</b>
       <ul style="margin:4px 0">
-        <li><b>Huffman</b> — statistical, per-symbol, needs frequencies, optimal prefix code for a known distribution. Build: <span class="tag b-Onlog">O(n log n)</span>.</li>
-        <li><b>Lempel-Ziv</b> — dictionary, exploits repeated substrings, adaptive/online (one pass), decoder rebuilds the same dictionary. Encode: <span class="tag b-On2">O(N²)</span> naive / <span class="tag b-On">O(N)</span> with trie; decode: <span class="tag b-On">O(N)</span>.</li>
+        <li><b>Huffman</b>: statistical, per-symbol, needs frequencies, optimal prefix code for a known distribution. Build: <span class="tag b-Onlog">O(n log n)</span>.</li>
+        <li><b>Lempel-Ziv</b>: dictionary, exploits repeated substrings, adaptive/online (one pass), decoder rebuilds the same dictionary. Encode: <span class="tag b-On2">O(N²)</span> naive / <span class="tag b-On">O(N)</span> with trie; decode: <span class="tag b-On">O(N)</span>.</li>
       </ul>
       Both are <b>lossless</b>. Real tools (DEFLATE in gzip/PNG) combine LZ + Huffman.
     </div>
 
     <h4>Interactive animator</h4>
-    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Preset demo: encode <b>A B A B A B A</b> — watch the dictionary grow and tokens <b>(index, char)</b> appear.</p>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Preset demo: encode <b>A B A B A B A</b>: watch the dictionary grow and tokens <b>(index, char)</b> appear.</p>
     <div class="comp-viz-wrap" data-mode="lz">
       <div class="viz-controls viz-controls--comp">
         <div class="viz-control-group viz-playback-group">

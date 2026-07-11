@@ -37,7 +37,7 @@
   <div class="card quiz-launch" id="quiz">
     <div class="quiz-launch-inner">
       <h2>Practice Quiz</h2>
-      <p>Algorithms, data structures, concepts &amp; complexity — not just Big-O. Animated visuals, instant feedback, and explanations.</p>
+      <p>Algorithms, data structures, concepts &amp; complexity: not just Big-O. Animated visuals, instant feedback, and explanations.</p>
       <div class="quiz-launch-stats">
         <span class="quiz-launch-stat"><b>100</b>questions</span>
         <span class="quiz-launch-stat"><b>5</b>per round</span>
@@ -47,12 +47,12 @@
     </div>
   </div>
 
-  <h2 class="section" id="master-table">8.1 Master Complexity Table — Data Structures</h2>
+  <h2 class="section" id="master-table">8.1 Master Complexity Table: Data Structures</h2>
   <div class="card">
     <div class="table-wrap">
     <table class="complex-table">
       <tr><th>Structure</th><th>Search</th><th>Insert</th><th>Delete</th><th>Min/Max</th><th>Notes</th></tr>
-      <tr><td>Unsorted array/list</td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-O1">O(1)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td><td>—</td></tr>
+      <tr><td>Unsorted array/list</td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-O1">O(1)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td><td>-</td></tr>
       <tr><td>Sorted array</td><td><span class="tag b-Olog">O(log n)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-O1">O(1)</span></td><td>binary search</td></tr>
       <tr><td>Sorted linked list</td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-O1">O(1)</span></td><td>no binary search</td></tr>
       <tr><td>BST (balanced = AVL)</td><td><span class="tag b-Olog">O(log n)</span></td><td><span class="tag b-Olog">O(log n)</span></td><td><span class="tag b-Olog">O(log n)</span></td><td><span class="tag b-Olog">O(log n)</span></td><td>plain BST = O(n) worst</td></tr>
@@ -63,13 +63,13 @@
         <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span><span class="tag b-Olog">O(log n)</span></span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-On">O(n)</span></span></div></td>
         <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span><span class="tag b-Olog">O(log n)</span></span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-On">O(n)</span></span></div></td>
         <td>randomized</td></tr>
-      <tr><td>Hash — <b>chaining</b></td>
+      <tr><td>Hash: <b>chaining</b></td>
         <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span><span class="tag b-O1">Θ(1+α)</span></span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-On">O(n)</span></span></div></td>
         <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span><span class="tag b-O1">O(1)</span></span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-O1">O(1)</span></span></div></td>
         <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span><span class="tag b-O1">O(1)</span></span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-On">O(n)</span></span></div></td>
         <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span><span class="tag b-On">O(n)</span></span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-On">O(n)</span></span></div></td>
         <td>no order; α=n/m</td></tr>
-      <tr><td>Hash — <b>probing</b></td>
+      <tr><td>Hash: <b>probing</b></td>
         <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span>O(1) probes</span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-On">O(n)</span></span></div></td>
         <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span>O(1) probes</span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-On">O(n)</span></span></div></td>
         <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span>O(1) probes</span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-On">O(n)</span></span></div></td>
@@ -81,7 +81,7 @@
     <p style="font-size:14px;color:var(--muted)">Plain rows = <b>worst-case Θ</b>. Skip list &amp; hash rows show <b>expected</b> / <b>worst</b> stacked. See hash quick-ref below.</p>
   </div>
 
-  <h2 class="section">Hash Tables — Quick Reference</h2>
+  <h2 class="section">Hash Tables: Quick Reference</h2>
   <div class="card">
     <div class="grid2">
       <table class="dual-table">
@@ -101,10 +101,10 @@
         <tr><td>Rehash</td><td colspan="2"><span class="tag b-On">O(n)</span> per event · <span class="tag b-O1">O(1)</span> amortized per insert</td></tr>
       </table>
     </div>
-    <p class="case-hint"><b>Chaining</b> insert is always O(1) — search/delete cost Θ(1+α) without a node pointer. <b>Probing</b> needs empty slots (α&lt;1); delete probes like search, then tombstone. <b>Rehash</b> (doubling) costs O(n) once but O(1) amortized per insert.</p>
+    <p class="case-hint"><b>Chaining</b> insert is always O(1): search/delete cost Θ(1+α) without a node pointer. <b>Probing</b> needs empty slots (α&lt;1); delete probes like search, then tombstone. <b>Rehash</b> (doubling) costs O(n) once but O(1) amortized per insert.</p>
   </div>
 
-  <h2 class="section">Master Complexity Table — Graph Algorithms</h2>
+  <h2 class="section">Master Complexity Table: Graph Algorithms</h2>
   <div class="card">
     <table>
       <tr><th>Algorithm</th><th>Time</th><th>Works on</th><th>Solves</th></tr>
@@ -129,9 +129,9 @@
       <tr><td>Sort integers in small range \([0, O(n)]\)</td><td><a href="02-sorting.html#counting">Counting sort</a></td></tr>
       <tr><td>Sort integers with \(d = o(\log n)\) digits</td><td><a href="02-sorting.html#radix">Radix sort</a> (stable digit sort per pass)</td></tr>
       <tr><td>Sort floats uniformly in \([0,1)\)</td><td><a href="02-sorting.html#bucket">Bucket sort</a></td></tr>
-      <tr><td>\(L = n\) binary digits — pick best worst-case sort</td><td>Merge sort \(\Theta(n\log n)\) — radix is \(\Theta(n^2)\)</td></tr>
-      <tr><td>\(L = o(\log n)\) binary digits — pick best worst-case sort</td><td>Radix sort — beats merge</td></tr>
-      <tr><td>Sort list in \(\Theta(N)\) but <b>no bound on max key \(K\)</b></td><td>Do <b>not</b> use counting/radix — use AVL + hash</td></tr>
+      <tr><td>\(L = n\) binary digits: pick best worst-case sort</td><td>Merge sort \(\Theta(n\log n)\): radix is \(\Theta(n^2)\)</td></tr>
+      <tr><td>\(L = o(\log n)\) binary digits: pick best worst-case sort</td><td>Radix sort: beats merge</td></tr>
+      <tr><td>Sort list in \(\Theta(N)\) but <b>no bound on max key \(K\)</b></td><td>Do <b>not</b> use counting/radix: use AVL + hash</td></tr>
       <tr><td>Guaranteed O(n log n) + stable</td><td>Merge sort</td></tr>
       <tr><td>In-place fast average sort</td><td>Quick sort (randomized)</td></tr>
       <tr><td>i-th smallest / median in O(n)</td><td>Quickselect / median-of-medians</td></tr>
@@ -146,32 +146,32 @@
       <tr><td>Graph variant (sets, colors, edge in MST?)</td><td><a href="06-graphs.html#reductions">Reduction</a> → standard algorithm</td></tr>
       <tr><td>Data on disk, huge dataset</td><td>B-tree</td></tr>
     </table>
-    <div class="note"><b>Design tip:</b> when ops need both O(1) lookup <b>and</b> order, combine a <b>hash table</b> (key → node) with an <b>AVL / skip list</b>. Union-Find has no search — always pair it with a hash map to reach elements.</div>
+    <div class="note"><b>Design tip:</b> when ops need both O(1) lookup <b>and</b> order, combine a <b>hash table</b> (key → node) with an <b>AVL / skip list</b>. Union-Find has no search: always pair it with a hash map to reach elements.</div>
   </div>
 
   <h2 class="section" id="exam-tips">8.3 Exam Strategy &amp; Common Pitfalls</h2>
   <div class="card">
     <h4>How the exam asks questions (from past papers)</h4>
     <ul>
-      <li><b>"Best time to implement operation X on structure Y"</b> — know each structure's operation costs cold. E.g. <i>DeleteLast</i> is O(1) on a hash chain but O(log n) worst on a skip list.</li>
-        <li><b>Sorting best/worst fill-ins</b> — given constraints (e.g. each element within \(n^{0.4}\) of its index), work out Insertion/Merge/Quick/Counting behavior. Insertion is O(n·shift-distance); deterministic Quick's worst is on sorted input. For <b>linear sorts</b>, check whether \(k=O(n)\) or \(d=o(\log n)\) — see <a href="02-sorting.html#linear-sorting">§2.3 decision guide</a>.</li>
-        <li><b>"Best algorithm to sort \(n\) integers with \(L\) binary digits"</b> — compare Radix \(\Theta(L\cdot n)\) vs Merge \(\Theta(n\log n)\). Radix when \(L=o(\log n)\); Merge when \(L=\Omega(\log n)\).</li>
-      <li><b>Design a structure meeting target complexities</b> — combine primitives: hash table (O(1) contains) + sorted array/AVL (order/median) + auxiliary arrays. State fields, describe each op, analyze.</li>
-      <li><b>Graph counting / proof</b> — e.g. "# distinct BFS trees", "is \(e_{\min}\) in every MST?", "is edge \(e\) in some MST?" — see <a href="06-graphs.html#graph-exam">§6.9 graph exam tips</a>.</li>
-      <li><b>Graph reductions</b> — super-source/sink, vertex splitting, reverse graph, reduce to MST. Always define \(G'\) and analyze build + algorithm time.</li>
+      <li><b>"Best time to implement operation X on structure Y"</b>: know each structure's operation costs cold. E.g. <i>DeleteLast</i> is O(1) on a hash chain but O(log n) worst on a skip list.</li>
+        <li><b>Sorting best/worst fill-ins</b>: given constraints (e.g. each element within \(n^{0.4}\) of its index), work out Insertion/Merge/Quick/Counting behavior. Insertion is O(n·shift-distance); deterministic Quick's worst is on sorted input. For <b>linear sorts</b>, check whether \(k=O(n)\) or \(d=o(\log n)\): see <a href="02-sorting.html#linear-sorting">§2.3 decision guide</a>.</li>
+        <li><b>"Best algorithm to sort \(n\) integers with \(L\) binary digits"</b>: compare Radix \(\Theta(L\cdot n)\) vs Merge \(\Theta(n\log n)\). Radix when \(L=o(\log n)\); Merge when \(L=\Omega(\log n)\).</li>
+      <li><b>Design a structure meeting target complexities</b>: combine primitives: hash table (O(1) contains) + sorted array/AVL (order/median) + auxiliary arrays. State fields, describe each op, analyze.</li>
+      <li><b>Graph counting / proof</b>: e.g. "# distinct BFS trees", "is \(e_{\min}\) in every MST?", "is edge \(e\) in some MST?": see <a href="06-graphs.html#graph-exam">§6.9 graph exam tips</a>.</li>
+      <li><b>Graph reductions</b>: super-source/sink, vertex splitting, reverse graph, reduce to MST. Always define \(G'\) and analyze build + algorithm time.</li>
     </ul>
     <h4>Top pitfalls to avoid</h4>
     <div class="pitfall">
       <ul style="margin:0">
         <li><b>buildHeap is O(n)</b>, not O(n log n). Heapsort overall is O(n log n).</li>
         <li><b>Quicksort worst = O(n²)</b> (deterministic pivot on sorted input); average = O(n log n).</li>
-        <li><b>Counting sort is O(n+k)</b> — only linear when <b>\(k = O(n)\)</b>; it is <b>stable</b>, radix depends on that. Without a bound on max key \(K\), you cannot sort in \(\Theta(N)\) with counting/radix.</li>
-        <li><b>Radix sort is \(\Theta(d(n+b))\)</b> — needs stable digit sort. With \(L\) binary digits and 1-bit passes: \(\Theta(L\cdot n)\). Compare to merge before answering "best sort".</li>
+        <li><b>Counting sort is O(n+k)</b>: only linear when <b>\(k = O(n)\)</b>; it is <b>stable</b>, radix depends on that. Without a bound on max key \(K\), you cannot sort in \(\Theta(N)\) with counting/radix.</li>
+        <li><b>Radix sort is \(\Theta(d(n+b))\)</b>: needs stable digit sort. With \(L\) binary digits and 1-bit passes: \(\Theta(L\cdot n)\). Compare to merge before answering "best sort".</li>
         <li><b>Bucket sort average = O(n)</b> but <b>worst = O(n²)</b> when all elements fall in one bucket.</li>
-        <li><b>Dijkstra breaks on negative edges</b> — use Bellman-Ford.</li>
-        <li><b>BFS ≠ shortest path on weighted graphs</b> — only unweighted hop count.</li>
-        <li><b>Spanning tree ≠ MST</b> — MST additionally minimizes total weight; cycle/cut properties for proofs.</li>
-        <li><b>Plain BST is O(n) worst</b> — only AVL/balanced guarantees O(log n).</li>
+        <li><b>Dijkstra breaks on negative edges</b>: use Bellman-Ford.</li>
+        <li><b>BFS ≠ shortest path on weighted graphs</b>: only unweighted hop count.</li>
+        <li><b>Spanning tree ≠ MST</b>: MST additionally minimizes total weight; cycle/cut properties for proofs.</li>
+        <li><b>Plain BST is O(n) worst</b>: only AVL/balanced guarantees O(log n).</li>
         <li><b>Hash chaining:</b> insert always O(1); search Θ(1+α) expected, O(n) worst. <b>Probing:</b> expected O(1) probes, worst O(n); needs α&lt;1.</li>
         <li><b>Master Theorem gap:</b> doesn't apply when f differs by only a log factor.</li>
         <li><b>Θ vs O:</b> give Θ for a tight bound; O suffices for an upper bound unless stated.</li>

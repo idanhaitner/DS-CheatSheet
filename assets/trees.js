@@ -1,4 +1,4 @@
-/* AVL & B-tree animators — insert / delete with step-through rebalancing */
+/* AVL & B-tree animators: insert / delete with step-through rebalancing */
 (function () {
   var SVGNS = 'http://www.w3.org/2000/svg';
   var FONT = '"Segoe UI", Roboto, Helvetica, Arial, sans-serif';
@@ -268,7 +268,7 @@
     if (bf > 1) {
       var isLR = avlBf(n.left) < 0;
       if (isLR) {
-        hi.panel = '<b>LR case</b> — left-rotate child, then right-rotate.';
+        hi.panel = '<b>LR case</b>: left-rotate child, then right-rotate.';
         hi.pivot = n.key;
         if (frames) {
           var lrChild = n.left;
@@ -288,7 +288,7 @@
           n.left = avlRotateLeft(n.left, hi);
         }
       } else {
-        hi.panel = '<b>LL case</b> — single right-rotate.';
+        hi.panel = '<b>LL case</b>: single right-rotate.';
       }
       hi.pivot = n.key;
       if (frames) {
@@ -315,7 +315,7 @@
     if (bf < -1) {
       var isRL = avlBf(n.right) > 0;
       if (isRL) {
-        hi.panel = '<b>RL case</b> — right-rotate child, then left-rotate.';
+        hi.panel = '<b>RL case</b>: right-rotate child, then left-rotate.';
         hi.pivot = n.key;
         if (frames) {
           var rlChild = n.right;
@@ -335,7 +335,7 @@
           n.right = avlRotateRight(n.right, hi);
         }
       } else {
-        hi.panel = '<b>RR case</b> — single left-rotate.';
+        hi.panel = '<b>RR case</b>: single left-rotate.';
       }
       hi.pivot = n.key;
       if (frames) {
@@ -570,7 +570,7 @@
         frames[startLen] = avlFrame(
           'Tree is already balanced.',
           rootRef[0], { showBf: true },
-          'All sides within 1 level — no rotation needed.');
+          'All sides within 1 level: no rotation needed.');
       } else {
         frames.push(avlFrame(
           'Tree balanced.',
@@ -588,7 +588,7 @@
 
   function avlDelete(root, key, frames, deferBalance) {
     if (!root) {
-      frames.push(avlFrame('Tree is empty — nothing to delete.', null, {}));
+      frames.push(avlFrame('Tree is empty: nothing to delete.', null, {}));
       return null;
     }
     var rootRef = [root];
@@ -624,7 +624,7 @@
       } else {
         if (!n.left || !n.right) {
           frames.push(avlFrame(
-            'Delete <b>' + key + '</b>' + (n.left || n.right ? ' — splice child up.' : ' — remove leaf.'),
+            'Delete <b>' + key + '</b>' + (n.left || n.right ? ': splice child up.' : ': remove leaf.'),
             rootRef[0], { deleted: key, path: path.slice() }));
           var child = n.left || n.right;
           if (n === rootRef[0]) rootRef[0] = child;
@@ -632,7 +632,7 @@
         }
         var succ = avlMin(n.right);
         frames.push(avlFrame(
-          'Delete <b>' + key + '</b> — swap with successor <b>' + succ.key + '</b>.',
+          'Delete <b>' + key + '</b>: swap with successor <b>' + succ.key + '</b>.',
           rootRef[0], { deleted: key, path: path.slice() }));
         n.key = succ.key;
         n.right = delSucc(n.right, succ.key);
@@ -703,15 +703,15 @@
       frames.push(btFrame(
         'Insert <b>' + key + '</b> into leaf [' + node.keys.join(', ') + '].',
         rootRef[0], { target: key, heavy: node.keys.join(',') },
-        'Leaf has room — insert in sorted order.'));
+        'Leaf has room: insert in sorted order.'));
       btInsertKey(node, key);
       if (node.keys.length <= btMaxKeys()) {
         frames.push(btFrame(
-          'Leaf is now [' + node.keys.join(', ') + ']' + (node.keys.length === btMaxKeys() ? ' — <b>full</b> (2t−1 keys).' : '.'),
+          'Leaf is now [' + node.keys.join(', ') + ']' + (node.keys.length === btMaxKeys() ? ': <b>full</b> (2t−1 keys).' : '.'),
           rootRef[0], { heavy: node.keys.join(',') }));
         return;
       }
-      /* leaf overflow without parent split on way down — rare if we split proactively */
+      /* leaf overflow without parent split on way down: rare if we split proactively */
       return;
     }
 
@@ -732,7 +732,7 @@
   function btInsert(root, key, frames) {
     if (!root) {
       var n = btNode([key], [], true);
-      frames.push(btFrame('Empty tree — create root [' + key + '].', n, {}));
+      frames.push(btFrame('Empty tree: create root [' + key + '].', n, {}));
       return n;
     }
     if (btSearch(root, key)) {
@@ -740,10 +740,10 @@
       return root;
     }
     var rootRef = [root];
-    frames.push(btFrame('Insert <b>' + key + '</b> — descend from root.', root, {}));
+    frames.push(btFrame('Insert <b>' + key + '</b>: descend from root.', root, {}));
 
     if (root.keys.length === btMaxKeys()) {
-      frames.push(btFrame('Root is <b>full</b> — split before descending.', root, { heavy: root.keys.join(',') }));
+      frames.push(btFrame('Root is <b>full</b>: split before descending.', root, { heavy: root.keys.join(',') }));
       var newRoot = btNode([], [root], false);
       btSplitChild(newRoot, 0, frames, rootRef);
       rootRef[0] = newRoot;
@@ -786,7 +786,7 @@
     frames.push(btFrame(
       'Merge [' + left.keys.join(', ') + '] + separator <b>' + sep + '</b> + [' + right.keys.join(', ') + '].',
       root, { heavy: left.keys.join(','), promote: sep },
-      'Both siblings at minimum — borrow impossible.'));
+      'Both siblings at minimum: borrow impossible.'));
     left.keys.push(sep);
     left.keys = left.keys.concat(right.keys);
     if (!left.leaf) left.children = left.children.concat(right.children);
@@ -826,7 +826,7 @@
     while (i < node.keys.length && key > node.keys[i]) i++;
 
     if (i < node.keys.length && node.keys[i] === key && !node.leaf) {
-      frames.push(btFrame('Key <b>' + key + '</b> in internal node — replace with predecessor or successor.', root, { deleted: key }));
+      frames.push(btFrame('Key <b>' + key + '</b> in internal node: replace with predecessor or successor.', root, { deleted: key }));
       if (node.children[i].keys.length > btMinKeys()) {
         var pred = btGetPred(node.children[i]);
         node.keys[i] = pred;
@@ -863,14 +863,14 @@
       frames.push(btFrame('<b>' + key + '</b> not found.', root, {}));
       return root;
     }
-    frames.push(btFrame('Delete <b>' + key + '</b> — ensure nodes on path have ≥ t keys.', root, {}));
+    frames.push(btFrame('Delete <b>' + key + '</b>: ensure nodes on path have ≥ t keys.', root, {}));
     if (root.keys.length === 1 && root.children.length === 2 &&
         root.children[0].keys.length === btMinKeys() && root.children[1].keys.length === btMinKeys()) {
-      frames.push(btFrame('Root has only one key and min children — may shrink height after merge.', root, {}));
+      frames.push(btFrame('Root has only one key and min children: may shrink height after merge.', root, {}));
     }
     btDeleteFromNode(root, root, key, frames);
     if (root.keys.length === 0 && root.children.length > 0) {
-      frames.push(btFrame('Root empty after delete — promote sole child as new root.', root.children[0], { newroot: 'root' }));
+      frames.push(btFrame('Root empty after delete: promote sole child as new root.', root.children[0], { newroot: 'root' }));
       root = root.children[0];
     }
     frames.push(btFrame('Delete <b>' + key + '</b> complete.', root, {}));
@@ -954,7 +954,7 @@
     }
 
     if (hi.promote && hi.splitLeft && hi.splitRight) {
-      /* optional floating promote badge — skip for cleaner layout */
+      /* optional floating promote badge: skip for cleaner layout */
     }
 
     return { nodes: nodes, links: links };

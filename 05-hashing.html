@@ -150,20 +150,20 @@
         <text x="426" y="103" fill="#eaf0ff" font-size="11">+inf</text>
       </g>
     </svg>
-    <div class="caption">Higher levels are express lanes. Keys 2, 5, 7, 9, 12 — node 9 promoted to L2 (three levels).</div>
+    <div class="caption">Higher levels are express lanes. Keys 2, 5, 7, 9, 12: node 9 promoted to L2 (three levels).</div>
 
     <table>
       <tr><th>Operation</th><th>Expected</th><th>Worst</th></tr>
       <tr><td>Search / Insert / Delete</td><td><span class="tag b-Olog">O(log n)</span></td><td><span class="tag b-On">O(n)</span></td></tr>
       <tr><td>Space</td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-Onlog">O(n log n)</span></td></tr>
     </table>
-    <div class="note"><b>Expected</b> bounds are over the random coin flips (not over input order). <b>Worst-case time O(n)</b> happens if every node stays on the bottom level only — the structure becomes a sorted linked list and you scan up to n keys. Yes, the list <b>grows forever</b> as you insert, but we always measure cost in terms of the <b>current n</b>: one operation costs at most Θ(n), not worse (not O(n²) per search).</div>
-    <div class="pitfall"><b>Not unbounded per operation:</b> worst case is O(n), not infinite. What grows without bound is <b>n itself</b> as you keep inserting — so absolute time can get arbitrarily large, but it stays <b>linear in the current size</b>. Real implementations also cap tower height at about O(log n), which keeps space near O(n) in practice.</div>
+    <div class="note"><b>Expected</b> bounds are over the random coin flips (not over input order). <b>Worst-case time O(n)</b> happens if every node stays on the bottom level only: the structure becomes a sorted linked list and you scan up to n keys. Yes, the list <b>grows forever</b> as you insert, but we always measure cost in terms of the <b>current n</b>: one operation costs at most Θ(n), not worse (not O(n²) per search).</div>
+    <div class="pitfall"><b>Not unbounded per operation:</b> worst case is O(n), not infinite. What grows without bound is <b>n itself</b> as you keep inserting: so absolute time can get arbitrarily large, but it stays <b>linear in the current size</b>. Real implementations also cap tower height at about O(log n), which keeps space near O(n) in practice.</div>
   </div>
 
-  <h2 class="section" id="hashing">5.2 Hash Tables — the Dictionary ADT</h2>
+  <h2 class="section" id="hashing">5.2 Hash Tables: the Dictionary ADT</h2>
   <div class="card">
-    <p>Maps keys to array slots via a <b>hash function</b> \(h:U\to\{0,\ldots,m-1\}\). <b>Load factor</b> \(\alpha=n/m\) (items ÷ table size). Under <b>simple uniform hashing</b>, both strategies are fast on average when \(\alpha\) stays reasonable — but <b>worst case</b> is always O(n) if every key collides.</p>
+    <p>Maps keys to array slots via a <b>hash function</b> \(h:U\to\{0,\ldots,m-1\}\). <b>Load factor</b> \(\alpha=n/m\) (items ÷ table size). Under <b>simple uniform hashing</b>, both strategies are fast on average when \(\alpha\) stays reasonable: but <b>worst case</b> is always O(n) if every key collides.</p>
     <div class="note" style="margin-top:10px"><b>Load factor</b> \(\alpha=n/m\). <b>Chaining</b> can use any \(\alpha\). <b>Probing</b> needs \(\alpha&lt;1\) (empty slots required).</div>
 
     <div class="grid2">
@@ -173,7 +173,7 @@
         <tr><td>Insert</td><td><span class="tag b-O1">O(1)</span></td><td><span class="tag b-O1">O(1)</span></td></tr>
         <tr><td>Search</td><td><span class="tag b-O1">Θ(1+α)</span></td><td><span class="tag b-On">O(n)</span></td></tr>
         <tr><td>Delete</td><td><span class="tag b-O1">Θ(1+α)</span> (search chain, then unlink)</td><td><span class="tag b-On">O(n)</span></td></tr>
-        <tr><td>Rehash (table doubles)</td><td colspan="2"><span class="tag b-On">O(n)</span> one-time — re-insert all n keys into new table of size 2m</td></tr>
+        <tr><td>Rehash (table doubles)</td><td colspan="2"><span class="tag b-On">O(n)</span> one-time: re-insert all n keys into new table of size 2m</td></tr>
       </table>
       <table class="dual-table">
         <caption>Open addressing (probing)</caption>
@@ -181,7 +181,7 @@
         <tr><td>Insert</td><td><span class="tag b-O1">O(1)</span> probes</td><td><span class="tag b-On">O(n)</span></td></tr>
         <tr><td>Search</td><td><span class="tag b-O1">O(1)</span> probes</td><td><span class="tag b-On">O(n)</span></td></tr>
         <tr><td>Delete</td><td><span class="tag b-O1">O(1)</span> probes + tombstone</td><td><span class="tag b-On">O(n)</span></td></tr>
-        <tr><td>Rehash (table doubles)</td><td colspan="2"><span class="tag b-On">O(n)</span> one-time — re-insert all n keys into new table of size 2m</td></tr>
+        <tr><td>Rehash (table doubles)</td><td colspan="2"><span class="tag b-On">O(n)</span> one-time: re-insert all n keys into new table of size 2m</td></tr>
       </table>
     </div>
     <p class="case-hint"><b>Expected</b> = simple uniform hashing. <b>Worst</b> = every key collides. Probing averages are in probes (each probe is O(1)). Delete in chaining is <span class="tag b-O1">Θ(1+α)</span> without a node pointer (must search the chain first). <b>Rehash:</b> a single rehash costs <span class="tag b-On">O(n)</span>, but with doubling strategy it is <span class="tag b-O1">O(1) amortized</span> per insert (same idea as dynamic array).</p>
@@ -190,7 +190,7 @@
     <p>Each slot points to a linked list. Insert at the head of the list.</p>
 
     <h4>Chaining animator</h4>
-    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Insert, search, or delete a key — watch hash + chain walk step by step. Set <b>max α</b> to trigger rehash (table doubles). <span style="color:#6366f1"><b>Purple</b></span> = probing bucket · <span style="color:#57e0c0"><b>Teal</b></span> = found/inserted.</p>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Insert, search, or delete a key: watch hash + chain walk step by step. Set <b>max α</b> to trigger rehash (table doubles). <span style="color:#6366f1"><b>Purple</b></span> = probing bucket · <span style="color:#57e0c0"><b>Teal</b></span> = found/inserted.</p>
     <div class="hash-viz-wrap" data-mode="chaining">
       <div class="viz-controls">
         <label>Key: <input type="number" class="viz-key" min="1" max="99" value="22" style="width:56px"></label>
@@ -233,10 +233,10 @@
       <tr><td>Insert</td><td><span class="tag b-O1">O(1)</span> probes</td><td><span class="tag b-On">O(n)</span></td></tr>
       <tr><td>Search</td><td><span class="tag b-O1">O(1)</span> probes</td><td><span class="tag b-On">O(n)</span></td></tr>
       <tr><td>Delete</td><td><span class="tag b-O1">O(1)</span> probes + tombstone</td><td><span class="tag b-On">O(n)</span></td></tr>
-      <tr><td>Rehash (table doubles)</td><td colspan="2"><span class="tag b-On">O(n)</span> one-time — re-insert all n keys into new table of size 2m</td></tr>
+      <tr><td>Rehash (table doubles)</td><td colspan="2"><span class="tag b-On">O(n)</span> one-time: re-insert all n keys into new table of size 2m</td></tr>
     </table>
     <p class="case-hint">Exact probe bounds (exam detail): unsuccessful ≤ \(\frac{1}{1-\alpha}\); successful ≤ \(\frac{1}{\alpha}\ln\frac{1}{1-\alpha}\). Delete probes the chain like search, then marks a tombstone in O(1). <b>Rehash</b> costs <span class="tag b-On">O(n)</span> per event; with doubling, <span class="tag b-O1">O(1) amortized</span> per insert.</p>
-    <div class="pitfall"><b>Deletion is tricky:</b> you can't just empty a slot (breaks probe chains). Use a <b>"deleted"</b> tombstone marker. Tombstones raise probe lengths over time — rehash periodically if many deletes.</div>
+    <div class="pitfall"><b>Deletion is tricky:</b> you can't just empty a slot (breaks probe chains). Use a <b>"deleted"</b> tombstone marker. Tombstones raise probe lengths over time: rehash periodically if many deletes.</div>
 
     <h4>Probing animator</h4>
     <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Linear probing with dynamic <b>h(k) = k mod m</b> (starts at m=11, doubles on rehash). Watch numbered probe steps and tombstones on delete. <span style="color:#6366f1"><b>Purple</b></span> = current probe · <span style="color:#ff6b81"><b>Red ✗</b></span> = tombstone.</p>

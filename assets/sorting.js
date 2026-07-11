@@ -1,4 +1,4 @@
-/* Sorting & median animators — one instance per .sort-viz-wrap */
+/* Sorting & median animators: one instance per .sort-viz-wrap */
 (function () {
   var INIT = [5, 2, 8, 3, 9, 1, 6, 4, 7, 3];
 

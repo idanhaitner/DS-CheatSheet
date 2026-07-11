@@ -55,12 +55,12 @@
     <h4>Key facts &amp; tricks</h4>
     <ul>
       <li><b>Transitivity:</b> if \(f=O(g)\) and \(g=O(h)\) then \(f=O(h)\).</li>
-      <li><b>Sum rule:</b> \(O(f)+O(g)=O(\max(f,g))\) — the dominant term wins.</li>
-      <li><b>Logs:</b> \(\log_a n = O(\log_b n)\) — base doesn't matter in \(O\).</li>
+      <li><b>Sum rule:</b> \(O(f)+O(g)=O(\max(f,g))\): the dominant term wins.</li>
+      <li><b>Logs:</b> \(\log_a n = O(\log_b n)\): base doesn't matter in \(O\).</li>
       <li><b>Polynomial vs log:</b> \(\log^k n = O(n^\epsilon)\) for any \(k,\epsilon&gt;0\).</li>
       <li><b>Polynomial vs exponential:</b> \(n^k = O(c^n)\) for \(c&gt;1\).</li>
       <li><b>Limit test:</b> \(\lim f/g = 0 \Rightarrow f=O(g)\); \(=\infty \Rightarrow g=O(f)\); constant \(\Rightarrow f=O(g)\) and \(g=O(f)\).</li>
-      <li>\(\log(n!) = O(n\log n)\) (Stirling) — gives the comparison-sort lower bound.</li>
+      <li>\(\log(n!) = O(n\log n)\) (Stirling): gives the comparison-sort lower bound.</li>
     </ul>
     <div class="pitfall"><b>Pitfall:</b> \(O\) is an <b>upper</b> bound, so "worst case is \(O(n^2)\)" and "worst case is \(O(n^3)\)" can both be true. If asked for a <b>tight</b> bound, use \(\Theta\).</div>
   </div>
@@ -71,8 +71,8 @@
     <p>For \(T(n) = a\,T(n/b) + f(n)\) with \(a\ge 1,\ b&gt;1\). Compare \(f(n)\) with the "watershed" \(n^{\log_b a}\):</p>
     <table>
       <tr><th>Case</th><th>Condition</th><th>Solution</th></tr>
-      <tr><td>1</td><td>\(f(n) = O(n^{\log_b a - \epsilon})\) — \(f\) polynomially <b>smaller</b></td><td>\(T(n)=\Theta(n^{\log_b a})\)</td></tr>
-      <tr><td>2</td><td>\(f(n) = \Theta(n^{\log_b a})\) — <b>same</b> order</td><td>\(T(n)=\Theta(n^{\log_b a}\log n)\)</td></tr>
+      <tr><td>1</td><td>\(f(n) = O(n^{\log_b a - \epsilon})\): \(f\) polynomially <b>smaller</b></td><td>\(T(n)=\Theta(n^{\log_b a})\)</td></tr>
+      <tr><td>2</td><td>\(f(n) = \Theta(n^{\log_b a})\): <b>same</b> order</td><td>\(T(n)=\Theta(n^{\log_b a}\log n)\)</td></tr>
       <tr><td>3</td><td>\(f(n) = \Omega(n^{\log_b a + \epsilon})\), + regularity \(a f(n/b) \le c f(n),\ c&lt;1\)</td><td>\(T(n)=\Theta(f(n))\)</td></tr>
     </table>
     <div class="warn"><b>Gap trap:</b> if \(f\) is larger only by a <i>logarithmic</i> factor (e.g. \(f=n^{\log_b a}\log n\)), the Master Theorem <b>does not apply</b>. Use the recursion-tree method.</div>
@@ -84,7 +84,7 @@
       <tr><td>\(2T(n/2)+n^2\)</td><td>\(n^1\)</td><td>3</td><td>\(\Theta(n^2)\)</td></tr>
       <tr><td>\(4T(n/2)+n\)</td><td>\(n^2\)</td><td>1</td><td>\(\Theta(n^2)\)</td></tr>
       <tr><td>\(3T(n/4)+n\log n\)</td><td>\(n^{0.79}\)</td><td>3</td><td>\(\Theta(n\log n)\)</td></tr>
-      <tr><td>\(T(n-1)+n\)</td><td>—</td><td>iterate</td><td>\(\Theta(n^2)\)</td></tr>
+      <tr><td>\(T(n-1)+n\)</td><td>-</td><td>iterate</td><td>\(\Theta(n^2)\)</td></tr>
     </table>
     <h4>Other methods</h4>
     <ul>
@@ -108,7 +108,7 @@
 
   <h2 class="section" id="probability">1.4 Probability Basics</h2>
   <div class="card">
-    <p>Randomized structures (skip lists, hashing, randomized quicksort/select) use <b>expected-time</b> analysis, averaged over the algorithm's coin flips — not over inputs.</p>
+    <p>Randomized structures (skip lists, hashing, randomized quicksort/select) use <b>expected-time</b> analysis, averaged over the algorithm's coin flips: not over inputs.</p>
     <table>
       <tr><th>Concept</th><th>Definition / formula</th></tr>
       <tr><td>Probability</td><td>\(P(A)\in[0,1]\); \(P(\Omega)=1\); \(P(\emptyset)=0\)</td></tr>
@@ -116,10 +116,10 @@
       <tr><td>Independence</td><td>\(P(A\cap B)=P(A)\cdot P(B)\)</td></tr>
       <tr><td>Conditional</td><td>\(P(A\mid B)=\dfrac{P(A\cap B)}{P(B)}\)</td></tr>
       <tr><td><b>Expectation</b></td><td>\(E[X]=\sum_i x_i\,P(X=x_i)\)</td></tr>
-      <tr><td><b>Linearity</b></td><td>\(E[X+Y]=E[X]+E[Y]\) — always, even if dependent</td></tr>
+      <tr><td><b>Linearity</b></td><td>\(E[X+Y]=E[X]+E[Y]\): always, even if dependent</td></tr>
       <tr><td>Indicator</td><td>\(X_A=1\) if A occurs else 0; then \(E[X_A]=P(A)\)</td></tr>
     </table>
-    <div class="note"><b>The key exam technique — indicators + linearity:</b> to count expected occurrences of many events, define an indicator \(X_i\) per event, then \(E[\text{total}]=\sum_i P(\text{event }i)\). This proves randomized quicksort/select bounds and skip-list height \(O(\log n)\).</div>
+    <div class="note"><b>The key exam technique: indicators + linearity:</b> to count expected occurrences of many events, define an indicator \(X_i\) per event, then \(E[\text{total}]=\sum_i P(\text{event }i)\). This proves randomized quicksort/select bounds and skip-list height \(O(\log n)\).</div>
     <ul>
       <li><b>Bernoulli(p):</b> \(E[X]=p\). Trials until first success (Geometric): \(E=1/p\) (skip-list level: \(p=\tfrac12\Rightarrow\) expected 2 flips).</li>
       <li><b>Uniform over m outcomes:</b> each has probability \(1/m\) (basis of simple uniform hashing).</li>

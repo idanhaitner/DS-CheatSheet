@@ -1,4 +1,4 @@
-/* Huffman coding & Lempel-Ziv animators — preset step-through demos */
+/* Huffman coding & Lempel-Ziv animators: preset step-through demos */
 (function () {
   var SVGNS = 'http://www.w3.org/2000/svg';
   var FONT = '"Segoe UI", Roboto, Helvetica, Arial, sans-serif';
@@ -83,7 +83,7 @@
       var labelB = b.internal ? '(' + b.freq + ')' : b.char + ':' + b.freq;
 
       push(
-        '<code>extractMin</code> twice — smallest nodes: <b>' + labelA + '</b> and <b>' + labelB + '</b>.',
+        '<code>extractMin</code> twice: smallest nodes: <b>' + labelA + '</b> and <b>' + labelB + '</b>.',
         'Greedy rule: merge the two least frequent subtrees at each step.',
         forest,
         { pick: [a.id, b.id], heap: true }
@@ -119,7 +119,7 @@
     }).join(' · ');
 
     push(
-      'One tree remains — read codes from root: <b>' + codeRows + '</b>.',
+      'One tree remains: read codes from root: <b>' + codeRows + '</b>.',
       'Prefix-free: no code is a prefix of another. Frequent symbols end up closer to the root (shorter codes).',
       forest,
       { done: true, root: root.id },
@@ -415,7 +415,7 @@
     }
 
     snap(
-      'Encode <b>' + input.split('').join(' ') + '</b> — dictionary starts with index <b>0 = ""</b> (empty).',
+      'Encode <b>' + input.split('').join(' ') + '</b>: dictionary starts with index <b>0 = ""</b> (empty).',
       'At each step: find longest prefix already in the dictionary, output (index, next char), then add prefix+char as a new entry.'
     );
 
@@ -426,10 +426,10 @@
 
       snap(
         'Position <b>' + pos + '</b>: longest match is dict[' + match.idx + '] = <b>"' + (dict[match.idx] || '') + '"</b>' +
-          (match.len ? ' (length ' + match.len + ')' : ' (none — new symbol)') + '.',
+          (match.len ? ' (length ' + match.len + ')' : ' (none: new symbol)') + '.',
         match.len
           ? 'Matched "' + matchStr + '" at index ' + match.idx + '. Next character: <b>' + nextCh + '</b>.'
-          : 'No prior entry — output raw character with index 0.'
+          : 'No prior entry: output raw character with index 0.'
       );
 
       snap(
@@ -444,7 +444,7 @@
 
       snap(
         'Add dict[' + dictNext + '] = <b>"' + newEntry + '"</b>, advance pointer.',
-        'Dictionary grows online — decoder rebuilds the same entries in the same order.',
+        'Dictionary grows online: decoder rebuilds the same entries in the same order.',
         { dictRow: dictNext, matchLen: match.len, token: output.length - 1 }
       );
 
@@ -453,7 +453,7 @@
     }
 
     snap(
-      'Done — ' + output.length + ' tokens compress repeated <b>AB</b> / <b>ABA</b> patterns.',
+      'Done: ' + output.length + ' tokens compress repeated <b>AB</b> / <b>ABA</b> patterns.',
       'Output: ' + output.map(function (t) { return '(' + t.idx + ',' + t.ch + ')'; }).join(' ') + '.',
       { done: true }
     );

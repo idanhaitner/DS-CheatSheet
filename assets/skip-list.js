@@ -1,4 +1,4 @@
-/* Skip list search & build animator — SVG visualization with synced pseudocode. */
+/* Skip list search & build animator: SVG visualization with synced pseudocode. */
 (function () {
   function init() {
     var stage = document.getElementById('sl-viz-stage');
@@ -177,7 +177,7 @@
         lv--;
         rec(out, {
           nodes: nodes, maxLevel: ml, cur: { ni: ni, lv: lv }, target: target,
-          desc: 'Cannot go further right on L' + (lv + 1) + ' — drop down to L' + lv + '.',
+          desc: 'Cannot go further right on L' + (lv + 1) + ': drop down to L' + lv + '.',
           line: 5
         });
       }

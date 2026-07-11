@@ -1,4 +1,4 @@
-/* DS Exam Quiz — mixed pool, 5 random per round, animated UI */
+/* DS Exam Quiz: mixed pool, 5 random per round, animated UI */
 (function () {
   var QUIZ_SIZE = 5;
   var CATS = {
@@ -17,7 +17,7 @@
     { q: 'Expected search in a skip list?', c: ['O(1)', 'O(log n)', 'O(n)', 'O(n²)'], a: 1, cat: 'complexity' },
     { q: 'Expected search in hash chaining (uniform hashing)?', c: ['O(1)', 'Θ(1+α)', 'O(log n)', 'O(n)'], a: 1, cat: 'complexity' },
     { q: 'Get-min in a binary min-heap?', c: ['O(1)', 'O(log n)', 'O(n)', 'O(n log n)'], a: 0, cat: 'complexity' },
-    { q: 'buildHeap (Floyd) complexity?', c: ['O(1)', 'O(log n)', 'O(n)', 'O(n log n)'], a: 2, cat: 'complexity', explain: 'Bottom-up heapify visits each node once — O(n) total, not O(n log n).' },
+    { q: 'buildHeap (Floyd) complexity?', c: ['O(1)', 'O(log n)', 'O(n)', 'O(n log n)'], a: 2, cat: 'complexity', explain: 'Bottom-up heapify visits each node once: O(n) total, not O(n log n).' },
     { q: 'BFS / DFS with adjacency list?', c: ['O(V)', 'O(E)', 'O(V + E)', 'O(V·E)'], a: 2, cat: 'complexity' },
     { q: 'Dijkstra with binary heap?', c: ['O(V²)', 'O(E log V)', 'O((V+E) log V)', 'O(V·E)'], a: 2, cat: 'complexity' },
     { q: 'Bellman-Ford?', c: ['O(V+E)', 'O(E log V)', 'O(V·E)', 'O(V²)'], a: 2, cat: 'complexity' },
@@ -27,53 +27,53 @@
     { q: 'Master Theorem: T(n)=2T(n/2)+n ?', c: ['Θ(n)', 'Θ(n log n)', 'Θ(n²)', 'Θ(log n)'], a: 1, cat: 'complexity' },
 
     /* ── Algorithms ── */
-    { q: 'BFS uses which data structure?', c: ['Stack', 'Queue', 'Priority queue', 'Hash table'], a: 1, cat: 'algorithm', viz: 'bfs', explain: 'BFS is FIFO — first discovered, first explored.' },
-    { q: 'DFS on a graph is typically implemented with…', c: ['Queue', 'Stack (or recursion)', 'Heap', 'Sorted array'], a: 1, cat: 'algorithm', viz: 'dfs', explain: 'DFS goes deep first — LIFO stack or the call stack.' },
+    { q: 'BFS uses which data structure?', c: ['Stack', 'Queue', 'Priority queue', 'Hash table'], a: 1, cat: 'algorithm', viz: 'bfs', explain: 'BFS is FIFO: first discovered, first explored.' },
+    { q: 'DFS on a graph is typically implemented with…', c: ['Queue', 'Stack (or recursion)', 'Heap', 'Sorted array'], a: 1, cat: 'algorithm', viz: 'dfs', explain: 'DFS goes deep first: LIFO stack or the call stack.' },
     { q: 'Dijkstra repeatedly extracts the vertex with…', c: ['Max degree', 'Min dist from source', 'Min edge weight', 'Earliest discovery time'], a: 1, cat: 'algorithm', viz: 'dijkstra', explain: 'Greedy: finalize the closest unvisited vertex each step.' },
     { q: 'Kruskal builds an MST by…', c: ['Growing one tree from a root', 'Adding lightest edges that avoid cycles', 'Running BFS on sorted edges', 'Relaxing all edges V−1 times'], a: 1, cat: 'algorithm', viz: 'mst', explain: 'Sort edges by weight; use Union-Find to skip cycle-forming edges.' },
-    { q: 'Prim grows an MST by…', c: ['Sorting all edges first', 'Adding min-weight edge from tree to outside', 'Running DFS from every vertex', 'Deleting max edges in cycles'], a: 1, cat: 'algorithm', viz: 'mst', explain: 'One growing tree — like Dijkstra but key = min edge to tree.' },
-    { q: 'Topological sort is valid only on…', c: ['Undirected graphs', 'DAGs', 'Complete graphs', 'Trees with one root'], a: 1, cat: 'algorithm', viz: 'topo', explain: 'Needs a directed acyclic graph — no cycles.' },
+    { q: 'Prim grows an MST by…', c: ['Sorting all edges first', 'Adding min-weight edge from tree to outside', 'Running DFS from every vertex', 'Deleting max edges in cycles'], a: 1, cat: 'algorithm', viz: 'mst', explain: 'One growing tree: like Dijkstra but key = min edge to tree.' },
+    { q: 'Topological sort is valid only on…', c: ['Undirected graphs', 'DAGs', 'Complete graphs', 'Trees with one root'], a: 1, cat: 'algorithm', viz: 'topo', explain: 'Needs a directed acyclic graph: no cycles.' },
     { q: 'Merge sort is a classic example of…', c: ['Greedy', 'Divide & conquer', 'Dynamic programming', 'Randomized hashing'], a: 1, cat: 'algorithm', viz: 'sort', explain: 'Split in half, sort recursively, merge in O(n).' },
     { q: 'Quicksort partitions around a…', c: ['Median of sorted array', 'Pivot element', 'First edge in MST', 'Heap root'], a: 1, cat: 'algorithm', viz: 'sort', explain: 'Partition: smaller left, larger right (or vice versa), recurse.' },
     { q: 'Heapsort first builds a…', c: ['BST', 'Max-heap (or min-heap)', 'Hash table', 'Skip list'], a: 1, cat: 'algorithm', viz: 'heap', explain: 'Build heap O(n), then repeatedly extract-max to the end.' },
-    { q: 'Counting sort is NOT comparison-based because it…', c: ['Uses random pivots', 'Counts occurrences per key value', 'Swaps adjacent elements', 'Uses a priority queue'], a: 1, cat: 'algorithm', viz: 'sort', explain: 'Direct indexing into a count array — bypasses Ω(n log n) comparison bound.' },
+    { q: 'Counting sort is NOT comparison-based because it…', c: ['Uses random pivots', 'Counts occurrences per key value', 'Swaps adjacent elements', 'Uses a priority queue'], a: 1, cat: 'algorithm', viz: 'sort', explain: 'Direct indexing into a count array: bypasses Ω(n log n) comparison bound.' },
     { q: 'Radix sort processes digits…', c: ['From most significant only', 'Stable digit-by-digit (often LSD)', 'Using a BST per digit', 'In random order'], a: 1, cat: 'algorithm', viz: 'sort', explain: 'Each digit pass uses a stable sort (usually counting sort).' },
     { q: 'Quickselect finds the i-th smallest in expected…', c: ['O(log n)', 'O(n)', 'O(n log n)', 'O(n²)'], a: 1, cat: 'algorithm', explain: 'Like quicksort but recurse only into the partition containing i.' },
     { q: 'Bellman-Ford can detect…', c: ['Only positive cycles', 'Negative-weight cycles', 'Disconnected components', 'Hamiltonian paths'], a: 1, cat: 'algorithm', viz: 'dijkstra', explain: 'V−1 relax rounds; one more round that improves ⇒ negative cycle.' },
-    { q: 'Unweighted shortest path from s — use…', c: ['Dijkstra', 'BFS', 'Kruskal', 'Heap sort'], a: 1, cat: 'algorithm', viz: 'bfs', explain: 'BFS layers = hop distance when all edges weight 1.' },
-    { q: 'Insertion sort shines when the array is…', c: ['Random and huge', 'Nearly sorted', 'All equal keys only', 'Reverse sorted only'], a: 1, cat: 'algorithm', viz: 'sort', explain: 'O(n·d) where d = shift distance — tiny when almost sorted.' },
+    { q: 'Unweighted shortest path from s: use…', c: ['Dijkstra', 'BFS', 'Kruskal', 'Heap sort'], a: 1, cat: 'algorithm', viz: 'bfs', explain: 'BFS layers = hop distance when all edges weight 1.' },
+    { q: 'Insertion sort shines when the array is…', c: ['Random and huge', 'Nearly sorted', 'All equal keys only', 'Reverse sorted only'], a: 1, cat: 'algorithm', viz: 'sort', explain: 'O(n·d) where d = shift distance: tiny when almost sorted.' },
 
     /* ── Data Structures ── */
-    { q: 'A binary heap is usually stored as…', c: ['Linked list of nodes', 'Array with index formulas', 'Hash table', 'Adjacency matrix'], a: 1, cat: 'structure', viz: 'heap', explain: 'Parent at ⌊i/2⌋, children at 2i and 2i+1 — no pointers needed.' },
+    { q: 'A binary heap is usually stored as…', c: ['Linked list of nodes', 'Array with index formulas', 'Hash table', 'Adjacency matrix'], a: 1, cat: 'structure', viz: 'heap', explain: 'Parent at ⌊i/2⌋, children at 2i and 2i+1: no pointers needed.' },
     { q: 'AVL trees stay balanced by…', c: ['Random promotions', 'Rotations when balance factor exceeds 1', 'Splitting B-tree nodes', 'Rehashing'], a: 1, cat: 'structure', viz: 'bst', explain: '|height(left) − height(right)| ≤ 1 enforced via single/double rotations.' },
     { q: 'Skip lists achieve O(log n) expected time by…', c: ['Perfect balancing', 'Randomized tower heights', 'Hashing every level', 'Always storing a sentinel'], a: 1, cat: 'structure', viz: 'skiplist', explain: 'Coin-flip tower heights give express lanes like a probabilistic BST.' },
     { q: 'Hash chaining resolves collisions by…', c: ['Probing the next slot', 'Linked lists at each bucket', 'Deleting the old key', 'Sorting the table'], a: 1, cat: 'structure', viz: 'hash', explain: 'Each bucket points to a chain of colliding keys.' },
     { q: 'Open addressing on delete often needs…', c: ['Rebuilding the whole table', 'Tombstone markers', 'Doubly linked chains', 'A BST per slot'], a: 1, cat: 'structure', viz: 'hash', explain: 'Tombstones keep probe sequences valid for later searches.' },
     { q: 'Adjacency list is best for…', c: ['Dense graphs, fast edge queries', 'Sparse graphs, iterating neighbors', 'Only directed acyclic graphs', 'Weighted graphs only'], a: 1, cat: 'structure', viz: 'graph', explain: 'O(V+E) space; iterate deg(u) neighbors in O(deg(u)).' },
     { q: 'Adjacency matrix is best for…', c: ['Sparse graphs', 'Fast O(1) edge-exists queries', 'Topological sort only', 'Union-Find internals'], a: 1, cat: 'structure', viz: 'graph', explain: 'O(V²) space but O(1) to check if edge (u,v) exists.' },
-    { q: 'Stack supports which core operations?', c: ['Enqueue & dequeue', 'Push & pop (LIFO)', 'Insert & extract-min', 'Union & find'], a: 1, cat: 'structure', viz: 'stack', explain: 'Last in, first out — used in DFS, parsing, undo.' },
-    { q: 'Queue supports which core operations?', c: ['Push & pop', 'Enqueue & dequeue (FIFO)', 'Insert & delete-min', 'Link & cut'], a: 1, cat: 'structure', viz: 'queue', explain: 'First in, first out — BFS, scheduling, buffers.' },
-    { q: 'A deque allows…', c: ['Only push at top', 'Insert/delete at both ends', 'Only sorted insert', 'Merge in O(1)'], a: 1, cat: 'structure', explain: 'Double-ended queue — push/pop front and back.' },
+    { q: 'Stack supports which core operations?', c: ['Enqueue & dequeue', 'Push & pop (LIFO)', 'Insert & extract-min', 'Union & find'], a: 1, cat: 'structure', viz: 'stack', explain: 'Last in, first out: used in DFS, parsing, undo.' },
+    { q: 'Queue supports which core operations?', c: ['Push & pop', 'Enqueue & dequeue (FIFO)', 'Insert & delete-min', 'Link & cut'], a: 1, cat: 'structure', viz: 'queue', explain: 'First in, first out: BFS, scheduling, buffers.' },
+    { q: 'A deque allows…', c: ['Only push at top', 'Insert/delete at both ends', 'Only sorted insert', 'Merge in O(1)'], a: 1, cat: 'structure', explain: 'Double-ended queue: push/pop front and back.' },
     { q: 'Binary search tree in-order traversal yields…', c: ['Random order', 'Sorted key order', 'Level order', 'Reverse graph order'], a: 1, cat: 'structure', viz: 'bst', explain: 'Left → node → right visits keys in ascending order.' },
     { q: 'B-tree nodes have many keys to…', c: ['Fit in CPU cache lines only', 'Reduce disk seeks (high fanout)', 'Enable O(1) search', 'Replace hashing'], a: 1, cat: 'structure', explain: 'Wide nodes = shallow tree = fewer slow disk reads.' },
     { q: 'Union-Find tracks…', c: ['Shortest paths', 'Disjoint connected components', 'Topological levels', 'Heap order'], a: 1, cat: 'structure', viz: 'uf', explain: 'Union merges sets; Find returns component representative.' },
 
     /* ── Concepts & pitfalls ── */
     { q: 'Why does Dijkstra fail with negative edges?', c: ['Uses too much memory', 'Finalized vertices are never updated', 'Requires a DAG', 'Only works on trees'], a: 1, cat: 'concept', viz: 'dijkstra', explain: 'Once dist is finalized, a later negative edge cannot fix it.' },
-    { q: 'Is merge sort stable?', c: ['Yes', 'No', 'Only for integers', 'Only in linked-list form'], a: 0, cat: 'concept', explain: 'Merge takes left element first when equal — preserves order.' },
+    { q: 'Is merge sort stable?', c: ['Yes', 'No', 'Only for integers', 'Only in linked-list form'], a: 0, cat: 'concept', explain: 'Merge takes left element first when equal: preserves order.' },
     { q: 'Is standard in-place quicksort stable?', c: ['Yes', 'No', 'Always with Lomuto', 'Only randomized'], a: 1, cat: 'concept', explain: 'Partition swaps can reorder equal keys.' },
     { q: 'Comparison sort lower bound (worst case)?', c: ['Ω(n)', 'Ω(n log n)', 'Ω(n²)', 'Ω(n!)'], a: 1, cat: 'concept', explain: 'Decision tree has n! leaves ⇒ height ≥ log(n!) = Ω(n log n).' },
-    { q: 'O(g) notation means f is…', c: ['Exactly equal to g', 'At most c·g for large n', 'At least c·g', 'Strictly less than g'], a: 1, cat: 'concept', explain: 'Upper bound — f grows no faster than g (up to constant).' },
+    { q: 'O(g) notation means f is…', c: ['Exactly equal to g', 'At most c·g for large n', 'At least c·g', 'Strictly less than g'], a: 1, cat: 'concept', explain: 'Upper bound: f grows no faster than g (up to constant).' },
     { q: 'Θ(g) means…', c: ['Upper bound only', 'Lower bound only', 'Tight bound (O and Ω)', 'Strictly smaller than g'], a: 2, cat: 'concept', explain: 'f sandwiched: c₁g ≤ f ≤ c₂g for large n.' },
     { q: 'Cut property (MST): safe edge is…', c: ['Max weight in a cycle', 'Min weight crossing a cut', 'Any edge in BFS tree', 'Heaviest in the graph'], a: 1, cat: 'concept', viz: 'mst', explain: 'Lightest edge crossing any cut belongs to some MST.' },
     { q: 'Cycle property (MST): never in MST is…', c: ['Min edge in a cycle', 'Max edge in a cycle', 'Any tree edge', 'First BFS edge'], a: 1, cat: 'concept', viz: 'mst', explain: 'Heaviest edge in any cycle can be swapped out.' },
     { q: 'In DFS, a red/back edge indicates…', c: ['Tree edge', 'A cycle (in directed graph)', 'Cross edge only in trees', 'MST membership'], a: 1, cat: 'concept', viz: 'dfs', explain: 'Edge to an ancestor in DFS tree ⇒ cycle in directed graph.' },
     { q: 'Load factor α < 1 is required for…', c: ['Chaining only', 'Open addressing probing', 'Skip lists', 'AVL trees'], a: 1, cat: 'concept', viz: 'hash', explain: 'Probing needs empty slots; α→1 makes clusters and long probes.' },
-    { q: 'Which gives O(1) membership without ordering?', c: ['AVL tree', 'Hash table', 'Sorted array', 'Binary heap'], a: 1, cat: 'concept', viz: 'hash', explain: 'Hash maps keys to buckets — no sorted order.' },
+    { q: 'Which gives O(1) membership without ordering?', c: ['AVL tree', 'Hash table', 'Sorted array', 'Binary heap'], a: 1, cat: 'concept', viz: 'hash', explain: 'Hash maps keys to buckets: no sorted order.' },
     { q: 'Which supports O(log n) successor queries?', c: ['Hash table', 'Balanced BST', 'Queue', 'Stack'], a: 1, cat: 'concept', viz: 'bst', explain: 'BST can find next larger key by walking tree.' },
     { q: 'Heap extract-min after insert uses…', c: ['Bubble up only', 'Swap root with last, sift down', 'Rotate like AVL', 'Rehash'], a: 1, cat: 'concept', viz: 'heap', explain: 'Replace root with last leaf, then restore heap property downward.' },
-    { q: 'Master Theorem gap: fails when f(n) differs by only…', c: ['A constant', 'A log factor from n^log_b(a)', 'A polynomial degree', 'The base b'], a: 1, cat: 'concept', explain: 'e.g. f = n^log_b(a) log n — use recursion tree instead.' },
-    { q: 'Plain BST worst-case height on sorted insert?', c: ['O(log n)', 'O(n)', 'O(√n)', 'O(1)'], a: 1, cat: 'concept', viz: 'bst', explain: 'Sorted input creates a chain — linear height.' },
+    { q: 'Master Theorem gap: fails when f(n) differs by only…', c: ['A constant', 'A log factor from n^log_b(a)', 'A polynomial degree', 'The base b'], a: 1, cat: 'concept', explain: 'e.g. f = n^log_b(a) log n: use recursion tree instead.' },
+    { q: 'Plain BST worst-case height on sorted insert?', c: ['O(log n)', 'O(n)', 'O(√n)', 'O(1)'], a: 1, cat: 'concept', viz: 'bst', explain: 'Sorted input creates a chain: linear height.' },
 
     /* ── More complexity (16–25) ── */
     { q: 'Insert into a binary heap?', c: ['O(1)', 'O(log n)', 'O(n)', 'O(n log n)'], a: 1, cat: 'complexity', viz: 'heap' },
@@ -102,10 +102,10 @@
     /* ── More structures ── */
     { q: 'Max-heap property: each parent is…', c: ['≤ both children', '≥ both children', 'Equal to children', 'Unordered'], a: 1, cat: 'structure', viz: 'heap' },
     { q: 'Left child of index i in 0-based heap array?', c: ['i−1', '2i', '2i+1', '⌊i/2⌋'], a: 2, cat: 'structure', viz: 'heap' },
-    { q: 'Singly linked list: delete given node pointer only?', c: ['O(1) always', 'O(1) if doubly linked or copy next', 'O(log n)', 'Impossible'], a: 1, cat: 'structure', explain: 'Singly linked needs predecessor — or copy successor data.' },
+    { q: 'Singly linked list: delete given node pointer only?', c: ['O(1) always', 'O(1) if doubly linked or copy next', 'O(log n)', 'Impossible'], a: 1, cat: 'structure', explain: 'Singly linked needs predecessor: or copy successor data.' },
     { q: 'Dynamic array insert at index 0 costs…', c: ['O(1)', 'O(log n)', 'O(n)', 'O(n²)'], a: 2, cat: 'structure' },
     { q: 'Circular buffer queue uses…', c: ['Two stacks', 'Head/tail indices modulo capacity', 'BST ordering', 'Hash buckets'], a: 1, cat: 'structure', viz: 'queue' },
-    { q: 'Separate chaining load factor α can be…', c: ['Only < 1', 'Any α ≥ 0', 'Exactly 1', 'Only integers'], a: 1, cat: 'structure', viz: 'hash', explain: 'Chains grow — no hard slot limit unlike probing.' },
+    { q: 'Separate chaining load factor α can be…', c: ['Only < 1', 'Any α ≥ 0', 'Exactly 1', 'Only integers'], a: 1, cat: 'structure', viz: 'hash', explain: 'Chains grow: no hard slot limit unlike probing.' },
     { q: 'Open addressing requires load factor…', c: ['α < 1 (empty slots exist)', 'α = 1', 'α > 2', 'α = 0'], a: 0, cat: 'structure', viz: 'hash' },
     { q: 'B-tree minimum keys per node (min degree t)?', c: ['t−1 (except root)', '2t−1 always', '1 always', 't+1'], a: 0, cat: 'structure', explain: 'Internal nodes hold t−1 … 2t−1 keys.' },
     { q: 'Graph tree with V vertices has how many edges?', c: ['V', 'V−1', 'V+1', '2V'], a: 1, cat: 'structure', viz: 'graph' },
@@ -115,12 +115,12 @@
     /* ── More concepts ── */
     { q: 'A sorting algorithm is stable if…', c: ['It is O(n log n)', 'Equal keys keep relative order', 'It uses O(1) space', 'It is in-place'], a: 1, cat: 'concept', viz: 'sort' },
     { q: 'Amortized O(1) means…', c: ['Every op is O(1)', 'Average cost per op over sequence is O(1)', 'Worst op is O(1)', 'Only for n=1'], a: 1, cat: 'concept' },
-    { q: 'Primary clustering affects…', c: ['Chaining only', 'Linear probing', 'AVL trees', 'Merge sort'], a: 1, cat: 'concept', viz: 'hash', explain: 'Runs of occupied slots grow — probes clump together.' },
+    { q: 'Primary clustering affects…', c: ['Chaining only', 'Linear probing', 'AVL trees', 'Merge sort'], a: 1, cat: 'concept', viz: 'hash', explain: 'Runs of occupied slots grow: probes clump together.' },
     { q: 'BFS can test bipartite by…', c: ['Counting edges', '2-coloring levels', 'DFS finish times', 'Sorting vertices'], a: 1, cat: 'concept', viz: 'bfs' },
-    { q: 'DAG ⟺ topological ordering exists?', c: ['False always', 'True — iff acyclic', 'Only for trees', 'Only undirected'], a: 1, cat: 'concept', viz: 'topo' },
+    { q: 'DAG ⟺ topological ordering exists?', c: ['False always', 'True: iff acyclic', 'Only for trees', 'Only undirected'], a: 1, cat: 'concept', viz: 'topo' },
     { q: 'MST of a connected graph has exactly…', c: ['V edges', 'V−1 edges', 'E edges', 'V+E edges'], a: 1, cat: 'concept', viz: 'mst' },
     { q: 'Shortest-path tree from s may differ from MST because…', c: ['Same always', 'MST minimizes total weight, not path from s', 'BFS is always MST', 'Dijkstra is Kruskal'], a: 1, cat: 'concept', viz: 'dijkstra' },
-    { q: 'Heap does NOT support in O(log n)…', c: ['Insert', 'Extract-max', 'Search arbitrary key', 'Increase-key'], a: 2, cat: 'concept', viz: 'heap', explain: 'Arbitrary search is O(n) — no ordering by key across heap.' },
+    { q: 'Heap does NOT support in O(log n)…', c: ['Insert', 'Extract-max', 'Search arbitrary key', 'Increase-key'], a: 2, cat: 'concept', viz: 'heap', explain: 'Arbitrary search is O(n): no ordering by key across heap.' },
     { q: 'Rehashing in hash table is triggered when…', c: ['α exceeds threshold', 'Every delete', 'BST rotates', 'Graph has cycle'], a: 0, cat: 'concept', viz: 'hash' },
     { q: 'White-gray-black in DFS: gray means…', c: ['Finished', 'Discovered, not finished', 'Not visited', 'In MST'], a: 1, cat: 'concept', viz: 'dfs' },
     { q: 'Counting sort is linear when k (range) is…', c: ['O(n²)', 'O(n)', 'O(n log n)', 'Infinite'], a: 1, cat: 'concept', viz: 'sort' }
@@ -262,10 +262,10 @@
     vizEl.innerHTML = '';
     scoreEl.hidden = false;
     var pct = Math.round((score / QUIZ_SIZE) * 100);
-    var msg = score === QUIZ_SIZE ? 'Perfect score — you crushed it!' :
+    var msg = score === QUIZ_SIZE ? 'Perfect score: you crushed it!' :
       score >= 4 ? 'Strong round! Review the hints you missed.' :
-      score >= 3 ? 'Solid — keep drilling weak topics.' :
-      'Keep studying — run another round!';
+      score >= 3 ? 'Solid: keep drilling weak topics.' :
+      'Keep studying: run another round!';
     scoreEl.innerHTML =
       '<div class="quiz-score-ring" style="--pct:' + pct + '"><span class="quiz-score-num">' + score + '<small>/' + QUIZ_SIZE + '</small></span></div>' +
       '<h3>' + msg + '</h3>' +

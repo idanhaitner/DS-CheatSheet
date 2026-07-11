@@ -1,9 +1,10 @@
-/* Graph algorithm animators — one independent instance per .graph-viz-wrap */
+/* Graph algorithm animators: one independent instance per .graph-viz-wrap */
 (function () {
   var SVGNS = 'http://www.w3.org/2000/svg';
   var FONT = '"Segoe UI", Roboto, Helvetica, Arial, sans-serif';
   var NR = 24;
-  var MET_Y = 38;
+  var MET_Y = 42;
+  var WGT_OFF = 24;
   var NUM_FS = 15;
   var uid = 0;
 
@@ -22,6 +23,22 @@
     nodes: TRAVERSE.nodes,
     edges: [[0, 1, 4], [0, 2, 2], [1, 3, 3], [2, 3, 1], [2, 4, 5], [3, 5, 6], [4, 5, 2], [5, 6, 3]]
   };
+  var DIJKSTRA_W = {
+    id: 'dijkstra-w', directed: false, weighted: true,
+    nodes: [
+      { id: 0, label: 'A', x: 70, y: 150 },
+      { id: 3, label: 'D', x: 265, y: 150 },
+      { id: 1, label: 'B', x: 265, y: 38 },
+      { id: 2, label: 'C', x: 265, y: 268 },
+      { id: 4, label: 'E', x: 430, y: 48 },
+      { id: 5, label: 'F', x: 430, y: 268 },
+      { id: 6, label: 'G', x: 580, y: 150 }
+    ],
+    edges: [
+      [0, 3, 2], [0, 1, 8], [3, 1, 1], [3, 2, 2],
+      [3, 4, 2], [3, 5, 2], [3, 6, 3]
+    ]
+  };
   var DAG = {
     id: 'dag', directed: true, weighted: false,
     nodes: [
@@ -31,10 +48,10 @@
     ],
     edges: [[0, 1], [0, 2], [1, 3], [2, 3], [3, 4], [4, 5]]
   };
-  var SCENARIOS = { traverse: TRAVERSE, weighted: WEIGHTED, dag: DAG };
+  var SCENARIOS = { traverse: TRAVERSE, weighted: WEIGHTED, 'dijkstra-w': DIJKSTRA_W, dag: DAG };
   var ALGO_SCENARIO = {
     bfs: 'traverse', dfs: 'traverse', topo: 'dag',
-    kruskal: 'weighted', prim: 'weighted', dijkstra: 'weighted'
+    kruskal: 'weighted', prim: 'weighted', dijkstra: 'dijkstra-w'
   };
   var ALGO_LABELS = {
     bfs: 'BFS', dfs: 'DFS', topo: 'Topological Sort',
@@ -49,16 +66,64 @@
   };
   var ECOL = {
     def: '#2a3058', tree: '#57e0c0', look: '#7c9cff',
-    back: '#ff6b81', reject: '#ff6b81', mst: '#57e0c0'
+    back: '#ff6b81', reject: '#ff6b81', mst: '#57e0c0', cand: '#64748b'
   };
-  var MARKER_KINDS = ['def', 'tree', 'look', 'back', 'reject', 'mst'];
+  var MARKER_KINDS = ['def', 'tree', 'look', 'back', 'reject', 'mst', 'cand'];
   var NOTES = {
     bfs: 'Each node shows <b>d</b> (hop distance). Undiscovered = <b>\u221E</b>.',
     dfs: 'Each node shows <b>d/f</b>. <span style="color:#ff6b81">Red</span> = back edge (cycle).',
     topo: 'DFS on a DAG. When a node turns black, it is prepended to the topological order.',
-    kruskal: '<span style="color:#57e0c0">Teal</span> = in MST. <span style="color:#ff6b81">Red</span> = skipped (would form cycle).',
-    prim: 'Grow tree from A. <span style="color:#57e0c0">Teal edges</span> = MST. <b>\u2713</b> = in tree.',
-    dijkstra: ''
+    kruskal: '<span style="color:#57e0c0">Teal</span> = in MST. <span style="color:#ff6b81">Red</span> = skipped (would form cycle). Panel shows <b>Union-Find</b> components after each step.',
+    prim: '<span style="color:#57e0c0"><b>Bold teal</b></span> = MST edge. <span style="color:#64748b">Gray dashed</span> = current candidate. <span style="color:#1a1a1a"><b>Black</b></span> = not chosen.',
+    dijkstra: '<span style="color:#57e0c0"><b>Teal</b></span> = shortest-path tree edge. Numbers under nodes = <b>dist</b> from source. Panel shows <b>PQ</b> (min-heap by dist).'
+  };
+  var PSEUDO = {
+    kruskal: [
+      '<span class="kw">Kruskal</span>(G, w):',
+      '  sort edges E by weight ascending',
+      '  <span class="kw">for each</span> v <span class="kw">in</span> V: MakeSet(v)',
+      '  mst = empty',
+      '  <span class="kw">for each</span> edge (u, v) <span class="kw">in</span> E (in order):',
+      '    <span class="kw">if</span> Find(u) != Find(v):  <span class="cm"># different components</span>',
+      '      add (u, v) to mst',
+      '      Union(u, v)',
+      '      <span class="kw">if</span> |mst| = |V| - 1: <span class="kw">break</span>',
+      '  return mst'
+    ],
+    prim: [
+      '<span class="kw">Prim</span>(G, w, r):',
+      '  key[v] = infinity, parent[v] = nil <span class="kw">for all</span> v',
+      '  key[r] = 0',
+      '  PQ = min-heap of all vertices keyed by key[v]',
+      '  <span class="kw">while</span> PQ not empty:',
+      '    u = extractMin(PQ)',
+      '    <span class="kw">if</span> u already in tree: <span class="kw">continue</span>  <span class="cm"># stale entry</span>',
+      '    <span class="kw">if</span> parent[u] != nil:',
+      '      add edge (parent[u], u) to mst',
+      '    mark u in tree',
+      '    <span class="kw">for each</span> neighbor v of u not in tree:',
+      '      <span class="kw">if</span> w(u, v) &lt; key[v]:',
+      '        key[v] = w(u, v)',
+      '        parent[v] = u',
+      '        decreaseKey(PQ, v)  <span class="cm"># or insert</span>',
+      '  return mst'
+    ],
+    dijkstra: [
+      '<span class="kw">Dijkstra</span>(G, w, s):',
+      '  dist[s] = 0, others = infinity',
+      '  PQ = min-heap keyed by dist[v]',
+      '  insert(s, 0)',
+      '  <span class="kw">while</span> PQ not empty:',
+      '    u = extractMin(PQ)',
+      '    <span class="kw">if</span> u already finalized: <span class="kw">continue</span>',
+      '    finalize u',
+      '    <span class="kw">for each</span> neighbor v of u not finalized:',
+      '      <span class="kw">if</span> dist[u] + w(u,v) &lt; dist[v]:',
+      '        dist[v] = dist[u] + w(u,v)',
+      '        parent[v] = u',
+      '        decreaseKey(PQ, v)  <span class="cm"># or insert</span>',
+      '  return dist'
+    ]
   };
 
   function createAnimator(wrap) {
@@ -68,7 +133,10 @@
 
     var $ = function (sel) { return wrap.querySelector(sel); };
     var stage = $('.graph-stage');
+    var codeBox = $('.viz-code');
     if (!stage) return;
+
+    var codeLineEls = [];
 
     var svg, nodeCircle = {}, nodeLetter = {}, nodeMetrics = {};
     var edgeLine = {}, edgeWeight = {};
@@ -122,15 +190,40 @@
       });
     }
 
+    function nodeMetricPos(n, sc) {
+      var vbH = sc.id === 'dijkstra-w' ? 330 : 300;
+      var below = vbH - (n.y + NR + 14);
+      var above = n.y - NR - 14;
+      if (sc.id === 'dijkstra-w' && n.y < 70) {
+        return { x: n.x - 38, y: n.y + 2, anchor: 'end' };
+      }
+      if (below < MET_Y + 4 && above > MET_Y + 4) {
+        return { x: n.x, y: n.y - MET_Y, anchor: 'middle' };
+      }
+      return { x: n.x, y: n.y + MET_Y, anchor: 'middle' };
+    }
+
+    function edgeLabelPos(ax, ay, bx, by) {
+      var mx = (ax + bx) / 2, my = (ay + by) / 2;
+      var dx = bx - ax, dy = by - ay;
+      var len = Math.hypot(dx, dy) || 1;
+      if (Math.abs(dy) < Math.abs(dx) * 0.35) {
+        return { x: mx, y: my - WGT_OFF };
+      }
+      var px = -dy / len, py = dx / len;
+      return { x: mx + px * WGT_OFF, y: my + py * WGT_OFF };
+    }
+
     function rebuildSvg(sc) {
       stage.innerHTML = '';
       nodeCircle = {}; nodeLetter = {}; nodeMetrics = {};
       edgeLine = {}; edgeWeight = {};
       buildAdj(sc);
       svg = document.createElementNS(SVGNS, 'svg');
-      svg.setAttribute('viewBox', '0 0 640 300');
+      var vbH = sc.id === 'dijkstra-w' ? 330 : 300;
+      svg.setAttribute('viewBox', '0 0 640 ' + vbH);
       svg.setAttribute('width', '100%');
-      svg.setAttribute('height', '300');
+      svg.setAttribute('height', String(vbH));
       var defs = document.createElementNS(SVGNS, 'defs');
       addArrowMarkers(defs);
       svg.appendChild(defs);
@@ -148,8 +241,9 @@
         if (sc.directed) ln.setAttribute('marker-end', 'url(#' + markerId + '-def)');
         svg.appendChild(ln); edgeLine[k] = ln;
         if (sc.weighted) {
+          var lp = edgeLabelPos(a.x, a.y, b.x, b.y);
           var wt = document.createElementNS(SVGNS, 'text');
-          wt.setAttribute('x', (a.x + b.x) / 2); wt.setAttribute('y', (a.y + b.y) / 2 - 10);
+          wt.setAttribute('x', lp.x); wt.setAttribute('y', lp.y);
           wt.setAttribute('text-anchor', 'middle'); wt.setAttribute('dominant-baseline', 'central');
           wt.setAttribute('font-size', String(NUM_FS)); wt.setAttribute('font-weight', '800');
           wt.setAttribute('fill', '#1e293b'); wt.setAttribute('stroke', '#ffffff');
@@ -157,6 +251,7 @@
           wt.setAttribute('font-family', FONT);
           wt.textContent = String(e[2]);
           svg.appendChild(wt);
+          edgeWeight[k] = wt;
         }
       });
 
@@ -172,9 +267,10 @@
         letter.setAttribute('fill', '#0f172a'); letter.setAttribute('font-family', FONT);
         letter.textContent = n.label;
         svg.appendChild(letter); nodeLetter[n.id] = letter;
+        var mp = nodeMetricPos(n, sc);
         var metrics = document.createElementNS(SVGNS, 'text');
-        metrics.setAttribute('x', n.x); metrics.setAttribute('y', n.y + MET_Y);
-        metrics.setAttribute('text-anchor', 'middle'); metrics.setAttribute('dominant-baseline', 'central');
+        metrics.setAttribute('x', mp.x); metrics.setAttribute('y', mp.y);
+        metrics.setAttribute('text-anchor', mp.anchor); metrics.setAttribute('dominant-baseline', 'central');
         metrics.setAttribute('font-size', String(NUM_FS)); metrics.setAttribute('font-weight', '800');
         metrics.setAttribute('fill', 'currentColor'); metrics.setAttribute('font-family', FONT);
         svg.appendChild(metrics); nodeMetrics[n.id] = metrics;
@@ -200,11 +296,12 @@
         ec[scenario.directed ? dekey(e[0], e[1]) : ekey(e[0], e[1])] = 'def';
       });
     }
-    function rec(desc, panel) {
+    function rec(desc, panel, line) {
       out.push({
         nc: Object.assign({}, nc), ec: Object.assign({}, ec),
         d: Object.assign({}, dval), f: Object.assign({}, fval),
-        order: order.slice(), desc: desc, panel: panel
+        order: order.slice(), desc: desc, panel: panel,
+        line: line == null ? -1 : line
       });
     }
 
@@ -317,7 +414,25 @@
         else { parent[rb] = ra; rank[ra]++; }
         return true;
       }
-      return { find: find, union: union };
+      function components(labels) {
+        var buckets = {}, i, r;
+        for (i = 0; i < n; i++) {
+          r = find(i);
+          if (!buckets[r]) buckets[r] = [];
+          buckets[r].push(labels[i]);
+        }
+        return Object.keys(buckets).map(function (k) {
+          return buckets[k].sort().join(', ');
+        }).sort().map(function (s) { return '{' + s + '}'; }).join(' &nbsp; ');
+      }
+      return { find: find, union: union, components: components };
+    }
+
+    function panelKruskal(mstW, uf, findInfo) {
+      var s = '<b>Disjoint sets:</b> ' + uf.components(NAME);
+      if (findInfo) s += '<br><b>Find:</b> ' + findInfo;
+      s += '<br><b>MST weight:</b> ' + mstW;
+      return s;
     }
 
     function genKruskal() {
@@ -325,107 +440,267 @@
       var uf = makeUF(scenario.nodes.length);
       var sorted = scenario.edges.slice().sort(function (a, b) { return a[2] - b[2]; });
       var mstW = 0, mstCount = 0;
-      rec('Sort edges by weight.', '<b>MST weight:</b> 0');
+      rec('Sort edges by weight. Each vertex starts in its own set.', panelKruskal(0, uf, null), 1);
       for (var i = 0; i < sorted.length; i++) {
         var e = sorted[i], u = e[0], v = e[1], w = e[2];
         var k = ekey(u, v);
         ec[k] = 'look';
         var ru = uf.find(u), rv = uf.find(v);
-        rec('Consider ' + NAME[u] + '\u2013' + NAME[v] + ' (w=' + w + '). Find=' + NAME[ru] + ',' + NAME[rv] + '.',
-          '<b>MST weight:</b> ' + mstW);
+        var findInfo = NAME[u] + ' \u2192 ' + NAME[ru] + ', &nbsp; ' + NAME[v] + ' \u2192 ' + NAME[rv];
+        rec('Consider ' + NAME[u] + '\u2013' + NAME[v] + ' (w=' + w + ').',
+          panelKruskal(mstW, uf, findInfo), 5);
         if (ru !== rv) {
           uf.union(u, v); ec[k] = 'mst'; nc[u] = nc[v] = 'in';
           mstW += w; mstCount++;
-          rec('Add to MST (total ' + mstW + ').', '<b>MST weight:</b> ' + mstW);
+          rec('Different sets \u2192 Union(' + NAME[u] + ', ' + NAME[v] + '). Add edge to MST.',
+            panelKruskal(mstW, uf, null), 6);
           if (mstCount === scenario.nodes.length - 1) break;
         } else {
           ec[k] = 'reject';
-          rec('Same component \u2192 skip.', '<b>MST weight:</b> ' + mstW);
+          rec('Same set \u2192 skip (would form a cycle).', panelKruskal(mstW, uf, null), 5);
         }
       }
-      rec('MST complete. Weight = ' + mstW + '.', '<b>MST weight:</b> ' + mstW);
+      rec('MST complete. Weight = ' + mstW + '.', panelKruskal(mstW, uf, null), 9);
       return out;
     }
 
-    function genPrim(start) {
-      resetState();
-      var inTree = {}, key = {}, par = {};
-      scenario.nodes.forEach(function (n) { key[n.id] = Infinity; });
-      key[start] = 0; par[start] = -1; nc[start] = 'gray';
-      rec('Start from ' + NAME[start] + '.', '<b>In tree:</b> {}');
-      for (var step = 0; step < scenario.nodes.length; step++) {
-        var u = -1, best = Infinity;
-        scenario.nodes.forEach(function (n) {
-          if (!inTree[n.id] && key[n.id] < best) { best = key[n.id]; u = n.id; }
-        });
-        if (par[u] !== -1) setEdge(par[u], u, 'mst');
-        inTree[u] = true; nc[u] = 'in';
-        rec('Add ' + NAME[u] + ' to tree (key=' + best + ').', panelPrim(inTree, key, u));
-        ADJ[u].forEach(function (v) {
-          if (inTree[v]) return;
-          var w = weight(u, v), ek = ekey(u, v), prev = ec[ek];
-          setEdge(u, v, 'look');
-          if (w < key[v]) {
-            key[v] = w; par[v] = u; setEdge(u, v, 'tree'); nc[v] = 'gray';
-            rec('key[' + NAME[v] + '] = ' + w + '.', panelPrim(inTree, key, u));
-          } else {
-            setEdge(u, v, prev === 'mst' ? 'mst' : 'def');
-          }
-        });
+    function makeMinHeap(labels) {
+      var h = [];
+      function swap(i, j) { var t = h[i]; h[i] = h[j]; h[j] = t; }
+      function parent(i) { return Math.floor((i - 1) / 2); }
+      function left(i) { return 2 * i + 1; }
+      function right(i) { return 2 * i + 2; }
+      function idxOf(id) {
+        for (var i = 0; i < h.length; i++) if (h[i].id === id) return i;
+        return -1;
       }
+      function heapifyUp(i) {
+        while (i > 0 && h[parent(i)].key > h[i].key) {
+          swap(i, parent(i));
+          i = parent(i);
+        }
+      }
+      function heapifyDown(i) {
+        var smallest = i, l = left(i), r = right(i);
+        if (l < h.length && h[l].key < h[smallest].key) smallest = l;
+        if (r < h.length && h[r].key < h[smallest].key) smallest = r;
+        if (smallest !== i) { swap(i, smallest); heapifyDown(smallest); }
+      }
+      function fmt(entry) {
+        return labels[entry.id] + ':' + (entry.key === Infinity ? '\u221E' : entry.key);
+      }
+      return {
+        insert: function (id, key) {
+          h.push({ id: id, key: key });
+          heapifyUp(h.length - 1);
+        },
+        decreaseKey: function (id, key) {
+          var i = idxOf(id);
+          if (i < 0 || key >= h[i].key) return;
+          h[i].key = key;
+          heapifyUp(i);
+        },
+        extractMin: function () {
+          if (!h.length) return null;
+          var min = h[0];
+          if (h.length === 1) { h.pop(); return min; }
+          h[0] = h.pop();
+          heapifyDown(0);
+          return min;
+        },
+        isEmpty: function () { return h.length === 0; },
+        display: function () {
+          if (!h.length) return '(empty)';
+          return h.map(fmt).join(', ');
+        }
+      };
+    }
+
+    function primMstWeight() {
       var total = 0;
       scenario.edges.forEach(function (e) {
         if (ec[ekey(e[0], e[1])] === 'mst') total += e[2];
       });
-      rec('Prim complete. Weight = ' + total + '.', panelPrim(inTree, key, null));
+      return total;
+    }
+
+    function primMstEdgeList() {
+      var list = [];
+      scenario.edges.forEach(function (e) {
+        var k = ekey(e[0], e[1]);
+        if (ec[k] === 'mst') {
+          list.push({ label: NAME[e[0]] + '\u2013' + NAME[e[1]], w: e[2] });
+        }
+      });
+      list.sort(function (a, b) { return a.w - b.w || a.label.localeCompare(b.label); });
+      return list.map(function (x) { return x.label + ' (' + x.w + ')'; }).join(', ');
+    }
+
+    function refreshPrimCandidates(par, inTree) {
+      scenario.edges.forEach(function (e) {
+        var k = ekey(e[0], e[1]);
+        if (ec[k] !== 'mst') ec[k] = 'def';
+      });
+      scenario.nodes.forEach(function (n) {
+        var v = n.id, p = par[v];
+        if (inTree[v] || p == null || p < 0 || inTree[p]) return;
+        setEdge(p, v, 'cand');
+      });
+    }
+
+    function finalizePrimMst() {
+      scenario.edges.forEach(function (e) {
+        var k = ekey(e[0], e[1]);
+        if (ec[k] !== 'mst') ec[k] = 'def';
+      });
+    }
+
+    function panelPrim(inTree, heap, action, done) {
+      var s = '<b>In tree:</b> {' + Object.keys(inTree).map(function (k) { return NAME[k]; }).join(', ') + '}';
+      s += '<br><b>Min-heap:</b> [' + heap.display() + ']';
+      if (action) s += '<br>' + action;
+      s += '<br><b>MST weight:</b> ' + primMstWeight();
+      if (done) s += '<br><b>MST edges:</b> ' + primMstEdgeList();
+      return s;
+    }
+
+    function genPrim(start) {
+      resetState();
+      var inTree = {}, key = {}, par = {}, inHeap = {};
+      var heap = makeMinHeap(NAME);
+      scenario.nodes.forEach(function (n) { key[n.id] = Infinity; });
+      key[start] = 0; par[start] = -1;
+      heap.insert(start, 0);
+      inHeap[start] = true;
+      nc[start] = 'gray';
+      rec('Start from ' + NAME[start] + '. Insert into min-heap with key 0.',
+        panelPrim(inTree, heap, '<b>Insert:</b> ' + NAME[start] + ' (key=0)'), 2);
+      var added = 0;
+      while (!heap.isEmpty() && added < scenario.nodes.length) {
+        var minEntry = heap.extractMin();
+        var u = minEntry.id;
+        rec('Extract-min from heap.', panelPrim(inTree, heap,
+          '<b>Extract-min:</b> ' + NAME[u] + ' (key=' + minEntry.key + ')'), 5);
+        if (inTree[u]) continue;
+        if (par[u] !== -1) setEdge(par[u], u, 'mst');
+        inTree[u] = true; inHeap[u] = false; nc[u] = 'in';
+        added++;
+        rec('Add ' + NAME[u] + ' to MST.', panelPrim(inTree, heap, null), 9);
+        ADJ[u].forEach(function (v) {
+          if (inTree[v]) return;
+          var w = weight(u, v);
+          if (w < key[v]) {
+            var old = key[v];
+            key[v] = w; par[v] = u;
+            nc[v] = 'gray';
+            refreshPrimCandidates(par, inTree);
+            if (inHeap[v]) {
+              heap.decreaseKey(v, w);
+              rec('Decrease-key ' + NAME[v] + '.', panelPrim(inTree, heap,
+                '<b>Decrease-key:</b> ' + NAME[v] + ': ' + (old === Infinity ? '\u221E' : old) + ' \u2192 ' + w), 14);
+            } else {
+              heap.insert(v, w);
+              inHeap[v] = true;
+              rec('Insert ' + NAME[v] + ' into heap.', panelPrim(inTree, heap,
+                '<b>Insert:</b> ' + NAME[v] + ' (key=' + w + ')'), 14);
+            }
+          }
+        });
+      }
+      finalizePrimMst();
+      rec('Prim complete. Weight = ' + primMstWeight() + '.', panelPrim(inTree, heap, null, true), 15);
       return out;
     }
-    function panelPrim(inTree, key, cur) {
-      var fringe = scenario.nodes.filter(function (n) { return !inTree[n.id]; })
-        .map(function (n) { return NAME[n.id] + ':' + (key[n.id] === Infinity ? '\u221E' : key[n.id]); }).join('  ');
-      var s = '<b>In tree:</b> {' + Object.keys(inTree).map(function (k) { return NAME[k]; }).join(', ') + '}';
-      if (cur != null) s += ' &nbsp;\u00b7&nbsp; <b>added:</b> ' + NAME[cur];
-      s += '<br><b>key[]:</b> ' + (fringe || '\u2014');
+
+    function refreshSPTEdges(parent) {
+      scenario.edges.forEach(function (e) {
+        var k = ekey(e[0], e[1]);
+        if (ec[k] !== 'look') ec[k] = 'def';
+      });
+      scenario.nodes.forEach(function (n) {
+        var v = n.id, p = parent[v];
+        if (p != null && p >= 0) setEdge(p, v, 'tree');
+      });
+    }
+
+    function panelDijkstra(dist, done, heap, action, cur) {
+      var s = '<b>PQ (min-heap):</b> [' + heap.display() + ']';
+      s += '<br><b>dist[]:</b> ' + scenario.nodes.map(function (n) {
+        return NAME[n.id] + ':' + (dist[n.id] === Infinity ? '\u221E' : dist[n.id]);
+      }).join('  ');
+      var fin = [];
+      scenario.nodes.forEach(function (n) {
+        if (done[n.id]) fin.push(NAME[n.id]);
+      });
+      s += '<br><b>Finalized:</b> {' + fin.join(', ') + '}';
+      if (action) s += '<br>' + action;
+      if (cur != null) s += '<br><b>Just finalized:</b> ' + NAME[cur];
       return s;
     }
 
     function genDijkstra(start) {
       resetState();
-      var dist = {}, done = {};
-      scenario.nodes.forEach(function (n) { dist[n.id] = Infinity; });
-      dist[start] = 0; nc[start] = 'gray'; dval[start] = 0;
-      rec('dist[' + NAME[start] + '] = 0.', panelDijkstra(dist, done, null));
-      for (var step = 0; step < scenario.nodes.length; step++) {
-        var u = -1, best = Infinity;
-        scenario.nodes.forEach(function (n) {
-          if (!done[n.id] && dist[n.id] < best) { best = dist[n.id]; u = n.id; }
-        });
-        done[u] = true; nc[u] = 'black';
-        Object.keys(dist).forEach(function (k) { dval[k] = dist[k]; });
-        rec('Extract ' + NAME[u] + ' (dist=' + dist[u] + '); relax its outgoing edges.', panelDijkstra(dist, done, u));
+      var dist = {}, done = {}, parent = {}, inHeap = {};
+      var heap = makeMinHeap(NAME);
+      parent[start] = -1;
+      scenario.nodes.forEach(function (n) {
+        dist[n.id] = Infinity;
+        dval[n.id] = Infinity;
+      });
+      rec('Initialize dist[v] = \u221E for every vertex.',
+        panelDijkstra(dist, done, heap, null), 1);
+      dist[start] = 0;
+      dval[start] = 0;
+      nc[start] = 'gray';
+      heap.insert(start, 0);
+      inHeap[start] = true;
+      rec('Set dist[' + NAME[start] + '] = 0. Insert into PQ.',
+        panelDijkstra(dist, done, heap, '<b>Insert:</b> ' + NAME[start] + ' (key=0)'), 3);
+      var finalized = 0;
+      while (!heap.isEmpty() && finalized < scenario.nodes.length) {
+        var minEntry = heap.extractMin();
+        var u = minEntry.id;
+        rec('Extract-min from PQ.', panelDijkstra(dist, done, heap,
+          '<b>Extract-min:</b> ' + NAME[u] + ' (key=' + minEntry.key + ')'), 5);
+        if (done[u]) continue;
+        done[u] = true; nc[u] = 'black'; finalized++;
+        scenario.nodes.forEach(function (n) { dval[n.id] = dist[n.id]; });
+        refreshSPTEdges(parent);
+        rec('Finalize ' + NAME[u] + ' (dist=' + dist[u] + '); relax outgoing edges.',
+          panelDijkstra(dist, done, heap, null, u), 7);
         ADJ[u].forEach(function (v) {
           if (done[v]) return;
-          var w = weight(u, v);
+          var wgt = weight(u, v);
           setEdge(u, v, 'look');
-          if (dist[u] + w < dist[v]) {
-            dist[v] = dist[u] + w; dval[v] = dist[v]; nc[v] = 'gray';
-            setEdge(u, v, 'tree');
-            rec('Relax ' + NAME[u] + '\u2013' + NAME[v] + ': dist[' + NAME[v] + '] = ' + dist[u] + ' + ' + w + ' = ' + dist[v] + '.', panelDijkstra(dist, done, u));
+          if (dist[u] + wgt < dist[v]) {
+            var old = dist[v];
+            dist[v] = dist[u] + wgt;
+            parent[v] = u;
+            dval[v] = dist[v];
+            nc[v] = 'gray';
+            refreshSPTEdges(parent);
+            if (inHeap[v]) {
+              heap.decreaseKey(v, dist[v]);
+              rec('Relax ' + NAME[u] + '\u2013' + NAME[v] + ': dist[' + NAME[v] + '] = ' + dist[u] + ' + ' + wgt + ' = ' + dist[v] + '.',
+                panelDijkstra(dist, done, heap,
+                  '<b>Decrease-key:</b> ' + NAME[v] + ': ' + (old === Infinity ? '\u221E' : old) + ' \u2192 ' + dist[v]), 10);
+            } else {
+              heap.insert(v, dist[v]);
+              inHeap[v] = true;
+              rec('Relax ' + NAME[u] + '\u2013' + NAME[v] + ': dist[' + NAME[v] + '] = ' + dist[v] + '.',
+                panelDijkstra(dist, done, heap,
+                  '<b>Insert:</b> ' + NAME[v] + ' (key=' + dist[v] + ')'), 10);
+            }
           } else {
-            setEdge(u, v, ec[ekey(u, v)] === 'tree' ? 'tree' : 'def');
-            rec('Relax ' + NAME[u] + '\u2013' + NAME[v] + ': no improvement (dist[' + NAME[v] + '] stays ' + (dist[v] === Infinity ? '\u221E' : dist[v]) + ').', panelDijkstra(dist, done, u));
+            refreshSPTEdges(parent);
+            rec('Relax ' + NAME[u] + '\u2013' + NAME[v] + ': no improvement (dist[' + NAME[v] + '] stays ' + (dist[v] === Infinity ? '\u221E' : dist[v]) + ').',
+              panelDijkstra(dist, done, heap, null, u), 9);
           }
         });
       }
-      rec('Dijkstra complete.', panelDijkstra(dist, done, null));
+      refreshSPTEdges(parent);
+      rec('Dijkstra complete.', panelDijkstra(dist, done, heap, null), 11);
       return out;
-    }
-    function panelDijkstra(dist, done, cur) {
-      var s = '<b>dist[]:</b> ' + scenario.nodes.map(function (n) {
-        return NAME[n.id] + ':' + (dist[n.id] === Infinity ? '\u221E' : dist[n.id]);
-      }).join('  ');
-      if (cur != null) s += '<br><b>finalized:</b> ' + NAME[cur];
-      return s;
     }
 
     var GENS = {
@@ -439,7 +714,8 @@
 
     function metricText(nid, fr) {
       if (mode === 'bfs' || mode === 'dijkstra') {
-        if (fr.d[nid] != null && fr.d[nid] !== Infinity) return String(fr.d[nid]);
+        var d = fr.d[nid];
+        if (d != null && d !== Infinity && isFinite(d)) return String(d);
         return '\u221E';
       }
       if (mode === 'prim' || mode === 'kruskal') return fr.nc[nid] === 'in' ? '\u2713' : '';
@@ -452,12 +728,33 @@
       return '';
     }
 
+    function renderCode() {
+      if (!codeBox || typeof window.renderVizCodeLines !== 'function') return;
+      if (PSEUDO[mode]) {
+        codeLineEls = window.renderVizCodeLines(codeBox, PSEUDO[mode]);
+      } else {
+        codeBox.innerHTML = '';
+        codeLineEls = [];
+      }
+    }
+
     function updateLegend() {
       var wgb = $('.leg-wgb'), tree = $('.leg-tree');
       var back = $('.leg-back'), reject = $('.leg-reject');
+      var cand = $('.leg-cand');
+      var notree = $('.leg-notree');
       var note = $('.gviz-legend-note');
-      if (wgb) wgb.style.display = (mode === 'bfs' || mode === 'dfs' || mode === 'topo') ? 'inline-flex' : 'none';
-      if (tree) tree.style.display = 'inline-flex';
+      if (wgb) wgb.style.display = (mode === 'bfs' || mode === 'dfs' || mode === 'topo' || mode === 'dijkstra') ? 'inline-flex' : 'none';
+      if (tree) {
+        tree.style.display = 'inline-flex';
+        tree.innerHTML = mode === 'prim'
+          ? '<span class="sw" style="background:#57e0c0"></span> MST edge'
+          : mode === 'dijkstra'
+            ? '<span class="sw" style="background:#57e0c0"></span> shortest-path tree edge'
+            : '<span class="sw" style="background:#57e0c0"></span> tree edge';
+      }
+      if (cand) cand.style.display = mode === 'prim' ? 'inline-flex' : 'none';
+      if (notree) notree.style.display = (mode === 'prim' || mode === 'kruskal') ? 'inline-flex' : 'none';
       if (back) back.style.display = mode === 'dfs' ? 'inline-flex' : 'none';
       if (reject) reject.style.display = mode === 'kruskal' ? 'inline-flex' : 'none';
       if (note) note.innerHTML = NOTES[mode] || '';
@@ -477,24 +774,49 @@
         nodeCircle[n.id].setAttribute('stroke', col.stroke);
         nodeCircle[n.id].setAttribute('stroke-width', state === 'cur' || state === 'in' ? '3' : '2');
         nodeLetter[n.id].setAttribute('fill', col.letter);
-        nodeMetrics[n.id].textContent = metricText(n.id, fr);
+        var mt = metricText(n.id, fr);
+        nodeMetrics[n.id].textContent = mt;
+        if (mode === 'bfs' || mode === 'dijkstra') {
+          nodeMetrics[n.id].setAttribute('fill', mt === '\u221E' ? '#64748b' : '#0f172a');
+        }
       });
       Object.keys(edgeLine).forEach(function (k) {
         var kind = fr.ec[k] || 'def';
         var ln = edgeLine[k];
-        ln.setAttribute('stroke', ECOL[kind] || ECOL.def);
+        var mstMode = mode === 'prim' || mode === 'kruskal';
+        var stroke = ECOL[kind] || ECOL.def;
+        if (kind === 'def' && mstMode) stroke = '#1a1a1a';
+        ln.setAttribute('stroke', stroke);
         ln.setAttribute('stroke-width',
-          kind === 'mst' || kind === 'tree' ? '3' : kind === 'back' || kind === 'reject' ? '3.5' : kind === 'look' ? '3' : '2.5');
+          kind === 'mst' ? '4' :
+          kind === 'tree' ? '3' :
+          kind === 'back' || kind === 'reject' ? '3.5' :
+          kind === 'look' ? '3' :
+          kind === 'cand' ? '2' : '2');
+        ln.setAttribute('stroke-dasharray', kind === 'cand' ? '7 5' : 'none');
+        ln.setAttribute('opacity', '1');
         if (scenario.directed) {
           var mk = ECOL[kind] ? kind : 'def';
           if (MARKER_KINDS.indexOf(mk) < 0) mk = 'def';
           ln.setAttribute('marker-end', 'url(#' + markerId + '-' + mk + ')');
+        }
+        var wt = edgeWeight[k];
+        if (wt) {
+          var inMst = kind === 'mst';
+          var fill = inMst ? '#0d9488' : kind === 'reject' ? '#dc2626' : '#64748b';
+          if (kind === 'def' && mstMode) fill = '#1a1a1a';
+          wt.setAttribute('fill', fill);
+          wt.setAttribute('opacity', '1');
+          wt.setAttribute('font-weight', inMst ? '900' : '700');
         }
       });
       if (descEl) descEl.textContent = fr.desc;
       if (panelEl) panelEl.innerHTML = fr.panel;
       if (stepEl) stepEl.textContent = idx;
       if (totalEl) totalEl.textContent = frames.length - 1;
+      for (var ci = 0; ci < codeLineEls.length; ci++) {
+        codeLineEls[ci].classList.toggle('active', ci === fr.line);
+      }
       updateLegend();
     }
 
@@ -503,6 +825,7 @@
       var algoSel = $('.viz-algo');
       if (algoSel && modes.length > 1 && algoSel.value) mode = algoSel.value;
       if (!mode || !GENS[mode]) mode = modes[0];
+      renderCode();
       var scId = ALGO_SCENARIO[mode];
       if (!scenario || scenario.id !== scId) rebuildSvg(SCENARIOS[scId]);
       frames = GENS[mode]();

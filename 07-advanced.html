@@ -36,11 +36,11 @@
 
   <h2 class="section" id="amortized">7.1 Amortized Analysis</h2>
   <div class="card">
-    <p>Average cost <b>per operation over a worst-case sequence</b> — not a probabilistic average. Guarantees any sequence of \(m\) operations costs at most \(m\times(\text{amortized cost})\).</p>
+    <p>Average cost <b>per operation over a worst-case sequence</b>: not a probabilistic average. Guarantees any sequence of \(m\) operations costs at most \(m\times(\text{amortized cost})\).</p>
     <table>
       <tr><th>Method</th><th>Idea</th><th>Example</th></tr>
       <tr><td><b>Aggregate</b></td><td>Total cost of m ops is \(T(m)\); amortized = \(T(m)/m\).</td><td><b>Dynamic array (doubling):</b> n insertions copy at most n + n/2 + n/4 + … &lt; 2n elements total → \(T(n)=O(n)\) ⟹ <span class="tag b-O1">O(1)</span> amortized per insert.</td></tr>
-      <tr><td><b>Accounting</b></td><td>Assign each op a charge \(\hat c_i\); cheap ops overpay to bank credit. Require bank ≥ 0: \(\sum\hat c_i\ge\sum c_i\).</td><td><b>Same dynamic array:</b> charge <b>3 coins</b> per insert — 1 pays the insert, 2 go to the bank. When the array doubles (cost n), pay from the bank (each of the n/2 elements since last resize saved 2 coins). Bank never goes negative ⟹ <span class="tag b-O1">O(1)</span> amortized.</td></tr>
+      <tr><td><b>Accounting</b></td><td>Assign each op a charge \(\hat c_i\); cheap ops overpay to bank credit. Require bank ≥ 0: \(\sum\hat c_i\ge\sum c_i\).</td><td><b>Same dynamic array:</b> charge <b>3 coins</b> per insert: 1 pays the insert, 2 go to the bank. When the array doubles (cost n), pay from the bank (each of the n/2 elements since last resize saved 2 coins). Bank never goes negative ⟹ <span class="tag b-O1">O(1)</span> amortized.</td></tr>
     </table>
     <h4>Classic results</h4>
     <ul>
@@ -68,18 +68,18 @@
       <tr><th>Configuration</th><th>Cost of m operations</th></tr>
       <tr><td>Linked list + weighted union</td><td>O(m + n log n)</td></tr>
       <tr><td>Forest, no optimization</td><td>O(m·n) worst</td></tr>
-      <tr><td><b>Both optimizations</b></td><td><span class="tag b-O1">O(m·α(n))</span> ≈ O(m) — α = inverse Ackermann, ≤ 4 in practice</td></tr>
+      <tr><td><b>Both optimizations</b></td><td><span class="tag b-O1">O(m·α(n))</span> ≈ O(m): α = inverse Ackermann, ≤ 4 in practice</td></tr>
     </table>
-    <div class="note"><b>Application:</b> connected components — MakeSet each vertex, then for each edge (u,v) Union their sets. Two vertices are connected ⟺ same Find.</div>
+    <div class="note"><b>Application:</b> connected components: MakeSet each vertex, then for each edge (u,v) Union their sets. Two vertices are connected ⟺ same Find.</div>
   </div>
 
   <h2 class="section" id="deamortization">7.3 Deamortization</h2>
   <div class="card">
-    <p><b>Deamortization</b> spreads an expensive periodic operation across many cheap steps so that <b>every single operation costs O(1) in the worst case</b> — not just amortized O(1).</p>
+    <p><b>Deamortization</b> spreads an expensive periodic operation across many cheap steps so that <b>every single operation costs O(1) in the worst case</b>: not just amortized O(1).</p>
     <table>
       <tr><th></th><th>Amortized</th><th>Deamortized</th></tr>
       <tr><td>Rehash cost</td><td>\(\Theta(n)\) once, but <span class="tag b-O1">O(1)</span> amortized per insert</td><td><span class="tag b-O1">O(1)</span> worst-case per insert <b>and</b> per rehash step</td></tr>
-      <tr><td>When it spikes</td><td>One insert pays \(\Theta(n)\)</td><td>Work is spread — no spike</td></tr>
+      <tr><td>When it spikes</td><td>One insert pays \(\Theta(n)\)</td><td>Work is spread: no spike</td></tr>
     </table>
 
     <h4>Problem: rehashing in a hash table (chaining)</h4>
@@ -102,9 +102,9 @@
 <span class="cm"># Total: m cell-scans + m element-inserts = 2m steps</span></pre>
     <p>Each "step" = scan one cell <b>or</b> insert one element into \(T'\). Full rehash = <b>\(2m\) steps</b>.</p>
 
-    <h4>Deamortized insert — two tables</h4>
+    <h4>Deamortized insert: two tables</h4>
     <p>Always maintain two tables: <b>\(T\)</b> (size \(m\)) and <b>\(T'\)</b> (size \(2m\)). When \(T\) has exactly \(m/2\) elements, \(T'\) is empty. Over the next <b>\(m/2\) insertions</b>, gradually rebuild into \(T'\):</p>
-    <span class="code-label">pseudocode — insert with deamortized rehash</span>
+    <span class="code-label">pseudocode: insert with deamortized rehash</span>
 <pre><span class="cm"># Invariant: |T| starts at m/2, grows to m over m/2 inserts</span>
 <span class="kw">Insert</span>(x):
     insert x into T (normal chaining insert)
@@ -122,7 +122,7 @@
     <table>
       <tr><th>Component</th><th>Cost per insert</th></tr>
       <tr><td>Normal insert into \(T\)</td><td>\(\Theta(1)\)</td></tr>
-      <tr><td>Rehash work (3 or 4 steps)</td><td>\(\Theta(1)\) — constant steps only</td></tr>
+      <tr><td>Rehash work (3 or 4 steps)</td><td>\(\Theta(1)\): constant steps only</td></tr>
       <tr><td>Swap \(T \leftarrow T'\) when full</td><td>\(\Theta(1)\) pointer swap</td></tr>
     </table>
     <div class="note"><b>Key idea:</b> \(2m\) rehash steps spread over \(m/2\) inserts \(\Rightarrow\) at most 4 steps/insert. Each insert does only <b>constant</b> rehash work, so worst-case insert = <span class="tag b-O1">O(1)</span>. Total for \(n\) inserts remains <span class="tag b-On">O(n)</span>.</div>

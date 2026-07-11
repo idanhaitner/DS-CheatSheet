@@ -1,4 +1,4 @@
-/* Shared pseudocode line renderer for animator panels — visible indentation. */
+/* Shared pseudocode line renderer for animator panels: visible indentation. */
 window.renderVizCodeLines = function (box, lines) {
   var INDENT_PX = 26;
   var BASE_PX = 14;

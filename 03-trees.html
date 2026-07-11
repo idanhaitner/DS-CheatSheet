@@ -37,13 +37,13 @@
   <h2 class="section" id="stackqueue">3.1 Stack &amp; Queue</h2>
   <div class="grid2">
     <div class="card">
-      <h4>Stack — LIFO (Last In, First Out)</h4>
+      <h4>Stack: LIFO (Last In, First Out)</h4>
       <div class="flow"><div class="box">push →</div><div class="box">[ a b c ]</div><div class="box">← pop (c)</div></div>
       <p>All ops <span class="tag b-O1">O(1)</span>: <code>push</code>, <code>pop</code>, <code>peek</code>, <code>isEmpty</code>.</p>
       <p style="font-size:13px">Uses: call stack, DFS, expression evaluation, backtracking, undo.</p>
     </div>
     <div class="card">
-      <h4>Queue — FIFO (First In, First Out)</h4>
+      <h4>Queue: FIFO (First In, First Out)</h4>
       <div class="flow"><div class="box">enqueue →</div><div class="box">[ a b c ]</div><div class="box">→ dequeue (a)</div></div>
       <p>All ops <span class="tag b-O1">O(1)</span>: <code>enqueue</code>, <code>dequeue</code>, <code>front</code>, <code>isEmpty</code>.</p>
       <p style="font-size:13px">Uses: BFS, scheduling, buffering. A <b>deque</b> gives O(1) at both ends.</p>
@@ -57,7 +57,7 @@
       <tr><td>Access by index</td><td><span class="tag b-O1">O(1)</span></td><td><span class="tag b-O1">O(1)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td></tr>
       <tr><td>Search</td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td></tr>
       <tr><td>Insert at head</td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-O1">O(1)</span></td><td><span class="tag b-O1">O(1)</span></td></tr>
-      <tr><td>Insert at tail</td><td>—</td><td><span class="tag b-O1">O(1)*</span></td><td><span class="tag b-O1">O(1)</span></td><td><span class="tag b-O1">O(1)</span></td></tr>
+      <tr><td>Insert at tail</td><td>-</td><td><span class="tag b-O1">O(1)*</span></td><td><span class="tag b-O1">O(1)</span></td><td><span class="tag b-O1">O(1)</span></td></tr>
       <tr><td>Delete given node</td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-O1">O(1)</span></td></tr>
     </table>
     <div class="note"><b>Dynamic array (doubling):</b> when full, allocate a 2× array and copy. A single insert can cost O(n) but <b>amortized</b> cost is <b>O(1)</b> (see <a href="07-advanced.html#amortized">Amortized</a>).</div>
@@ -65,19 +65,19 @@
 
   <h2 class="section" id="tree-defs">3.3 Tree Definitions &amp; Traversals</h2>
   <div class="card two-col" style="font-size:13.5px">
-    <p><b>Root</b> — node with no parent.</p>
-    <p><b>Leaf</b> — node with no children.</p>
-    <p><b>Depth</b> — # edges from root to node.</p>
-    <p><b>Height</b> — # edges on longest path to a leaf below.</p>
-    <p><b>Tree height</b> — height of root (empty = −1).</p>
-    <p><b>Degree</b> — number of children.</p>
-    <p><b>Binary tree</b> — each node ≤ 2 children.</p>
-    <p><b>Full</b> — every internal node has exactly 2 children.</p>
-    <p><b>Perfect</b> — full + all leaves same depth (\(2^{h+1}-1\) nodes).</p>
-    <p><b>Complete</b> — all levels full except last, filled left→right (heaps).</p>
+    <p><b>Root</b>: node with no parent.</p>
+    <p><b>Leaf</b>: node with no children.</p>
+    <p><b>Depth</b>: # edges from root to node.</p>
+    <p><b>Height</b>: # edges on longest path to a leaf below.</p>
+    <p><b>Tree height</b>: height of root (empty = −1).</p>
+    <p><b>Degree</b>: number of children.</p>
+    <p><b>Binary tree</b>: each node ≤ 2 children.</p>
+    <p><b>Full</b>: every internal node has exactly 2 children.</p>
+    <p><b>Perfect</b>: full + all leaves same depth (\(2^{h+1}-1\) nodes).</p>
+    <p><b>Complete</b>: all levels full except last, filled left→right (heaps).</p>
   </div>
   <div class="card">
-    <h4>Traversals — all O(n)</h4>
+    <h4>Traversals: all O(n)</h4>
     <table>
       <tr><th>Traversal</th><th>Order</th><th>On a BST gives</th></tr>
       <tr><td><b>In-order</b></td><td>Left → Root → Right</td><td><b>sorted</b> order</td></tr>
@@ -124,7 +124,7 @@
       <li><b>Successor:</b> if right child exists → min of right subtree; else → lowest ancestor whose left child is also an ancestor of x.</li>
       <li><b>Predecessor:</b> if left child exists → max of left subtree; else → lowest ancestor whose right child is also an ancestor of x.</li>
     </ul>
-    <h4>Deletion — 3 cases</h4>
+    <h4>Deletion: 3 cases</h4>
     <ol>
       <li><b>No children:</b> remove it.</li>
       <li><b>One child:</b> splice it out (connect parent to child).</li>
@@ -132,14 +132,14 @@
     </ol>
   </div>
 
-  <h2 class="section" id="avl">3.5 AVL Tree — self-balancing BST</h2>
+  <h2 class="section" id="avl">3.5 AVL Tree: self-balancing BST</h2>
   <div class="card">
     <p><b>Invariant:</b> for every node, \(|h_{left}-h_{right}|\le 1\). Forces height \(h=\Theta(\log n)\) → all ops <b>O(log n)</b> worst case. Each node stores its height.</p>
     <table>
       <tr><th>Operation</th><th>Time</th></tr>
       <tr><td>Search</td><td><span class="tag b-Olog">O(log n)</span></td></tr>
-      <tr><td>Insert</td><td><span class="tag b-Olog">O(log n)</span> — at most <b>1</b> (single/double) rotation</td></tr>
-      <tr><td>Delete</td><td><span class="tag b-Olog">O(log n)</span> — up to <b>O(log n)</b> rotations to the root</td></tr>
+      <tr><td>Insert</td><td><span class="tag b-Olog">O(log n)</span>: at most <b>1</b> (single/double) rotation</td></tr>
+      <tr><td>Delete</td><td><span class="tag b-Olog">O(log n)</span>: up to <b>O(log n)</b> rotations to the root</td></tr>
     </table>
     <h4>The 4 rotation cases</h4>
     <table>
@@ -187,7 +187,7 @@
     <div class="note"><b>Mnemonic:</b> the rotation is the <b>opposite</b> of the heavy side. Right-heavy → rotate left; left-heavy → rotate right. Double cases first rotate the child to reduce to a single case.</div>
 
     <h4>Interactive animator</h4>
-    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Insert or delete a key — the node is added/removed <b>without</b> auto-rebalancing. Press <b>Balance Tree</b> when <b>|h(L)−h(R)| &gt; 1</b>. Use <b>Fit</b> / <b>+/−</b> or Ctrl+scroll to zoom. <span style="color:#ff6b81"><b>Red</b></span> = pivot · <span style="color:#a78bfa"><b>Purple</b></span> = rotating subtree · <span style="color:#57e0c0"><b>Teal</b></span> = promoted root · <span style="color:#7c4dff"><b>Violet</b></span> = inserted / deleted.</p>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Insert or delete a key: the node is added/removed <b>without</b> auto-rebalancing. Press <b>Balance Tree</b> when <b>|h(L)−h(R)| &gt; 1</b>. Use <b>Fit</b> / <b>+/−</b> or Ctrl+scroll to zoom. <span style="color:#ff6b81"><b>Red</b></span> = pivot · <span style="color:#a78bfa"><b>Purple</b></span> = rotating subtree · <span style="color:#57e0c0"><b>Teal</b></span> = promoted root · <span style="color:#7c4dff"><b>Violet</b></span> = inserted / deleted.</p>
     <div class="tree-viz-wrap avl-viz-wrap">
       <div class="viz-controls">
         <label>Key: <input type="number" class="viz-key" min="1" max="99" value="25" style="width:56px"></label>
@@ -217,12 +217,12 @@
     </table>
     <ul>
       <li><b>Insert:</b> descend; if a node is <b>full (2t−1)</b>, split it first (median goes up) so you never descend into a full node.</li>
-      <li><b>Delete:</b> ensure the node you descend into has <b>≥ t</b> keys — borrow from a sibling or merge if needed.</li>
+      <li><b>Delete:</b> ensure the node you descend into has <b>≥ t</b> keys: borrow from a sibling or merge if needed.</li>
     </ul>
     <div class="note">A "2-3-4 tree" is a B-tree with t = 2. Best answer when the exam says "data on disk" or "minimize block accesses."</div>
 
     <h4>Interactive animator</h4>
-    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">B-tree with <b>t = 2</b> (max 3 keys/node). Insert or delete — watch <b>splits</b>, <b>borrows</b>, and <b>merges</b>. Use <b>Fit</b> / <b>+/−</b> when the tree grows wide.</p>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">B-tree with <b>t = 2</b> (max 3 keys/node). Insert or delete: watch <b>splits</b>, <b>borrows</b>, and <b>merges</b>. Use <b>Fit</b> / <b>+/−</b> when the tree grows wide.</p>
     <div class="tree-viz-wrap btree-viz-wrap">
       <div class="viz-controls">
         <label>Key: <input type="number" class="viz-key" min="1" max="99" value="25" style="width:56px"></label>

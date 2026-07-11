@@ -1,4 +1,4 @@
-/* Binary max-heap animator — buildHeap, insert, extractMax, heapify, increaseKey */
+/* Binary max-heap animator: buildHeap, insert, extractMax, heapify, increaseKey */
 (function () {
   var SVGNS = 'http://www.w3.org/2000/svg';
   var FONT = '"Segoe UI", Roboto, Helvetica, Arial, sans-serif';
@@ -37,7 +37,7 @@
     },
     insert: function () {
       var fr = [introFrame(
-        'Valid max-heap — insert <b>15</b> at the end.',
+        'Valid max-heap: insert <b>15</b> at the end.',
         'Append to A[7], then sift-up while parent &lt; child. Start: A = [10, 8, 9, 4, 7, 5, 6].',
         HEAP_DEMO, 7, [], { root: 0 }
       )];
@@ -45,7 +45,7 @@
     },
     extract: function () {
       var fr = [introFrame(
-        'Valid max-heap — extract the maximum (root).',
+        'Valid max-heap: extract the maximum (root).',
         'Swap root with last, shrink heap, then MaxHeapify(0). Start: A = [10, 8, 9, 4, 7, 5, 6].',
         HEAP_DEMO, 7, [], { root: 0 }
       )];
@@ -54,7 +54,7 @@
     heapify: function () {
       var start = [16, 4, 10, 8, 7, 9, 3];
       var fr = [introFrame(
-        'MaxHeapify at index <b>1</b> — node 4 is smaller than its children.',
+        'MaxHeapify at index <b>1</b>: node 4 is smaller than its children.',
         'Compare with left/right child, swap with larger child, recurse down. A = [16, 4, 10, 8, 7, 9, 3].',
         start, 7, [], { active: 1, compare: [1, 3, 4] }
       )];
@@ -62,7 +62,7 @@
     },
     increase: function () {
       var fr = [introFrame(
-        'IncreaseKey — raise A[3] from <b>4</b> to <b>11</b>, then sift-up.',
+        'IncreaseKey: raise A[3] from <b>4</b> to <b>11</b>, then sift-up.',
         'Only increases allowed. Start: A = [10, 8, 9, 4, 7, 5, 6].',
         HEAP_DEMO, 7, [], { active: 3 }
       )];
@@ -263,7 +263,7 @@
     var n = a.length;
     push(fr, {
       arr: a, heapSize: n, extracted: extracted,
-      desc: 'BuildMaxHeap — start from last non-leaf index <b>' + (Math.floor(n / 2) - 1) + '</b>.',
+      desc: 'BuildMaxHeap: start from last non-leaf index <b>' + (Math.floor(n / 2) - 1) + '</b>.',
       panel: 'Loop i = floor(n/2)-1 down to 0; call MaxHeapify(i).',
       phase: 'build'
     });
@@ -274,8 +274,8 @@
     }
     push(fr, {
       arr: a, heapSize: n, extracted: extracted,
-      desc: 'Heap built — max at root A[0] = <b>' + a[0] + '</b>.',
-      panel: 'O(n) total — most nodes are near leaves.',
+      desc: 'Heap built: max at root A[0] = <b>' + a[0] + '</b>.',
+      panel: 'O(n) total: most nodes are near leaves.',
       highlight: { root: 0 },
       phase: 'build'
     });
@@ -300,7 +300,7 @@
       var p = parent(i);
       push(fr, {
         arr: a, heapSize: n, extracted: extracted,
-        desc: 'Sift-up: A[' + p + ']=' + a[p] + ' &lt; A[' + i + ']=' + a[i] + ' — swap.',
+        desc: 'Sift-up: A[' + p + ']=' + a[p] + ' &lt; A[' + i + ']=' + a[i] + ': swap.',
         highlight: { swap: [p, i] },
         phase: 'insert'
       });
@@ -309,7 +309,7 @@
     }
     push(fr, {
       arr: a, heapSize: n, extracted: extracted,
-      desc: 'Insert complete — <b>' + key + '</b> in heap.',
+      desc: 'Insert complete: <b>' + key + '</b> in heap.',
       highlight: { active: a.indexOf(key) },
       phase: 'insert'
     });
@@ -328,7 +328,7 @@
     var maxVal = a[0];
     push(fr, {
       arr: a, heapSize: heapSize, extracted: ext,
-      desc: 'ExtractMax — max is root <b>' + maxVal + '</b>.',
+      desc: 'ExtractMax: max is root <b>' + maxVal + '</b>.',
       highlight: { root: 0 },
       phase: 'extract'
     });
@@ -345,7 +345,7 @@
 
     push(fr, {
       arr: a, heapSize: n, extracted: ext,
-      desc: 'Remove last slot — heap size = ' + n + '. Extracted: [' + ext.join(', ') + '].',
+      desc: 'Remove last slot: heap size = ' + n + '. Extracted: [' + ext.join(', ') + '].',
       highlight: { out: heapSize - 1 },
       phase: 'extract'
     });
@@ -356,7 +356,7 @@
     }
     push(fr, {
       arr: a, heapSize: n, extracted: ext,
-      desc: 'ExtractMax done — new root A[0] = ' + (n > 0 ? a[0] : '—') + '.',
+      desc: 'ExtractMax done: new root A[0] = ' + (n > 0 ? a[0] : '-') + '.',
       highlight: n > 0 ? { root: 0 } : {},
       phase: 'extract'
     });

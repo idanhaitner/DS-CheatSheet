@@ -80,19 +80,19 @@
       <tr><td><b>Merge</b></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-Onlog">n log n</span></td><td>O(n)</td><td>Yes</td><td>No</td></tr>
       <tr><td><b>Quick</b></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-On2">n²</span></td><td>O(log n)</td><td>No</td><td>Yes</td></tr>
       <tr><td><b>Heap</b></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-Onlog">n log n</span></td><td><span class="tag b-Onlog">n log n</span></td><td>O(1)</td><td>No</td><td>Yes</td></tr>
-      <tr style="background:var(--row-alt)"><td colspan="7" style="text-align:center;color:var(--accent2);font-weight:600">↓ Linear (non-comparison) sorts — see <a href="#linear-sorting">§2.3 decision guide</a></td></tr>
+      <tr style="background:var(--row-alt)"><td colspan="7" style="text-align:center;color:var(--accent2);font-weight:600">↓ Linear (non-comparison) sorts: see <a href="#linear-sorting">§2.3 decision guide</a></td></tr>
       <tr><td><b>Counting</b></td><td colspan="3" style="text-align:center"><span class="tag b-On">n + k</span></td><td>O(n+k)</td><td>Yes</td><td>No</td></tr>
       <tr><td><b>Radix</b></td><td colspan="3" style="text-align:center"><span class="tag b-On">d(n + b)</span></td><td>O(n+b)</td><td>Yes</td><td>No</td></tr>
       <tr><td><b>Bucket</b></td><td><span class="tag b-On">n</span></td><td><span class="tag b-On">n</span></td><td><span class="tag b-On2">n²</span></td><td>O(n)</td><td>Yes</td><td>No</td></tr>
     </table>
     <p style="font-size:12px;color:var(--muted)">\(k\) = key range, \(d\) = digits, \(b\) = radix base. Quick Sort space is O(log n) expected (recursion stack).</p>
-    <div class="note"><b>Comparison sorts</b> cannot beat <b>Ω(n log n)</b> worst case. <b>Linear sorts</b> (counting, radix, bucket) break this only when key structure is bounded — use the <a href="#linear-sorting">§2.3 decision guide</a> to pick one.</div>
+    <div class="note"><b>Comparison sorts</b> cannot beat <b>Ω(n log n)</b> worst case. <b>Linear sorts</b> (counting, radix, bucket) break this only when key structure is bounded: use the <a href="#linear-sorting">§2.3 decision guide</a> to pick one.</div>
   </div>
 
   <!-- ===== INSERTION ===== -->
   <h2 class="section" id="insertion">Insertion Sort <span class="tag b-On2" style="font-size:11px">O(n²)</span></h2>
   <div class="card">
-    <p><b>Idea.</b> Grow a sorted prefix on the left. Take the next "key" and shift larger sorted elements right until the key lands in place — like sorting cards in your hand.</p>
+    <p><b>Idea.</b> Grow a sorted prefix on the left. Take the next "key" and shift larger sorted elements right until the key lands in place: like sorting cards in your hand.</p>
     <span class="code-label">pseudocode</span>
 <pre><span class="kw">for</span> j = 1 <span class="kw">to</span> n-1:
     key = A[j]
@@ -241,7 +241,7 @@
       <tr>
         <td>Integers in \([0, N^2]\), need <b>time</b> \(\Theta(N)\)</td>
         <td><b>Counting sort</b></td>
-        <td>Still \(\Theta(N)\) time, but <b>space</b> jumps to \(\Theta(N^2)\) — mention both!</td>
+        <td>Still \(\Theta(N)\) time, but <b>space</b> jumps to \(\Theta(N^2)\): mention both!</td>
       </tr>
       <tr>
         <td>Each \(A[i]\) is within \(n^{0.4}\) of its sorted index (\(i \le A[i] \le i + n^{0.4}\))</td>
@@ -251,7 +251,7 @@
       <tr>
         <td>Each number has exactly \(L\) binary digits; \(L = n\)</td>
         <td><b>Merge sort</b> \(\Theta(n\log n)\)</td>
-        <td>Radix with 1-bit passes costs \(\Theta(L\cdot n) = \Theta(n^2)\) — worse than merge.</td>
+        <td>Radix with 1-bit passes costs \(\Theta(L\cdot n) = \Theta(n^2)\): worse than merge.</td>
       </tr>
       <tr>
         <td>Each number has exactly \(L\) binary digits; \(L = (\log n)^{1/2}\)</td>
@@ -285,7 +285,7 @@
       </tr>
     </table>
 
-    <h4>Radix vs Merge — the one comparison to memorize</h4>
+    <h4>Radix vs Merge: the one comparison to memorize</h4>
     <p>Radix (with counting per digit, base \(b\)): <b>\(\Theta(d\cdot(n+b))\)</b>. Merge: <b>\(\Theta(n\log n)\)</b>.</p>
     <ul>
       <li><b>Radix wins</b> when \(d\cdot n = o(n\log n)\), i.e. \(d = o(\log n)\).</li>
@@ -296,9 +296,9 @@
     <div class="pitfall">
       <b>Top traps for linear sorts:</b>
       <ul style="margin:0">
-        <li>Counting is only \(\Theta(n)\) when <b>\(k = O(n)\)</b>. If \(k = n^2\), time is still \(\Theta(n)\) but space is \(\Theta(n^2)\) — and some graders treat it as not "linear" overall.</li>
+        <li>Counting is only \(\Theta(n)\) when <b>\(k = O(n)\)</b>. If \(k = n^2\), time is still \(\Theta(n)\) but space is \(\Theta(n^2)\): and some graders treat it as not "linear" overall.</li>
         <li>Radix <b>requires a stable</b> digit sort (counting sort works). Without stability, radix breaks.</li>
-        <li>Bucket sort worst case is \(\Theta(n^2)\) — never claim worst-case \(\Theta(n)\) without the uniform-distribution assumption.</li>
+        <li>Bucket sort worst case is \(\Theta(n^2)\): never claim worst-case \(\Theta(n)\) without the uniform-distribution assumption.</li>
         <li>Don't confuse <b>linear probing</b> (hashing) with <b>linear sorting</b> (counting/radix/bucket).</li>
       </ul>
     </div>
@@ -361,7 +361,7 @@
   <!-- ===== MEDIAN / SELECTION ANIMATOR ===== -->
   <h2 class="section" id="median-viz">2.12 Median &amp; Order Statistics Visualizer</h2>
   <div class="card">
-    <p style="margin-top:0">Find the <b>median</b> (or i-th smallest) in <b>linear time</b> — without fully sorting. Eliminated regions fade out as the algorithm narrows the search.</p>
+    <p style="margin-top:0">Find the <b>median</b> (or i-th smallest) in <b>linear time</b>: without fully sorting. Eliminated regions fade out as the algorithm narrows the search.</p>
     <div class="sort-viz-wrap median-viz-wrap" data-modes='["quickselect","mom"]' data-default="quickselect">
       <div class="viz-controls">
         <label class="viz-algo-label">Algorithm: <select class="viz-algo"></select></label>
@@ -398,7 +398,7 @@
   <h2 class="section" id="selection-median">Selection &amp; Median (order statistics)</h2>
   <div class="card">
     <p>Find the \(i\)-th smallest element (the <b>median</b> is \(i=\lfloor n/2\rfloor\)). Sorting takes \(O(n\log n)\), but selection can be done in <b>linear time</b>. Use the <a href="#median-viz">visualizer above</a> to watch Quickselect and Median-of-Medians.</p>
-    <h4>Randomized Select (Quickselect) — expected O(n)</h4>
+    <h4>Randomized Select (Quickselect): expected O(n)</h4>
     <p>Like quicksort but recurse into <b>only one side</b>.</p>
     <span class="code-label">pseudocode</span>
 <pre><span class="kw">RandSelect</span>(A, lo, hi, i):
@@ -410,14 +410,14 @@
     <span class="kw">elif</span> i &lt; k:  <span class="kw">return</span> RandSelect(A, lo,  q-1, i)
     <span class="kw">else</span>:       <span class="kw">return</span> RandSelect(A, q+1, hi,  i-k)</pre>
     <p>Expected <span class="tag b-On">O(n)</span> from \(T(n)\le T(3n/4)+O(n)\); worst <span class="tag b-On2">O(n²)</span>.</p>
-    <h4>Deterministic Select — median of medians — worst-case O(n)</h4>
+    <h4>Deterministic Select: median of medians: worst-case O(n)</h4>
     <ol>
       <li>Divide into groups of <b>5</b>; find each group's median (O(n) total).</li>
       <li><b>Recursively</b> find the median \(x\) of those \(\lceil n/5\rceil\) medians.</li>
       <li>Partition around \(x\); recurse into the correct side.</li>
     </ol>
     <p style="text-align:center">\(T(n) \le T(n/5) + T(7n/10) + O(n) \Rightarrow T(n)=O(n)\) &nbsp; (since \(\tfrac15+\tfrac{7}{10}&lt;1\))</p>
-    <div class="warn"><b>Why groups of 5?</b> Odd size gives a clean median and keeps the two recursion fractions summing below 1. Groups of 3 give \(T(n/3)+T(2n/3)+O(n)=O(n\log n)\) — fails.</div>
+    <div class="warn"><b>Why groups of 5?</b> Odd size gives a clean median and keeps the two recursion fractions summing below 1. Groups of 3 give \(T(n/3)+T(2n/3)+O(n)=O(n\log n)\): fails.</div>
   </div>
 
   </div>
