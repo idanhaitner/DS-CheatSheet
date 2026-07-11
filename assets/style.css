@@ -1019,6 +1019,13 @@ hr { border: none; border-top: 1px solid var(--line); margin: 24px 0; }
 .tree-viz-wrap .tree-viz-svg line {
   shape-rendering: geometricPrecision;
 }
+.tree-viz-wrap .tree-viz-svg .viz-bf-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--muted);
+  letter-spacing: 0.02em;
+}
 .viz-zoom-label { display: inline-flex; align-items: center; gap: 4px; }
 .viz-zoom-label .viz-btn { min-width: 36px; padding: 8px 10px; }
 .graph-stage {

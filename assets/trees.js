@@ -1061,11 +1061,8 @@
         g.appendChild(t);
         var bfLabel = document.createElementNS(SVGNS, 'text');
         bfLabel.setAttribute('data-bf', '1');
+        bfLabel.setAttribute('class', 'viz-bf-label');
         bfLabel.setAttribute('text-anchor', 'middle');
-        bfLabel.setAttribute('font-size', '10');
-        bfLabel.setAttribute('font-weight', '700');
-        bfLabel.setAttribute('font-family', FONT);
-        bfLabel.setAttribute('fill', '#ff6b81');
         g.appendChild(bfLabel);
         nodeLayer.appendChild(g);
       }
