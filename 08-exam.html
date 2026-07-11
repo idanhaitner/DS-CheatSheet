@@ -135,12 +135,16 @@
       <tr><td>Guaranteed O(n log n) + stable</td><td>Merge sort</td></tr>
       <tr><td>In-place fast average sort</td><td>Quick sort (randomized)</td></tr>
       <tr><td>i-th smallest / median in O(n)</td><td>Quickselect / median-of-medians</td></tr>
-      <tr><td>Shortest path, unweighted</td><td>BFS</td></tr>
-      <tr><td>Shortest path, weighted ≥ 0</td><td>Dijkstra</td></tr>
-      <tr><td>Shortest path, negative weights</td><td>Bellman-Ford</td></tr>
-      <tr><td>Dependency ordering</td><td>Topological sort (DFS on DAG)</td></tr>
+      <tr><td>Shortest path, unweighted</td><td><a href="06-graphs.html#bfs">BFS</a></td></tr>
+      <tr><td>Shortest path, weighted ≥ 0</td><td><a href="06-graphs.html#dijkstra">Dijkstra</a></td></tr>
+      <tr><td>Shortest path, negative weights</td><td><a href="06-graphs.html#bellman">Bellman-Ford</a></td></tr>
+      <tr><td>Dependency ordering</td><td><a href="06-graphs.html#toposort">Topological sort</a> (DFS on DAG)</td></tr>
+      <tr><td>Connect all vertices, min total weight</td><td><a href="06-graphs.html#mst">Kruskal / Prim</a> (MST)</td></tr>
+      <tr><td>MST, weights in [1, V] integers</td><td>Kruskal + counting sort → O(E·α(V))</td></tr>
+      <tr><td>MST, weights in [1, W] constant W</td><td>Prim + bucket PQ → O(E)</td></tr>
+      <tr><td>Dynamic connectivity / Kruskal</td><td><a href="07-advanced.html#unionfind">Union-Find</a></td></tr>
+      <tr><td>Graph variant (sets, colors, edge in MST?)</td><td><a href="06-graphs.html#reductions">Reduction</a> → standard algorithm</td></tr>
       <tr><td>Data on disk, huge dataset</td><td>B-tree</td></tr>
-      <tr><td>Connectivity / MST</td><td>Union-Find / Kruskal</td></tr>
     </table>
     <div class="note"><b>Design tip:</b> when ops need both O(1) lookup <b>and</b> order, combine a <b>hash table</b> (key → node) with an <b>AVL / skip list</b>. Union-Find has no search — always pair it with a hash map to reach elements.</div>
   </div>
@@ -153,7 +157,8 @@
         <li><b>Sorting best/worst fill-ins</b> — given constraints (e.g. each element within \(n^{0.4}\) of its index), work out Insertion/Merge/Quick/Counting behavior. Insertion is O(n·shift-distance); deterministic Quick's worst is on sorted input. For <b>linear sorts</b>, check whether \(k=O(n)\) or \(d=o(\log n)\) — see <a href="02-sorting.html#linear-sorting">§2.3 decision guide</a>.</li>
         <li><b>"Best algorithm to sort \(n\) integers with \(L\) binary digits"</b> — compare Radix \(\Theta(L\cdot n)\) vs Merge \(\Theta(n\log n)\). Radix when \(L=o(\log n)\); Merge when \(L=\Omega(\log n)\).</li>
       <li><b>Design a structure meeting target complexities</b> — combine primitives: hash table (O(1) contains) + sorted array/AVL (order/median) + auxiliary arrays. State fields, describe each op, analyze.</li>
-      <li><b>Graph counting / proof</b> — e.g. "# distinct BFS trees" — reason about tie-breaking and structure.</li>
+      <li><b>Graph counting / proof</b> — e.g. "# distinct BFS trees", "is \(e_{\min}\) in every MST?", "is edge \(e\) in some MST?" — see <a href="06-graphs.html#graph-exam">§6.9 graph exam tips</a>.</li>
+      <li><b>Graph reductions</b> — super-source/sink, vertex splitting, reverse graph, reduce to MST. Always define \(G'\) and analyze build + algorithm time.</li>
     </ul>
     <h4>Top pitfalls to avoid</h4>
     <div class="pitfall">
@@ -163,7 +168,9 @@
         <li><b>Counting sort is O(n+k)</b> — only linear when <b>\(k = O(n)\)</b>; it is <b>stable</b>, radix depends on that. Without a bound on max key \(K\), you cannot sort in \(\Theta(N)\) with counting/radix.</li>
         <li><b>Radix sort is \(\Theta(d(n+b))\)</b> — needs stable digit sort. With \(L\) binary digits and 1-bit passes: \(\Theta(L\cdot n)\). Compare to merge before answering "best sort".</li>
         <li><b>Bucket sort average = O(n)</b> but <b>worst = O(n²)</b> when all elements fall in one bucket.</li>
-        <li><b>Dijkstra breaks on negative edges.</b></li>
+        <li><b>Dijkstra breaks on negative edges</b> — use Bellman-Ford.</li>
+        <li><b>BFS ≠ shortest path on weighted graphs</b> — only unweighted hop count.</li>
+        <li><b>Spanning tree ≠ MST</b> — MST additionally minimizes total weight; cycle/cut properties for proofs.</li>
         <li><b>Plain BST is O(n) worst</b> — only AVL/balanced guarantees O(log n).</li>
         <li><b>Hash chaining:</b> insert always O(1); search Θ(1+α) expected, O(n) worst. <b>Probing:</b> expected O(1) probes, worst O(n); needs α&lt;1.</li>
         <li><b>Master Theorem gap:</b> doesn't apply when f differs by only a log factor.</li>

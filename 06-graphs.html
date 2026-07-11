@@ -30,9 +30,68 @@
   <div class="pagehead">
     <div class="crumbs"><a href="index.html">Home</a> › Graphs</div>
     <h1>6 · Graphs</h1>
-    <p>Interactive animators per algorithm · representations · MST · shortest paths</p>
+    <p>What each algorithm solves · when to use it · MST deep dive · exam tips</p>
   </div>
   <div class="inner">
+
+  <!-- ===== BIG PICTURE ===== -->
+  <h2 class="section" id="graph-map">6.0 The Big Picture — Which Graph Algorithm?</h2>
+  <div class="card">
+    <p style="margin-top:0">Before memorizing pseudocode, ask: <b>what is the graph?</b> (directed? weighted? DAG?) and <b>what do I need?</b> (shortest path? connectivity? ordering? minimum total weight?).</p>
+    <table>
+      <tr><th>You need…</th><th>Algorithm</th><th>Why this one</th><th>Time</th></tr>
+      <tr>
+        <td>Shortest path, <b>unweighted</b> (each edge = 1 hop)</td>
+        <td><a href="#bfs">BFS</a></td>
+        <td>Explores by distance layers — first arrival = fewest edges</td>
+        <td><span class="tag b-On">O(V+E)</span></td>
+      </tr>
+      <tr>
+        <td>Shortest path, <b>non-negative weights</b></td>
+        <td><a href="#dijkstra">Dijkstra</a></td>
+        <td>Greedy: once a vertex is finalized, its distance is final</td>
+        <td><span class="tag b-Onlog">O((V+E) log V)</span></td>
+      </tr>
+      <tr>
+        <td>Shortest path, <b>negative weights OK</b></td>
+        <td><a href="#bellman">Bellman-Ford</a></td>
+        <td>Relaxes all edges V−1 times; detects negative cycles</td>
+        <td><span class="tag b-On2">O(VE)</span></td>
+      </tr>
+      <tr>
+        <td>Is there a cycle? / topological order?</td>
+        <td><a href="#dfs">DFS</a></td>
+        <td>Back edge to gray vertex = cycle; finish times → topo sort</td>
+        <td><span class="tag b-On">O(V+E)</span></td>
+      </tr>
+      <tr>
+        <td>Dependency ordering (courses, build steps)</td>
+        <td><a href="#toposort">Topological sort</a></td>
+        <td>Only works on a <b>DAG</b>; if cycle exists → impossible</td>
+        <td><span class="tag b-On">O(V+E)</span></td>
+      </tr>
+      <tr>
+        <td>Connect all vertices, <b>minimum total edge weight</b></td>
+        <td><a href="#mst">Kruskal / Prim</a></td>
+        <td>Both find an MST; differ in how they grow the tree</td>
+        <td><span class="tag b-Onlog">O(E log V)</span></td>
+      </tr>
+      <tr>
+        <td>Are two vertices connected? / count components?</td>
+        <td><a href="#bfs">BFS</a> or <a href="#dfs">DFS</a></td>
+        <td>Run from each unvisited vertex; each run = one component</td>
+        <td><span class="tag b-On">O(V+E)</span></td>
+      </tr>
+      <tr>
+        <td>Dynamic connectivity while adding edges</td>
+        <td><a href="07-advanced.html#unionfind">Union-Find</a></td>
+        <td>Kruskal uses this to check “same component?” in O(α(n))</td>
+        <td><span class="tag b-O1">O(m·α(n))</span></td>
+      </tr>
+    </table>
+    <div class="note"><b>Real-world mapping:</b> GPS with equal road segments → BFS. GPS with distances → Dijkstra. Flight prices with possible rebates (negative) → Bellman-Ford. Connect cities with minimum cable cost → MST. Course prerequisites → topological sort.</div>
+    <div class="warn"><b>Exam pattern:</b> many questions are not “run BFS” directly — they ask a variant (distance between two <em>sets</em> of vertices, path with color changes, “is edge e in some MST?”). The trick is usually a <b>reduction</b>: build a new graph G′, then run a standard algorithm. See <a href="#reductions">§6.8</a>.</div>
+  </div>
 
   <h2 class="section" id="graph-defs">6.1 Definitions &amp; Representations</h2>
   <div class="card two-col">
@@ -59,7 +118,8 @@
 
   <h2 class="section" id="bfs">6.2 BFS — Breadth-First Search</h2>
   <div class="card">
-    <p><b>Idea:</b> explore the graph in <b>layers</b> from source \(s\) — all vertices at distance 1, then distance 2, and so on. Uses a <b>FIFO queue</b> (first discovered, first explored).</p>
+    <p><b>Problem it solves:</b> explore all vertices reachable from a source \(s\), processing them in order of <b>increasing distance</b> (number of edges). On unweighted graphs, this gives the <b>shortest path</b> from \(s\) to every reachable vertex.</p>
+    <p><b>Idea:</b> explore the graph in <b>layers</b> — all vertices at distance 1, then distance 2, etc. Uses a <b>FIFO queue</b> (first discovered, first explored).</p>
 
     <h4>What BFS is good for</h4>
     <table>
@@ -116,6 +176,7 @@
 
   <h2 class="section" id="dfs">6.3 DFS — Depth-First Search</h2>
   <div class="card">
+    <p><b>Problem it solves:</b> systematically explore a graph to answer <b>structural</b> questions — cycles, connectivity, dependency order, ancestor/descendant relationships — not necessarily shortest paths.</p>
     <p><b>Idea:</b> from a vertex, go as <b>deep</b> as possible along one path, then <b>backtrack</b>. Uses a <b>stack</b> (explicit) or <b>recursion</b> (call stack). Records <b>discovery</b> \(d[v]\) and <b>finish</b> \(f[v]\) timestamps.</p>
 
     <h4>What DFS is good for</h4>
@@ -187,7 +248,9 @@
 
   <h2 class="section" id="toposort">6.4 Topological Sort</h2>
   <div class="card">
-    <p>Linear ordering of a <b>DAG</b>'s vertices so every edge \((u,v)\) goes left→right. Run DFS; output vertices in <b>decreasing finish time</b>.</p>
+    <p><b>Problem it solves:</b> given a DAG (directed acyclic graph), produce a linear order of vertices so that for every edge \((u,v)\), vertex \(u\) appears <b>before</b> \(v\). If there is a cycle, no valid order exists.</p>
+    <p><b>Why it exists:</b> models <b>dependencies</b> — you cannot start task \(v\) until all prerequisites \(u\) are done. Examples: course prerequisites, build systems (compile before link), package installation order.</p>
+    <p><b>Algorithm (DFS-based):</b> run DFS; when a vertex turns <b>black</b> (finished), prepend it to the output list. Equivalently: output in <b>decreasing finish time</b> \(f[v]\).</p>
     <div class="graph-viz-wrap" data-modes='["topo"]' data-default="topo">
       <div class="viz-controls">
         <label class="viz-algo-label" style="display:none">Algorithm: <select class="viz-algo"></select></label>
@@ -210,12 +273,75 @@
     </div>
     <div class="flow"><div class="box">shirt</div><span class="arrow">→</span><div class="box">tie</div><span class="arrow">→</span><div class="box">jacket</div></div>
     <p>Time <span class="tag b-On">O(V + E)</span>.</p>
-    <div class="note">Uses: task scheduling, build systems, course prerequisites.</div>
+    <div class="note"><b>Multiple valid orders:</b> a DAG may have many topological sorts — any order respecting all edges is valid. DFS finish-time order is one canonical choice.</div>
+    <div class="warn"><b>Cycle = failure:</b> if DFS finds a back edge, the graph is not a DAG and topological sort is impossible. Always check for cycles first.</div>
+    <h4>Longest path in a DAG (exam variant)</h4>
+    <p>On a DAG, the <b>longest path</b> from \(s\) to \(t\) can be found by: (1) topological sort, (2) process vertices in topo order, (3) relax edges like Dijkstra but take <b>max</b> instead of min. Time <span class="tag b-On">O(V + E)</span>. Works because topo order guarantees all predecessors of \(v\) are processed before \(v\).</p>
   </div>
 
   <h2 class="section" id="mst">6.5 Minimum Spanning Tree (MST)</h2>
   <div class="card">
-    <p>For a connected, weighted, undirected graph: a spanning tree (\(|V|-1\) edges) of <b>minimum total weight</b>. Both algorithms are <b>greedy</b>.</p>
+    <h4>What problem does MST solve?</h4>
+    <p>You have a connected, weighted, undirected graph. You want to connect <b>all vertices</b> using exactly \(|V|-1\) edges (a tree) such that the <b>total weight is minimized</b>. Real-world: lay fiber-optic cables between cities at minimum cost; connect computers in a network; design a pipeline system.</p>
+
+    <h4>Spanning tree vs MST — know the difference</h4>
+    <table>
+      <tr><th>Concept</th><th>Definition</th><th>Check</th></tr>
+      <tr>
+        <td><b>Spanning tree</b></td>
+        <td>Subgraph that connects all \(V\) vertices, has exactly \(|V|-1\) edges, and has <b>no cycles</b></td>
+        <td>Connected + acyclic + \(|E_T|=|V|-1\)</td>
+      </tr>
+      <tr>
+        <td><b>NOT a spanning tree</b></td>
+        <td>Has a cycle, or is disconnected, or has wrong edge count</td>
+        <td>Any cycle ⟹ not a tree; missing vertex ⟹ not spanning</td>
+      </tr>
+      <tr>
+        <td><b>MST</b></td>
+        <td>A spanning tree whose <b>sum of edge weights</b> is minimum among all spanning trees</td>
+        <td>Compare total weight \(w(T)\) across all spanning trees</td>
+      </tr>
+    </table>
+
+    <h4>The two key properties (memorize for proofs)</h4>
+    <div class="grid2">
+      <div class="note" style="margin:0">
+        <b>Cut property:</b> for any partition of \(V\) into \(S\) and \(V\setminus S\), the <b>lightest edge crossing the cut</b> belongs to some MST.<br>
+        <em>Intuition:</em> to connect the two sides, you must use a crossing edge — pick the cheapest one.
+      </div>
+      <div class="note" style="margin:0">
+        <b>Cycle property:</b> in any cycle, the <b>heaviest edge</b> (strictly heaviest if weights are distinct) is <b>never</b> in an MST.<br>
+        <em>Intuition:</em> you can always swap it for a lighter edge on the cycle and get a cheaper tree.
+      </div>
+    </div>
+
+    <h4>Edge membership — exam favorites</h4>
+    <table>
+      <tr><th>Question</th><th>Answer / test</th></tr>
+      <tr>
+        <td>Is \(e_{\min}\) (unique lightest edge) in every MST?</td>
+        <td><b>Yes.</b> Proof by contradiction: if some MST \(T\) lacks \(e_{\min}\), then \(T \cup \{e_{\min}\}\) has a cycle; remove the cycle's max edge (heavier than \(e_{\min}\)) → cheaper spanning tree. Contradiction.</td>
+      </tr>
+      <tr>
+        <td>Can \(e_{\max}\) be in an MST?</td>
+        <td><b>Yes</b> — e.g. if \(e_{\max}\) is the only edge to a leaf vertex (bridge to an isolated part), every spanning tree must include it.</td>
+      </tr>
+      <tr>
+        <td>Can there be multiple MSTs?</td>
+        <td><b>Yes</b> when weights tie. If all weights are <b>distinct</b>, the MST is <b>unique</b> (proof: swap argument on two different MSTs gives contradiction).</td>
+      </tr>
+      <tr>
+        <td>Is edge \(e=(u,v)\) in <b>some</b> MST?</td>
+        <td>\(e\) is <b>not</b> the unique heaviest edge in any cycle. Build \(G'\) with edges lighter than \(e\); run BFS/DFS from \(u\). If \(v\) is reachable → cycle exists where \(e\) is heaviest → \(e\) is safe. Else → \(e\) is in every MST.</td>
+      </tr>
+      <tr>
+        <td>Is edge \(e\) in <b>every</b> MST?</td>
+        <td>Same test but \(G'\) uses edges with weight \(\le w(e)\), <b>excluding</b> \(e\) itself. If \(u \leadsto v\) in \(G'\) → there is a cycle with an equal-or-lighter alternative → \(e\) not mandatory.</td>
+      </tr>
+    </table>
+    <p class="case-hint">Both edge-membership tests run in <span class="tag b-On">O(V + E)</span> — build \(G'\) + one BFS/DFS.</p>
+
     <div class="graph-viz-wrap" data-modes='["kruskal","prim"]' data-default="kruskal">
       <div class="viz-controls">
         <label class="viz-algo-label">Algorithm: <select class="viz-algo"></select></label>
@@ -236,32 +362,65 @@
       <div class="viz-panel"></div>
       <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
     </div>
+
     <div class="grid2">
       <div>
-        <h4>Kruskal</h4>
+        <h4>Kruskal — edge-centric</h4>
+        <p><b>Strategy:</b> sort edges globally, add cheapest first if it doesn't create a cycle.</p>
         <ol>
           <li>Sort all edges by weight ascending.</li>
-          <li>Add the next edge if it connects two <b>different components</b> (no cycle) — checked with <b>Union-Find</b>.</li>
+          <li>For each edge \((u,v)\) in order: if \(u\) and \(v\) are in <b>different components</b>, add the edge and union the components.</li>
           <li>Stop after \(|V|-1\) edges.</li>
         </ol>
-        <p>Time <span class="tag b-Onlog">O(E log E) = O(E log V)</span>. Edge-centric; great for sparse graphs.</p>
+        <p><b>Data structure:</b> <a href="07-advanced.html#unionfind">Union-Find</a> (disjoint sets with union-by-rank + path compression).</p>
+        <table>
+          <tr><th>Step</th><th>Time</th></tr>
+          <tr><td>Sort edges</td><td><span class="tag b-Onlog">O(E log E)</span></td></tr>
+          <tr><td>\(E\) union-find ops</td><td><span class="tag b-O1">O(E · α(V))</span></td></tr>
+          <tr><td><b>Total</b></td><td><span class="tag b-Onlog">O(E log V)</span></td></tr>
+        </table>
+        <p><b>Prefer Kruskal when:</b> graph is sparse, you think in terms of edges, or you already have Union-Find.</p>
       </div>
       <div>
-        <h4>Prim</h4>
+        <h4>Prim — vertex-centric</h4>
+        <p><b>Strategy:</b> grow one tree from a root; always attach the closest outside vertex.</p>
         <ol>
-          <li>Grow one tree from an arbitrary root.</li>
-          <li>Each vertex has <code>key</code> = min edge weight to the tree.</li>
-          <li>Repeatedly <b>extract-min</b> vertex, add it, update neighbor <code>key</code> values.</li>
+          <li>Start from arbitrary root \(r\); \(key[v]\) = min edge weight from \(v\) to the current tree (∞ if not adjacent).</li>
+          <li>Repeatedly pick vertex \(u\) with minimum \(key[u]\), add it to the tree.</li>
+          <li>For each neighbor \(v\) of \(u\) outside the tree: if \(w(u,v) &lt; key[v]\), update \(key[v]\) and parent.</li>
+          <li>Stop when all vertices are in the tree.</li>
         </ol>
-        <p>Time <span class="tag b-Onlog">O(E log V)</span> (binary heap).</p>
+        <p><b>Data structure:</b> min-heap (binary heap) for extract-min + decrease-key.</p>
+        <table>
+          <tr><th>Step</th><th>Time</th></tr>
+          <tr><td>Init keys</td><td><span class="tag b-On">O(V)</span></td></tr>
+          <tr><td>\(V\) extract-min + up to \(E\) decrease-key</td><td><span class="tag b-Onlog">O(E log V)</span></td></tr>
+          <tr><td><b>Total</b></td><td><span class="tag b-Onlog">O(E log V)</span></td></tr>
+        </table>
+        <p><b>Prefer Prim when:</b> graph is dense, or you naturally grow from a known starting point.</p>
       </div>
     </div>
-    <div class="note"><b>Cut property:</b> for any cut, the min-weight crossing edge is safe to add. <b>Cycle property:</b> the max-weight edge in any cycle is never in an MST.</div>
+
+    <h4>Kruskal vs Prim — decision guide</h4>
+    <table>
+      <tr><th>Condition</th><th>Better choice</th><th>Resulting complexity</th></tr>
+      <tr><td>Standard implementation</td><td>Either — both <span class="tag b-Onlog">O(E log V)</span></td><td>Equivalent asymptotically</td></tr>
+      <tr><td>Edge weights in <b>[1, V]</b> (integers)</td><td><b>Kruskal</b> with counting sort on edges</td><td><span class="tag b-On">O(E · α(V))</span></td></tr>
+      <tr><td>Edge weights in <b>[1, W]</b>, \(W\) constant</td><td><b>Prim</b> with bucket PQ (array of linked lists per weight)</td><td><span class="tag b-On">O(E)</span></td></tr>
+      <tr><td>Some edges already exist (weight 0)</td><td>Either MST algorithm — zero-weight edges are taken first</td><td>Model as MST on full graph</td></tr>
+    </table>
+
+    <h4>Modeling real problems as MST</h4>
+    <div class="note">
+      <b>Example — connect cities with existing cables:</b> build complete graph on cities; existing connections get weight <b>0</b>, new connections get cost \(c(u,v) &gt; 0\). Run MST. The result uses all zero-weight (existing) edges that don't form a cycle, plus minimum-cost new edges to connect everything. Total cost = sum of weights of new edges in the MST.
+    </div>
+    <p><b>Exam tip:</b> once you recognize “connect all nodes, minimize total cost,” write “reduce to MST” and cite Kruskal or Prim as a black box — then analyze the reduction + MST runtime.</p>
   </div>
 
   <h2 class="section" id="dijkstra">6.6 Dijkstra — Single-Source Shortest Paths</h2>
   <div class="card">
-    <p>Shortest paths from \(s\) with <b>non-negative</b> weights. Greedy: repeatedly finalize the closest unvisited vertex, then <b>relax</b> each outgoing edge \((u,v)\) — if \(dist[u]+w(u,v) &lt; dist[v]\), update \(dist[v]\).</p>
+    <p><b>Problem it solves:</b> find shortest paths from source \(s\) to all vertices when edge weights are <b>non-negative</b>. Generalizes BFS to weighted graphs.</p>
+    <p><b>Strategy:</b> greedy — repeatedly finalize the closest unvisited vertex, then <b>relax</b> each outgoing edge \((u,v)\): if \(dist[u]+w(u,v) &lt; dist[v]\), update \(dist[v]\).</p>
     <div class="graph-viz-wrap" data-modes='["dijkstra"]' data-default="dijkstra">
       <div class="viz-controls">
         <label class="viz-algo-label" style="display:none">Algorithm: <select class="viz-algo"></select></label>
@@ -298,6 +457,119 @@
     </table>
     <div class="pitfall"><b>Fails with negative edges!</b> Once a vertex is finalized it's never revisited. Use <b>Bellman-Ford</b> (O(VE)) for negative weights.</div>
     <div class="note"><b>BFS vs Dijkstra:</b> BFS = Dijkstra with all weights 1. On unweighted graphs, prefer BFS.</div>
+  </div>
+
+  <h2 class="section" id="bellman">6.7 Bellman-Ford — Negative Weights OK</h2>
+  <div class="card">
+    <p><b>Problem it solves:</b> single-source shortest paths when edge weights can be <b>negative</b>. Also detects <b>negative-weight cycles</b> reachable from \(s\) (then shortest paths are undefined).</p>
+    <p><b>Why Dijkstra fails:</b> Dijkstra assumes that once a vertex is extracted from the priority queue, its distance is final. A later negative edge could shorten it — Dijkstra never revisits.</p>
+    <span class="code-label">pseudocode</span>
+<pre><span class="kw">Bellman-Ford</span>(G, w, s):
+    dist[s] = 0, others = infinity
+    <span class="kw">repeat</span> |V| - 1 times:
+        <span class="kw">for each</span> edge (u,v) <span class="kw">in</span> E:
+            <span class="kw">if</span> dist[u] + w(u,v) &lt; dist[v]:
+                dist[v] = dist[u] + w(u,v)
+    <span class="kw">for each</span> edge (u,v):
+        <span class="kw">if</span> dist[u] + w(u,v) &lt; dist[v]:
+            <span class="kw">return</span> "negative cycle"
+    <span class="kw">return</span> dist</pre>
+    <p>Time <span class="tag b-On2">O(VE)</span> · Space <span class="tag b-On">O(V)</span>.</p>
+    <div class="note"><b>Intuition:</b> after \(k\) rounds, \(dist[v]\) is the shortest path using at most \(k\) edges. After \(|V|-1\) rounds, all simple shortest paths are found (a simple path has at most \(|V|-1\) edges).</div>
+    <table>
+      <tr><th>Scenario</th><th>Use</th></tr>
+      <tr><td>All weights ≥ 0</td><td><b>Dijkstra</b> — faster</td></tr>
+      <tr><td>Negative weights, no negative cycle</td><td><b>Bellman-Ford</b></td></tr>
+      <tr><td>Need to detect negative cycle</td><td><b>Bellman-Ford</b> (extra pass)</td></tr>
+      <tr><td>All-pairs shortest paths (small V)</td><td><b>Floyd-Warshall</b> O(V³) — beyond scope but know the name</td></tr>
+    </table>
+  </div>
+
+  <h2 class="section" id="reductions">6.8 Graph Reductions — Exam Pattern</h2>
+  <div class="card">
+    <p>Many exam questions don't ask you to run BFS/DFS directly — they describe a variant. The standard approach: <b>reduce</b> the new problem to a known one by building graph \(G'\), then run the standard algorithm.</p>
+
+    <h4>Pattern 1: Super-source / super-sink</h4>
+    <p><b>Problem:</b> find shortest distance between two <b>sets</b> of vertices \(V_1\) and \(V_2\) (not just two vertices).</p>
+    <p><b>Reduction:</b> add dummy vertex \(s\), connect \(s \to u\) for all \(u \in V_1\) (weight 0); add dummy \(t\), connect \(v \to t\) for all \(v \in V_2\) (weight 0). Run BFS/Dijkstra from \(s\). Answer = \(dist[t] - 2\) (subtract the two dummy hops).</p>
+    <p>Time: building \(G'\) is <span class="tag b-On">O(V + E)</span>; BFS on \(G'\) is <span class="tag b-On">O(V + E)</span>.</p>
+
+    <h4>Pattern 2: Vertex splitting (track a state)</h4>
+    <p><b>Problem:</b> is there a path from \(s\) to \(t\) with exactly \(k\) “color changes” (edges between differently-colored vertices)?</p>
+    <p><b>Reduction:</b> for each vertex \(v\), create two copies \(v_0\) and \(v_1\) in \(G'\):</p>
+    <ul>
+      <li>Same-color edge \((u,v)\) → add \((u_0, v_0)\) and \((u_1, v_1)\)</li>
+      <li>Different-color edge \((u,v)\) → add \((u_0, v_1)\) only (one color flip)</li>
+    </ul>
+    <p>Run DFS/BFS from \(s_0\) to check reachability of \(t_1\) (exactly one color change). Generalizes to \(c\) flips with \(c+1\) copies per vertex.</p>
+
+    <h4>Pattern 3: Reverse graph / transpose</h4>
+    <p><b>Problem:</b> “can every vertex reach \(t\)?” or “vertices from which \(t\) is reachable?”</p>
+    <p><b>Reduction:</b> reverse all edges to get \(G^T\), run BFS/DFS from \(t\) in \(G^T\). Vertices visited = vertices that can reach \(t\) in the original graph.</p>
+
+    <h4>Pattern 4: Reduce to MST</h4>
+    <p>“Connect all nodes at minimum cost, some connections already exist” → assign weight 0 to existing edges, positive cost to new ones → run Kruskal/Prim on the complete graph.</p>
+
+    <h4>Pattern 5: Reduce to edge-in-MST test</h4>
+    <p>“Is edge \(e\) in some/every MST?” → build subgraph with only lighter (or lighter-or-equal) edges, run BFS/DFS to check if endpoints are connected without \(e\). See <a href="#mst">§6.5</a>.</p>
+
+    <div class="warn"><b>Always write the reduction explicitly in exams:</b> (1) define \(G'=(V',E')\), (2) state the claim (“path exists in \(G\) ⟺ path exists in \(G'\)”), (3) run known algorithm, (4) analyze total time as O(build) + O(algorithm).</div>
+  </div>
+
+  <h2 class="section" id="graph-exam">6.9 Exam Tips &amp; Conclusions</h2>
+  <div class="card">
+    <h4>Before you code — ask these 4 questions</h4>
+    <ol>
+      <li><b>Directed or undirected?</b> Affects edge types, cycle detection, and whether to use both directions in adjacency list.</li>
+      <li><b>Weighted or unweighted?</b> Unweighted → BFS. Non-negative weights → Dijkstra. Negative OK → Bellman-Ford.</li>
+      <li><b>What is the output?</b> Distance? Path? Yes/no (connectivity)? Ordering? Minimum total weight?</li>
+      <li><b>Is this a standard problem or a variant?</b> If variant → look for a reduction (super-source, vertex split, reverse graph, MST).</li>
+    </ol>
+
+    <h4>Complexity cheat sheet (state the bottleneck)</h4>
+    <table>
+      <tr><th>Algorithm</th><th>Time</th><th>When analyzing, mention…</th></tr>
+      <tr><td>BFS / DFS</td><td><span class="tag b-On">O(V + E)</span></td><td>Each vertex enqueued/visited once; each edge examined once</td></tr>
+      <tr><td>Topological sort</td><td><span class="tag b-On">O(V + E)</span></td><td>One DFS pass</td></tr>
+      <tr><td>Kruskal</td><td><span class="tag b-Onlog">O(E log V)</span></td><td>Sort dominates; or counting sort if weights ∈ [1,V]</td></tr>
+      <tr><td>Prim (binary heap)</td><td><span class="tag b-Onlog">O(E log V)</span></td><td>V extract-min + E decrease-key</td></tr>
+      <tr><td>Dijkstra (binary heap)</td><td><span class="tag b-Onlog">O((V+E) log V)</span></td><td>Same heap analysis as Prim</td></tr>
+      <tr><td>Bellman-Ford</td><td><span class="tag b-On2">O(VE)</span></td><td>(V−1) rounds × E edges</td></tr>
+    </table>
+
+    <h4>Common mistakes (from practice sessions &amp; past exams)</h4>
+    <ul>
+      <li><b>Using BFS for weighted graphs</b> — BFS only gives shortest hop count, not minimum weight.</li>
+      <li><b>Using Dijkstra with negative edges</b> — greedy finalization breaks; use Bellman-Ford.</li>
+      <li><b>Topological sort on a graph with cycles</b> — always check for back edges first.</li>
+      <li><b>Confusing spanning tree with MST</b> — any acyclic connected subgraph with \(|V|-1\) edges is a spanning tree; MST additionally minimizes total weight.</li>
+      <li><b>Forgetting Union-Find in Kruskal analysis</b> — mention α(V) per operation, not O(1) amortized without justification.</li>
+      <li><b>Not specifying data structure</b> — “run Prim” is incomplete; say “Prim with binary min-heap” and derive O(E log V).</li>
+      <li><b>Reduction without proof sketch</b> — write one sentence why the reduction preserves the answer.</li>
+      <li><b>Off-by-one in super-source reduction</b> — remember to subtract dummy edge count from final distance.</li>
+    </ul>
+
+    <h4>Proof techniques that appear repeatedly</h4>
+    <table>
+      <tr><th>Claim type</th><th>Technique</th></tr>
+      <tr><td>“Lightest edge is in every MST”</td><td>Contradiction: add edge → cycle → swap heavier edge → cheaper tree</td></tr>
+      <tr><td>“MST is unique” (distinct weights)</td><td>Contradiction: two MSTs differ on edge \(e\) → cycle with lighter swap</td></tr>
+      <tr><td>“Edge \(e\) safe to add”</td><td>Cut property — \(e\) is lightest crossing some cut</td></tr>
+      <tr><td>“Edge \(e\) never in MST”</td><td>Cycle property — \(e\) is heaviest in some cycle</td></tr>
+      <tr><td>“BFS finds shortest path”</td><td>Induction on distance layers — first visit at layer \(d\) means shortest path has length \(d\)</td></tr>
+    </table>
+
+    <h4>How to write algorithm answers in exams</h4>
+    <ol>
+      <li><b>State the reduction</b> (if any) — define \(G'\) explicitly.</li>
+      <li><b>Name the algorithm</b> and the data structure (heap, Union-Find, queue).</li>
+      <li><b>Write main logic</b> — 5–10 lines of pseudocode; skip boilerplate init unless asked.</li>
+      <li><b>Analyze runtime</b> — separate build time from algorithm time; state the dominant term.</li>
+      <li><b>Handle edge cases</b> in one line: disconnected graph, empty graph, negative cycle.</li>
+    </ol>
+
+    <div class="note"><b>Black-box usage:</b> in many exam questions you can treat MST, BFS, or Dijkstra as a subroutine (“run Kruskal on \(G\)”) and only analyze the reduction + black-box cost. Don't re-derive Kruskal unless the question asks for it.</div>
+    <div class="warn"><b>When stuck:</b> draw a small example graph (4–5 vertices), trace the algorithm by hand, then generalize. Most graph exam questions test understanding of <em>what the algorithm preserves</em>, not tricky implementation details.</div>
   </div>
 
   </div>
