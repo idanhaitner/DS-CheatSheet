@@ -1179,15 +1179,20 @@
       updateFrameMeta(fr);
     }
 
-    function stop() {
+    function haltPlayback() {
       playing = false;
       if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
       if (timer) { clearInterval(timer); timer = null; }
       accum = 0;
       lastTs = 0;
       stableBounds = null;
+      liveSvg = null;
       var btn = $('.viz-play');
       if (btn) btn.textContent = '\u25B6 Play';
+    }
+
+    function stop() {
+      haltPlayback();
       if (autoFit) render(true);
     }
 
@@ -1237,8 +1242,9 @@
     }
 
     function play() {
-      if (playing) { stop(); return; }
-      if (idx >= frames.length - 1) { idx = 0; render(true); }
+      if (playing) { haltPlayback(); return; }
+      idx = 0;
+      render(true);
       startPlayback();
     }
 
@@ -1249,13 +1255,13 @@
     }
 
     function runOp(op) {
+      haltPlayback();
       var key = parseKey();
       if (key === null) {
         frames = [kind === 'avl'
           ? avlFrame('Enter a valid key (1–99).', tree, {})
           : btFrame('Enter a valid key (1–99).', tree, {})];
         idx = 0;
-        stop();
         render(true);
         return;
       }
@@ -1265,18 +1271,12 @@
       } else {
         tree = op === 'insert' ? btInsert(tree, key, frames) : btDelete(tree, key, frames);
       }
-      idx = 0;
-      playing = false;
-      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-      accum = 0;
-      lastTs = 0;
-      stableBounds = null;
+      idx = Math.max(0, frames.length - 1);
       autoFit = true;
       zoom = 1;
       panX = 0;
       panY = 0;
       render(true);
-      if (frames.length > 1) playToEnd();
     }
 
     function reset() {
