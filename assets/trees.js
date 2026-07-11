@@ -1042,6 +1042,7 @@
         c.setAttribute('stroke-width', '2');
         g.appendChild(c);
         var t = document.createElementNS(SVGNS, 'text');
+        t.setAttribute('data-label', '1');
         t.setAttribute('text-anchor', 'middle');
         t.setAttribute('font-size', '14');
         t.setAttribute('font-weight', '700');
@@ -1056,8 +1057,9 @@
         nodeLayer.appendChild(g);
       }
       var c = g.querySelector('circle');
-      var t = g.querySelector('text:not([data-bf])');
+      var t = g.querySelector('text[data-label]') || g.querySelector('text');
       var bf = g.querySelector('[data-bf]');
+      if (!c || !t) return;
       c.setAttribute('cx', n.x); c.setAttribute('cy', n.y);
       c.setAttribute('fill', col.fill); c.setAttribute('stroke', col.stroke);
       t.setAttribute('x', n.x); t.setAttribute('y', n.y + 5);
@@ -1219,13 +1221,6 @@
           : btFrame('Enter a key and click <b>Insert</b> or <b>Delete</b>. (t = 2)', tree, {})];
       }
       var fr = frames[Math.min(idx, frames.length - 1)];
-      var canPatch = !forceRebuild && playing && liveSvg && fr.kind === 'avl' && fr.nodes.length;
-      if (canPatch) {
-        paintAvlFrame(liveSvg, fr);
-        applyFrameView(liveSvg, fr);
-        updateFrameMeta(fr);
-        return;
-      }
       stage.innerHTML = '';
       liveSvg = null;
       var svg = document.createElementNS(SVGNS, 'svg');
@@ -1235,7 +1230,6 @@
       else drawBtreeFrame(svg, fr);
       applyFrameView(svg, fr);
       stage.appendChild(svg);
-      liveSvg = fr.kind === 'avl' ? svg : null;
       updateFrameMeta(fr);
     }
 
@@ -1277,9 +1271,10 @@
         idx++;
         advanced = true;
       }
-      if (advanced) render(false);
+      if (advanced) render(true);
       if (idx >= frames.length - 1) {
-        stop();
+        haltPlayback();
+        render(true);
         return;
       }
       rafId = requestAnimationFrame(tick);
@@ -1295,7 +1290,7 @@
       var btn = $('.viz-play');
       if (btn) btn.textContent = '\u23F8 Pause';
       if (rafId) cancelAnimationFrame(rafId);
-      render(false);
+      render(true);
       rafId = requestAnimationFrame(tick);
     }
 
@@ -1317,16 +1312,19 @@
     function balanceTree() {
       if (playing) { haltPlayback(); return; }
       haltPlayback();
-      frames = [];
-      tree = avlBalanceTree(tree, frames, { showBf: true });
-      idx = 0;
+      var steps = [];
+      tree = avlBalanceTree(tree, steps, { showBf: true });
+      frames = steps;
+      idx = frames.length - 1;
       autoFit = true;
       zoom = 1;
       panX = 0;
       panY = 0;
       render(true);
-      if (frames.length > 1) startPlayback();
-      else idx = frames.length - 1;
+      if (frames.length > 1) {
+        idx = 0;
+        startPlayback();
+      }
     }
 
     function parseKey() {
@@ -1346,26 +1344,30 @@
         render(true);
         return;
       }
-      frames = [];
+      var steps = [];
       if (kind === 'avl') {
-        tree = op === 'insert'
-          ? avlInsert(tree, key, frames, true)
-          : avlDelete(tree, key, frames, true);
-        var lastDesc = frames.length ? frames[frames.length - 1].desc : '';
-        if (lastDesc.indexOf('already') < 0 && lastDesc.indexOf('done') < 0 && lastDesc.indexOf('complete') < 0) {
-          frames.push(avlFrame(
+        if (op === 'insert') tree = avlInsert(tree, key, steps, true);
+        else tree = avlDelete(tree, key, steps, true);
+        var dup = steps.length && steps[steps.length - 1].desc.indexOf('already') >= 0;
+        if (dup) {
+          frames = steps;
+        } else {
+          frames = steps.concat([avlFrame(
             (op === 'insert' ? 'Insert' : 'Delete') + ' <b>' + key + '</b> done.',
             tree,
             op === 'insert' ? { inserted: key, showBf: true } : { deleted: key, showBf: true },
-            'Press <b>Balance Tree</b> to rebalance if |bf| &gt; 1.'));
+            'Press <b>Balance Tree</b> to rebalance if |bf| &gt; 1.')]);
         }
       } else {
-        tree = op === 'insert' ? btInsert(tree, key, frames) : btDelete(tree, key, frames);
-        var btLast = frames.length ? frames[frames.length - 1].desc : '';
-        if (btLast.indexOf('already') < 0 && btLast.indexOf('complete') < 0) {
-          frames.push(btFrame(
+        if (op === 'insert') tree = btInsert(tree, key, steps);
+        else tree = btDelete(tree, key, steps);
+        var btDup = steps.length && steps[steps.length - 1].desc.indexOf('already') >= 0;
+        if (btDup || (steps.length && steps[steps.length - 1].desc.indexOf('complete') >= 0)) {
+          frames = steps;
+        } else {
+          frames = steps.concat([btFrame(
             (op === 'insert' ? 'Insert' : 'Delete') + ' <b>' + key + '</b> done.',
-            tree, {}));
+            tree, {})]);
         }
       }
       idx = frames.length - 1;
