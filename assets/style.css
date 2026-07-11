@@ -1145,7 +1145,7 @@ hr { border: none; border-top: 1px solid var(--line); margin: 24px 0; }
   background: rgba(60, 80, 140, 0.05);
   border: 1px solid var(--line);
   border-radius: 10px;
-  min-height: 300px;
+  min-height: 320px;
   max-height: 500px;
   overflow: auto;
 }

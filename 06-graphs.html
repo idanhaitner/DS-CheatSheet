@@ -543,7 +543,7 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
     </div>
     <div class="note">
       <b>Teal edges = shortest-path tree (SPT), not MST.</b> Each teal edge is the last edge on a <em>best known path from \(s\)</em> to some vertex. At the end they form a tree rooted at \(s\). An edge can be in the SPT but <b>not</b> in an MST (and vice versa): SPT minimizes path cost from one source; MST minimizes total weight connecting all nodes.<br>
-      <b>Hub graph (7 vertices):</b> A is the source. Most traffic goes through center <b>D</b> (like a router). The direct edge A→B (8) is a trap — B first gets 8, then improves to <b>3</b> via A→D→B (the only decrease-key). Teal edges = current shortest-path tree from A.
+      <b>Example graph (7 vertices):</b> Same layout as the MST visualizer. A is the source. The direct edge A→B (8) is a trap — B first gets 8, then improves to <b>6</b> via A→C→D→B (the only decrease-key). Teal edges = current shortest-path tree from A.
     </div>
     <div class="graph-viz-wrap" data-modes='["dijkstra"]' data-default="dijkstra">
       <div class="viz-controls">
@@ -554,10 +554,10 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
         <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1450" step="20"></label>
       </div>
       <div class="gviz-legend-compact">
-        <span class="leg-wgb"><span class="sw" style="background:#ffffff;border:1px solid #94a3b8"></span><span class="sw" style="background:#9ca3af;border:1px solid #6b7280"></span><span class="sw" style="background:#1a1a1a;border:1px solid #000"></span> white → gray → black</span>
-        <span class="leg-tree"><span class="sw" style="background:#57e0c0"></span> shortest-path tree edge</span>
-        <span class="leg-back" style="display:none"><span class="sw" style="background:#ff6b81"></span> back edge</span>
-        <span class="leg-reject" style="display:none"><span class="sw" style="background:#ff6b81"></span> rejected</span>
+        <span class="leg-wgb"><span class="sw" style="background:#ffffff;border:1px solid #94a3b8"></span><span class="sw" style="background:#9ca3af;border:1px solid #6b7280"></span><span class="sw" style="background:#1a1a1a;border:1px solid #000"></span> unvisited / in PQ / finalized</span>
+        <span class="leg-tree"><span class="sw" style="background:#57e0c0"></span> shortest-path tree</span>
+        <span class="leg-look"><span class="sw" style="background:#7c9cff"></span> relaxing now</span>
+        <span class="leg-notree"><span class="sw" style="background:#2a3058"></span> not on shortest path</span>
       </div>
       <p class="gviz-legend-note"></p>
       <div class="gviz-main">
@@ -743,6 +743,6 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
 </main>
 </div>
 <script src="assets/viz-code-helper.js"></script>
-<script src="assets/graph.js?v=20260711dijk10" defer></script>
+<script src="assets/graph.js?v=20260711dijk15" defer></script>
 </body>
 </html>

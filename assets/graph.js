@@ -3,8 +3,9 @@
   var SVGNS = 'http://www.w3.org/2000/svg';
   var FONT = '"Segoe UI", Roboto, Helvetica, Arial, sans-serif';
   var NR = 24;
-  var MET_Y = 42;
-  var WGT_OFF = 24;
+  var MET_PAD = 10;
+  var WGT_OFF = 22;
+  var VB_H = 320;
   var NUM_FS = 15;
   var uid = 0;
 
@@ -25,18 +26,10 @@
   };
   var DIJKSTRA_W = {
     id: 'dijkstra-w', directed: false, weighted: true,
-    nodes: [
-      { id: 0, label: 'A', x: 70, y: 150 },
-      { id: 3, label: 'D', x: 265, y: 150 },
-      { id: 1, label: 'B', x: 265, y: 38 },
-      { id: 2, label: 'C', x: 265, y: 268 },
-      { id: 4, label: 'E', x: 430, y: 48 },
-      { id: 5, label: 'F', x: 430, y: 268 },
-      { id: 6, label: 'G', x: 580, y: 150 }
-    ],
+    nodes: TRAVERSE.nodes,
     edges: [
-      [0, 3, 2], [0, 1, 8], [3, 1, 1], [3, 2, 2],
-      [3, 4, 2], [3, 5, 2], [3, 6, 3]
+      [0, 1, 8], [0, 2, 2], [1, 3, 3], [2, 3, 1],
+      [2, 4, 5], [3, 5, 6], [4, 5, 2], [5, 6, 3]
     ]
   };
   var DAG = {
@@ -75,7 +68,7 @@
     topo: 'DFS on a DAG. When a node turns black, it is prepended to the topological order.',
     kruskal: '<span style="color:#57e0c0">Teal</span> = in MST. <span style="color:#ff6b81">Red</span> = skipped (would form cycle). Panel shows <b>Union-Find</b> components after each step.',
     prim: '<span style="color:#57e0c0"><b>Bold teal</b></span> = MST edge. <span style="color:#64748b">Gray dashed</span> = current candidate. <span style="color:#1a1a1a"><b>Black</b></span> = not chosen.',
-    dijkstra: '<span style="color:#57e0c0"><b>Teal</b></span> = shortest-path tree edge. Numbers under nodes = <b>dist</b> from source. Panel shows <b>PQ</b> (min-heap by dist).'
+    dijkstra: '<b>Nodes:</b> white = unvisited, gray = in PQ (best dist known), black = finalized (dist locked). <b>Edges:</b> <span style="color:#57e0c0">teal</span> = on shortest-path tree, dark = not chosen, <span style="color:#7c9cff">blue</span> = edge being relaxed this step. Numbers under nodes = <b>dist</b> from source A.'
   };
   var PSEUDO = {
     kruskal: [
@@ -190,28 +183,18 @@
       });
     }
 
-    function nodeMetricPos(n, sc) {
-      var vbH = sc.id === 'dijkstra-w' ? 330 : 300;
-      var below = vbH - (n.y + NR + 14);
-      var above = n.y - NR - 14;
-      if (sc.id === 'dijkstra-w' && n.y < 70) {
-        return { x: n.x - 38, y: n.y + 2, anchor: 'end' };
-      }
-      if (below < MET_Y + 4 && above > MET_Y + 4) {
-        return { x: n.x, y: n.y - MET_Y, anchor: 'middle' };
-      }
-      return { x: n.x, y: n.y + MET_Y, anchor: 'middle' };
+    function nodeMetricPos(n) {
+      return { x: n.x, y: n.y + NR + MET_PAD, anchor: 'middle' };
     }
 
     function edgeLabelPos(ax, ay, bx, by) {
       var mx = (ax + bx) / 2, my = (ay + by) / 2;
       var dx = bx - ax, dy = by - ay;
       var len = Math.hypot(dx, dy) || 1;
-      if (Math.abs(dy) < Math.abs(dx) * 0.35) {
-        return { x: mx, y: my - WGT_OFF };
-      }
       var px = -dy / len, py = dx / len;
-      return { x: mx + px * WGT_OFF, y: my + py * WGT_OFF };
+      var cx = 320, cy = 150;
+      var sign = (cx - mx) * px + (cy - my) * py > 0 ? -1 : 1;
+      return { x: mx + sign * px * WGT_OFF, y: my + sign * py * WGT_OFF };
     }
 
     function rebuildSvg(sc) {
@@ -220,10 +203,9 @@
       edgeLine = {}; edgeWeight = {};
       buildAdj(sc);
       svg = document.createElementNS(SVGNS, 'svg');
-      var vbH = sc.id === 'dijkstra-w' ? 330 : 300;
-      svg.setAttribute('viewBox', '0 0 640 ' + vbH);
+      svg.setAttribute('viewBox', '0 0 640 ' + VB_H);
       svg.setAttribute('width', '100%');
-      svg.setAttribute('height', String(vbH));
+      svg.setAttribute('height', String(VB_H));
       var defs = document.createElementNS(SVGNS, 'defs');
       addArrowMarkers(defs);
       svg.appendChild(defs);
@@ -267,12 +249,14 @@
         letter.setAttribute('fill', '#0f172a'); letter.setAttribute('font-family', FONT);
         letter.textContent = n.label;
         svg.appendChild(letter); nodeLetter[n.id] = letter;
-        var mp = nodeMetricPos(n, sc);
+        var mp = nodeMetricPos(n);
         var metrics = document.createElementNS(SVGNS, 'text');
         metrics.setAttribute('x', mp.x); metrics.setAttribute('y', mp.y);
         metrics.setAttribute('text-anchor', mp.anchor); metrics.setAttribute('dominant-baseline', 'central');
         metrics.setAttribute('font-size', String(NUM_FS)); metrics.setAttribute('font-weight', '800');
-        metrics.setAttribute('fill', 'currentColor'); metrics.setAttribute('font-family', FONT);
+        metrics.setAttribute('fill', '#64748b'); metrics.setAttribute('font-family', FONT);
+        metrics.setAttribute('stroke', '#ffffff'); metrics.setAttribute('stroke-width', '3');
+        metrics.setAttribute('paint-order', 'stroke fill');
         svg.appendChild(metrics); nodeMetrics[n.id] = metrics;
       });
       stage.appendChild(svg);
@@ -614,8 +598,7 @@
 
     function refreshSPTEdges(parent) {
       scenario.edges.forEach(function (e) {
-        var k = ekey(e[0], e[1]);
-        if (ec[k] !== 'look') ec[k] = 'def';
+        ec[ekey(e[0], e[1])] = 'def';
       });
       scenario.nodes.forEach(function (n) {
         var v = n.id, p = parent[v];
@@ -672,6 +655,8 @@
           if (done[v]) return;
           var wgt = weight(u, v);
           setEdge(u, v, 'look');
+          rec('Relax edge ' + NAME[u] + '\u2013' + NAME[v] + ' (w=' + wgt + ').',
+            panelDijkstra(dist, done, heap, null, u), 8);
           if (dist[u] + wgt < dist[v]) {
             var old = dist[v];
             dist[v] = dist[u] + wgt;
@@ -744,17 +729,40 @@
       var cand = $('.leg-cand');
       var notree = $('.leg-notree');
       var note = $('.gviz-legend-note');
-      if (wgb) wgb.style.display = (mode === 'bfs' || mode === 'dfs' || mode === 'topo' || mode === 'dijkstra') ? 'inline-flex' : 'none';
+      if (wgb) {
+        if (mode === 'dijkstra') {
+          wgb.style.display = 'inline-flex';
+          wgb.innerHTML =
+            '<span class="sw" style="background:#ffffff;border:1px solid #94a3b8"></span> unvisited ' +
+            '<span class="sw" style="background:#9ca3af;border:1px solid #6b7280"></span> in PQ ' +
+            '<span class="sw" style="background:#1a1a1a;border:1px solid #000"></span> finalized';
+        } else {
+          wgb.style.display = (mode === 'bfs' || mode === 'dfs' || mode === 'topo') ? 'inline-flex' : 'none';
+          wgb.innerHTML =
+            '<span class="sw" style="background:#ffffff;border:1px solid #94a3b8"></span>' +
+            '<span class="sw" style="background:#9ca3af;border:1px solid #6b7280"></span>' +
+            '<span class="sw" style="background:#1a1a1a;border:1px solid #000"></span> white \u2192 gray \u2192 black';
+        }
+      }
       if (tree) {
         tree.style.display = 'inline-flex';
         tree.innerHTML = mode === 'prim'
           ? '<span class="sw" style="background:#57e0c0"></span> MST edge'
           : mode === 'dijkstra'
-            ? '<span class="sw" style="background:#57e0c0"></span> shortest-path tree edge'
+            ? '<span class="sw" style="background:#57e0c0"></span> shortest-path tree'
             : '<span class="sw" style="background:#57e0c0"></span> tree edge';
       }
       if (cand) cand.style.display = mode === 'prim' ? 'inline-flex' : 'none';
-      if (notree) notree.style.display = (mode === 'prim' || mode === 'kruskal') ? 'inline-flex' : 'none';
+      if (notree) {
+        notree.style.display = (mode === 'prim' || mode === 'kruskal' || mode === 'dijkstra') ? 'inline-flex' : 'none';
+        if (mode === 'dijkstra') {
+          notree.innerHTML = '<span class="sw" style="background:#2a3058"></span> not on shortest path';
+        } else if (mode === 'prim' || mode === 'kruskal') {
+          notree.innerHTML = '<span class="sw" style="background:#1a1a1a"></span> not chosen';
+        }
+      }
+      var look = $('.leg-look');
+      if (look) look.style.display = mode === 'dijkstra' ? 'inline-flex' : 'none';
       if (back) back.style.display = mode === 'dfs' ? 'inline-flex' : 'none';
       if (reject) reject.style.display = mode === 'kruskal' ? 'inline-flex' : 'none';
       if (note) note.innerHTML = NOTES[mode] || '';
