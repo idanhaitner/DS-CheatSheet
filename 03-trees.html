@@ -187,16 +187,16 @@
     <div class="note"><b>Mnemonic:</b> the rotation is the <b>opposite</b> of the heavy side. Right-heavy → rotate left; left-heavy → rotate right. Double cases first rotate the child to reduce to a single case.</div>
 
     <h4>Interactive animator</h4>
-    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Insert or delete a key — rebalancing runs <b>automatically</b> after each operation (use Pause/Step to slow down). Large trees auto-shrink; use <b>Fit</b> / <b>+/−</b> or Ctrl+scroll to zoom. <span style="color:#ff6b81"><b>Red</b></span> = pivot · <span style="color:#a78bfa"><b>Purple</b></span> = rotating subtree · <span style="color:#57e0c0"><b>Teal</b></span> = promoted root · <span style="color:#7c4dff"><b>Violet</b></span> = inserted / deleted.</p>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Insert or delete a key — the final tree appears immediately. Click <b>Play</b> to watch rebalancing step-by-step. Large trees auto-shrink; use <b>Fit</b> / <b>+/−</b> or Ctrl+scroll to zoom. <span style="color:#ff6b81"><b>Red</b></span> = pivot · <span style="color:#a78bfa"><b>Purple</b></span> = rotating subtree · <span style="color:#57e0c0"><b>Teal</b></span> = promoted root · <span style="color:#7c4dff"><b>Violet</b></span> = inserted / deleted.</p>
     <div class="tree-viz-wrap avl-viz-wrap">
       <div class="viz-controls">
         <label>Key: <input type="number" class="viz-key" min="1" max="99" value="25" style="width:56px"></label>
-        <button class="viz-btn viz-primary viz-insert">Insert</button>
-        <button class="viz-btn viz-delete">Delete</button>
-        <button class="viz-btn viz-reset">Reset</button>
-        <button class="viz-btn viz-play">▶ Play</button>
-        <button class="viz-btn viz-prev">◀ Step</button>
-        <button class="viz-btn viz-next">Step ▶</button>
+        <button type="button" class="viz-btn viz-primary viz-insert">Insert</button>
+        <button type="button" class="viz-btn viz-delete">Delete</button>
+        <button type="button" class="viz-btn viz-reset">Reset</button>
+        <button type="button" class="viz-btn viz-play">▶ Play</button>
+        <button type="button" class="viz-btn viz-prev">◀ Step</button>
+        <button type="button" class="viz-btn viz-next">Step ▶</button>
         <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1600" step="20"></label>
       </div>
       <div class="tree-stage"></div>
@@ -226,12 +226,12 @@
     <div class="tree-viz-wrap btree-viz-wrap">
       <div class="viz-controls">
         <label>Key: <input type="number" class="viz-key" min="1" max="99" value="25" style="width:56px"></label>
-        <button class="viz-btn viz-primary viz-insert">Insert</button>
-        <button class="viz-btn viz-delete">Delete</button>
-        <button class="viz-btn viz-reset">Reset</button>
-        <button class="viz-btn viz-play">▶ Play</button>
-        <button class="viz-btn viz-prev">◀ Step</button>
-        <button class="viz-btn viz-next">Step ▶</button>
+        <button type="button" class="viz-btn viz-primary viz-insert">Insert</button>
+        <button type="button" class="viz-btn viz-delete">Delete</button>
+        <button type="button" class="viz-btn viz-reset">Reset</button>
+        <button type="button" class="viz-btn viz-play">▶ Play</button>
+        <button type="button" class="viz-btn viz-prev">◀ Step</button>
+        <button type="button" class="viz-btn viz-next">Step ▶</button>
         <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1600" step="20"></label>
       </div>
       <div class="tree-stage"></div>
@@ -244,6 +244,6 @@
   </div>
 </main>
 </div>
-<script src="assets/trees.js" defer></script>
+<script src="assets/trees.js?v=20260711" defer></script>
 </body>
 </html>

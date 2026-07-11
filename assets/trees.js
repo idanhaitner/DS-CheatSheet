@@ -1268,10 +1268,24 @@
       frames = [];
       if (kind === 'avl') {
         tree = op === 'insert' ? avlInsert(tree, key, frames) : avlDelete(tree, key, frames);
+        var lastDesc = frames.length ? frames[frames.length - 1].desc : '';
+        if (lastDesc.indexOf('already') < 0 && lastDesc.indexOf('done') < 0 && lastDesc.indexOf('complete') < 0) {
+          frames.push(avlFrame(
+            (op === 'insert' ? 'Insert' : 'Delete') + ' <b>' + key + '</b> done.',
+            tree,
+            op === 'insert' ? { inserted: key, showBf: true } : { deleted: key, showBf: true },
+            'Click <b>Play</b> to replay step-by-step.'));
+        }
       } else {
         tree = op === 'insert' ? btInsert(tree, key, frames) : btDelete(tree, key, frames);
+        var btLast = frames.length ? frames[frames.length - 1].desc : '';
+        if (btLast.indexOf('already') < 0 && btLast.indexOf('complete') < 0) {
+          frames.push(btFrame(
+            (op === 'insert' ? 'Insert' : 'Delete') + ' <b>' + key + '</b> done.',
+            tree, {}));
+        }
       }
-      idx = Math.max(0, frames.length - 1);
+      idx = frames.length - 1;
       autoFit = true;
       zoom = 1;
       panX = 0;
