@@ -1266,13 +1266,17 @@
         tree = op === 'insert' ? btInsert(tree, key, frames) : btDelete(tree, key, frames);
       }
       idx = 0;
-      stop();
+      playing = false;
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+      accum = 0;
+      lastTs = 0;
+      stableBounds = null;
       autoFit = true;
       zoom = 1;
       panX = 0;
       panY = 0;
       render(true);
-      if (kind === 'avl') playToEnd();
+      if (frames.length > 1) playToEnd();
     }
 
     function reset() {
