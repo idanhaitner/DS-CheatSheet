@@ -14,8 +14,13 @@
     path: { fill: '#5c6bc0', stroke: '#7c9cff', text: '#fff' }
   };
   var ECOL = { def: '#4a5580', active: '#57e0c0', heavy: '#a78bfa' };
-  var ROT_SUBSTEPS = 6;
+  var ROT_SUBSTEPS = 20;
+  var ROT_GEOM_PHASE = 0.62;
   var ROW_DY = 68;
+
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
 
   /* ── AVL tree ── */
   function avlNode(key, left, right) {
@@ -158,30 +163,31 @@
 
   function avlBuildPivotFrame(before, geomTargets, after, hi, t, desc, panel) {
     var roles = hi.animRoles;
-    var ease = t * (2 - t);
+    var ease = easeInOutCubic(Math.min(1, Math.max(0, t)));
     var nodes = [], keys = {};
     Object.keys(before.pos).forEach(function (k) { keys[k] = true; });
     Object.keys(after.pos).forEach(function (k) { keys[k] = true; });
 
-    function isMoving(ki) {
-      if (!roles) return false;
-      return roles.pivot === ki || roles.newroot === ki || (roles.rotate && roles.rotate[ki]);
-    }
-
     Object.keys(keys).forEach(function (k) {
       var ki = parseInt(k, 10);
       var b = before.pos[k];
+      var a = after.pos[k];
       if (!b) return;
       var x, y;
-      if (t >= 1 && after.pos[k]) {
-        x = after.pos[k].x;
-        y = after.pos[k].y;
+      if (!a || t >= 1) {
+        x = a ? a.x : b.x;
+        y = a ? a.y : b.y;
+      } else if (geomTargets[ki] && t < ROT_GEOM_PHASE) {
+        var gt = easeInOutCubic(t / ROT_GEOM_PHASE);
+        x = b.x + (geomTargets[ki].x - b.x) * gt;
+        y = b.y + (geomTargets[ki].y - b.y) * gt;
       } else if (geomTargets[ki]) {
-        x = b.x + (geomTargets[ki].x - b.x) * ease;
-        y = b.y + (geomTargets[ki].y - b.y) * ease;
+        var st = easeInOutCubic((t - ROT_GEOM_PHASE) / (1 - ROT_GEOM_PHASE));
+        x = geomTargets[ki].x + (a.x - geomTargets[ki].x) * st;
+        y = geomTargets[ki].y + (a.y - geomTargets[ki].y) * st;
       } else {
-        x = b.x;
-        y = b.y;
+        x = b.x + (a.x - b.x) * ease;
+        y = b.y + (a.y - b.y) * ease;
       }
       nodes.push({
         id: 'k' + k, label: String(k), x: x, y: y,
@@ -190,8 +196,12 @@
       });
     });
 
-    var edges = t >= 1 ? after.edges : before.edges;
-    return { kind: 'avl', desc: desc, panel: panel || '', nodes: nodes, edges: edges, pivotRing: t > 0 && t < 1 ? before.pos[roles.pivot] : null };
+    var edges = t <= 0 ? before.edges : after.edges;
+    return {
+      kind: 'avl', desc: desc, panel: panel || '', nodes: nodes, edges: edges,
+      pivotRing: t > 0 && t < 1 ? before.pos[roles.pivot] : null,
+      anim: true, animT: t
+    };
   }
 
   function avlPushRotationAnim(frames, rootRef, baseHi, applyRotate, meta) {
@@ -866,6 +876,25 @@
       svg.appendChild(t);
       return;
     }
+    var ringLayer = document.createElementNS(SVGNS, 'g');
+    ringLayer.setAttribute('data-layer', 'ring');
+    svg.appendChild(ringLayer);
+    var edgeLayer = document.createElementNS(SVGNS, 'g');
+    edgeLayer.setAttribute('data-layer', 'edges');
+    svg.appendChild(edgeLayer);
+    var nodeLayer = document.createElementNS(SVGNS, 'g');
+    nodeLayer.setAttribute('data-layer', 'nodes');
+    svg.appendChild(nodeLayer);
+    paintAvlFrame(svg, fr);
+  }
+
+  function paintAvlFrame(svg, fr) {
+    var ringLayer = svg.querySelector('[data-layer="ring"]');
+    var edgeLayer = svg.querySelector('[data-layer="edges"]');
+    var nodeLayer = svg.querySelector('[data-layer="nodes"]');
+    if (!ringLayer || !edgeLayer || !nodeLayer) return;
+
+    while (ringLayer.firstChild) ringLayer.removeChild(ringLayer.firstChild);
     if (fr.pivotRing) {
       var ring = document.createElementNS(SVGNS, 'circle');
       ring.setAttribute('cx', fr.pivotRing.x);
@@ -876,42 +905,77 @@
       ring.setAttribute('stroke-width', '2.5');
       ring.setAttribute('stroke-dasharray', '6 4');
       ring.setAttribute('opacity', '0.85');
-      svg.appendChild(ring);
+      ringLayer.appendChild(ring);
     }
+
     var nm = nodeMap(fr.nodes);
-    fr.edges.forEach(function (e) {
+    var edgeSig = fr.edges.map(function (e) { return e[0] + '-' + e[1]; }).join('|');
+    if (edgeLayer.getAttribute('data-sig') !== edgeSig) {
+      while (edgeLayer.firstChild) edgeLayer.removeChild(edgeLayer.firstChild);
+      fr.edges.forEach(function (e, i) {
+        var ln = document.createElementNS(SVGNS, 'line');
+        ln.setAttribute('data-edge', String(i));
+        edgeLayer.appendChild(ln);
+      });
+      edgeLayer.setAttribute('data-sig', edgeSig);
+    }
+    fr.edges.forEach(function (e, i) {
       var a = nm[e[0]], b = nm[e[1]];
-      if (!a || !b) return;
+      var ln = edgeLayer.querySelector('[data-edge="' + i + '"]');
+      if (!a || !b || !ln) return;
       var heavy = a.role === 'heavy' || b.role === 'heavy' || a.role === 'pivot' || b.role === 'pivot' ||
         a.role === 'subtree' || b.role === 'subtree' || a.role === 'newroot' || b.role === 'newroot';
-      var ln = document.createElementNS(SVGNS, 'line');
       ln.setAttribute('x1', a.x); ln.setAttribute('y1', a.y + 18);
       ln.setAttribute('x2', b.x); ln.setAttribute('y2', b.y - 18);
       ln.setAttribute('stroke', heavy ? ECOL.heavy : ECOL.def);
       ln.setAttribute('stroke-width', heavy ? '2.5' : '2');
-      svg.appendChild(ln);
     });
+
     fr.nodes.forEach(function (n) {
+      var g = nodeLayer.querySelector('[data-node="' + n.id + '"]');
       var col = NCOL[n.role] || NCOL.normal;
-      var g = document.createElementNS(SVGNS, 'g');
-      var c = document.createElementNS(SVGNS, 'circle');
-      c.setAttribute('cx', n.x); c.setAttribute('cy', n.y); c.setAttribute('r', '18');
-      c.setAttribute('fill', col.fill); c.setAttribute('stroke', col.stroke); c.setAttribute('stroke-width', '2');
-      g.appendChild(c);
-      var t = document.createElementNS(SVGNS, 'text');
-      t.setAttribute('x', n.x); t.setAttribute('y', n.y + 5);
-      t.setAttribute('text-anchor', 'middle'); t.setAttribute('fill', col.text);
-      t.setAttribute('font-size', '14'); t.setAttribute('font-weight', '700'); t.setAttribute('font-family', FONT);
-      t.textContent = n.label;
-      g.appendChild(t);
-      if (n.bf) {
+      if (!g) {
+        g = document.createElementNS(SVGNS, 'g');
+        g.setAttribute('data-node', n.id);
+        var c = document.createElementNS(SVGNS, 'circle');
+        c.setAttribute('r', '18');
+        c.setAttribute('stroke-width', '2');
+        g.appendChild(c);
+        var t = document.createElementNS(SVGNS, 'text');
+        t.setAttribute('text-anchor', 'middle');
+        t.setAttribute('font-size', '14');
+        t.setAttribute('font-weight', '700');
+        t.setAttribute('font-family', FONT);
+        t.textContent = n.label;
+        g.appendChild(t);
         var bf = document.createElementNS(SVGNS, 'text');
-        bf.setAttribute('x', n.x + 22); bf.setAttribute('y', n.y - 14);
-        bf.setAttribute('fill', '#ff6b81'); bf.setAttribute('font-size', '11'); bf.setAttribute('font-weight', '700');
-        bf.textContent = 'bf' + n.bf;
+        bf.setAttribute('data-bf', '1');
+        bf.setAttribute('font-size', '11');
+        bf.setAttribute('font-weight', '700');
         g.appendChild(bf);
+        nodeLayer.appendChild(g);
       }
-      svg.appendChild(g);
+      var c = g.querySelector('circle');
+      var t = g.querySelector('text:not([data-bf])');
+      var bf = g.querySelector('[data-bf]');
+      c.setAttribute('cx', n.x); c.setAttribute('cy', n.y);
+      c.setAttribute('fill', col.fill); c.setAttribute('stroke', col.stroke);
+      t.setAttribute('x', n.x); t.setAttribute('y', n.y + 5);
+      t.setAttribute('fill', col.text);
+      if (n.bf) {
+        bf.setAttribute('x', n.x + 22); bf.setAttribute('y', n.y - 14);
+        bf.setAttribute('fill', '#ff6b81'); bf.textContent = 'bf' + n.bf;
+        bf.setAttribute('display', 'inline');
+      } else if (bf) {
+        bf.textContent = '';
+        bf.setAttribute('display', 'none');
+      }
+    });
+
+    var liveIds = {};
+    fr.nodes.forEach(function (n) { liveIds[n.id] = true; });
+    nodeLayer.querySelectorAll('[data-node]').forEach(function (g) {
+      if (!liveIds[g.getAttribute('data-node')]) g.remove();
     });
   }
 
@@ -982,6 +1046,43 @@
     var panY = 0;
     var autoFit = true;
     var initKeys = kind === 'avl' ? [30, 20, 40, 10] : [20, 40, 10, 30, 50];
+    var stableBounds = null;
+    var liveSvg = null;
+    var rafId = null;
+    var accum = 0;
+    var lastTs = 0;
+
+    function frameDuration(fr) {
+      var speedVal = parseInt($('.viz-speed').value, 10) || 1600;
+      if (fr && fr.anim) {
+        return Math.max(14, 42 - speedVal * 0.018);
+      }
+      return Math.max(60, 900 - speedVal * 0.45);
+    }
+
+    function applyFrameView(svg, fr) {
+      var bounds = playing && stableBounds ? stableBounds : frameBounds(fr);
+      if (autoFit && !playing) {
+        zoom = 1;
+        panX = 0;
+        panY = 0;
+      }
+      applyTreeView(svg, bounds, zoom, panX, panY);
+      var aspect = bounds.h / Math.max(bounds.w, 1);
+      var displayH = Math.min(480, Math.max(200, stage.clientWidth * aspect));
+      svg.setAttribute('height', String(Math.round(displayH)));
+    }
+
+    function updateFrameMeta(fr) {
+      var descEl = $('.viz-desc');
+      var panelEl = $('.viz-panel');
+      var stepEl = $('.viz-step');
+      var totalEl = $('.viz-total');
+      if (descEl) descEl.innerHTML = fr.desc;
+      if (panelEl) panelEl.innerHTML = fr.panel;
+      if (stepEl) stepEl.textContent = idx;
+      if (totalEl) totalEl.textContent = Math.max(0, frames.length - 1);
+    }
 
     function ensureZoomControls() {
       var ctrl = wrap.querySelector('.viz-controls');
@@ -995,99 +1096,110 @@
       lbl.querySelector('.viz-zoom-in').onclick = function () {
         autoFit = false;
         zoom = Math.min(4, zoom * 1.3);
-        render();
+        render(true);
       };
       lbl.querySelector('.viz-zoom-out').onclick = function () {
         autoFit = false;
         zoom = Math.max(0.4, zoom / 1.3);
-        render();
+        render(true);
       };
       lbl.querySelector('.viz-zoom-fit').onclick = function () {
         autoFit = true;
         zoom = 1;
         panX = 0;
         panY = 0;
-        render();
+        render(true);
       };
     }
 
-    function render() {
+    function render(forceRebuild) {
       if (!frames.length) {
         frames = [kind === 'avl'
           ? avlFrame('Enter a key and click <b>Insert</b> or <b>Delete</b>.', tree, {})
           : btFrame('Enter a key and click <b>Insert</b> or <b>Delete</b>. (t = 2)', tree, {})];
       }
       var fr = frames[Math.min(idx, frames.length - 1)];
+      var canPatch = !forceRebuild && playing && liveSvg && fr.kind === 'avl' && fr.nodes.length;
+      if (canPatch) {
+        paintAvlFrame(liveSvg, fr);
+        applyFrameView(liveSvg, fr);
+        updateFrameMeta(fr);
+        return;
+      }
       stage.innerHTML = '';
+      liveSvg = null;
       var svg = document.createElementNS(SVGNS, 'svg');
       svg.setAttribute('width', '100%');
       svg.classList.add('tree-viz-svg');
       if (fr.kind === 'avl') drawAvlFrame(svg, fr);
       else drawBtreeFrame(svg, fr);
-      var bounds = frameBounds(fr);
-      if (autoFit) {
-        zoom = 1;
-        panX = 0;
-        panY = 0;
-      }
-      applyTreeView(svg, bounds, zoom, panX, panY);
-      var aspect = bounds.h / Math.max(bounds.w, 1);
-      var displayH = Math.min(480, Math.max(200, stage.clientWidth * aspect));
-      svg.setAttribute('height', String(Math.round(displayH)));
+      applyFrameView(svg, fr);
       stage.appendChild(svg);
-      var descEl = $('.viz-desc');
-      var panelEl = $('.viz-panel');
-      var stepEl = $('.viz-step');
-      var totalEl = $('.viz-total');
-      if (descEl) descEl.innerHTML = fr.desc;
-      if (panelEl) panelEl.innerHTML = fr.panel;
-      if (stepEl) stepEl.textContent = idx;
-      if (totalEl) totalEl.textContent = Math.max(0, frames.length - 1);
+      liveSvg = fr.kind === 'avl' ? svg : null;
+      updateFrameMeta(fr);
     }
 
     function stop() {
       playing = false;
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
       if (timer) { clearInterval(timer); timer = null; }
+      accum = 0;
+      lastTs = 0;
+      stableBounds = null;
       var btn = $('.viz-play');
       if (btn) btn.textContent = '\u25B6 Play';
+      if (autoFit) render(true);
     }
 
     function step(dir) {
       stop();
       idx = Math.min(frames.length - 1, Math.max(0, idx + dir));
-      render();
+      render(true);
     }
 
-    function playToEnd() {
+    function tick(ts) {
+      if (!playing) return;
+      if (!lastTs) lastTs = ts;
+      accum += ts - lastTs;
+      lastTs = ts;
+      var fr = frames[Math.min(idx, frames.length - 1)];
+      var dur = frameDuration(fr);
+      var advanced = false;
+      while (accum >= dur && idx < frames.length - 1) {
+        accum -= dur;
+        idx++;
+        advanced = true;
+      }
+      if (advanced) render(false);
+      if (idx >= frames.length - 1) {
+        stop();
+        return;
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function startPlayback() {
       if (frames.length <= 1) return;
       if (idx >= frames.length - 1) return;
       playing = true;
+      stableBounds = frameBounds(frames[idx]);
+      accum = 0;
+      lastTs = 0;
       var btn = $('.viz-play');
       if (btn) btn.textContent = '\u23F8 Pause';
-      var speed = 900 - parseInt($('.viz-speed').value, 10) * 0.45;
-      if (speed < 80) speed = 80;
-      if (timer) clearInterval(timer);
-      timer = setInterval(function () {
-        if (idx >= frames.length - 1) {
-          stop();
-          return;
-        }
-        idx++;
-        render();
-      }, speed);
+      if (rafId) cancelAnimationFrame(rafId);
+      render(false);
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function playToEnd() {
+      startPlayback();
     }
 
     function play() {
       if (playing) { stop(); return; }
-      if (idx >= frames.length - 1) { idx = 0; render(); }
-      playing = true;
-      $('.viz-play').textContent = '\u23F8 Pause';
-      var speed = 900 - parseInt($('.viz-speed').value, 10) * 0.45;
-      if (speed < 80) speed = 80;
-      timer = setInterval(function () {
-        if (idx >= frames.length - 1) { stop(); return; }
-        idx++; render();
-      }, speed);
+      if (idx >= frames.length - 1) { idx = 0; render(true); }
+      startPlayback();
     }
 
     function parseKey() {
@@ -1104,7 +1216,7 @@
           : btFrame('Enter a valid key (1–99).', tree, {})];
         idx = 0;
         stop();
-        render();
+        render(true);
         return;
       }
       frames = [];
@@ -1119,7 +1231,7 @@
       zoom = 1;
       panX = 0;
       panY = 0;
-      render();
+      render(true);
       if (kind === 'avl') playToEnd();
     }
 
@@ -1141,7 +1253,7 @@
       zoom = 1;
       panX = 0;
       panY = 0;
-      render();
+      render(true);
     }
 
     $('.viz-insert').onclick = function () { runOp('insert'); };
@@ -1160,7 +1272,7 @@
       e.preventDefault();
       autoFit = false;
       zoom = Math.max(0.4, Math.min(4, zoom * (e.deltaY < 0 ? 1.12 : 1 / 1.12)));
-      render();
+      render(true);
     }, { passive: false });
 
     ensureZoomControls();

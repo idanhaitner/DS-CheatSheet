@@ -1015,6 +1015,10 @@ hr { border: none; border-top: 1px solid var(--line); margin: 24px 0; }
   display: block;
   min-height: 200px;
 }
+.tree-viz-wrap .tree-viz-svg circle,
+.tree-viz-wrap .tree-viz-svg line {
+  shape-rendering: geometricPrecision;
+}
 .viz-zoom-label { display: inline-flex; align-items: center; gap: 4px; }
 .viz-zoom-label .viz-btn { min-width: 36px; padding: 8px 10px; }
 .graph-stage {
