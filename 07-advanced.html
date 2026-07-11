@@ -149,32 +149,6 @@
     <div class="note">Amortized cost per insert/delete = <span class="tag b-O1">O(1)</span> for structural ops (tree height still \(O(\log n)\) per search). See <a href="03-trees.html#btree">B-trees</a> for the structure itself.</div>
   </div>
 
-  <h2 class="section" id="bb-tree">7.5 BB[\(\alpha\)] Trees</h2>
-  <div class="card">
-    <p>A <b>BB[\(\alpha\)] tree</b> (\(\alpha < 1/2\)) is a BST where every node \(v\) has <b>bounded balance</b>:</p>
-    <p style="text-align:center">\(\text{size}(v.\text{left}) \ge \lfloor \alpha \cdot \text{size}(v) \rfloor\) &nbsp;and&nbsp; \(\text{size}(v.\text{right}) \ge \lfloor \alpha \cdot \text{size}(v) \rfloor\)</p>
-    <p>Height bound: \(h \le \log_{1/(1-\alpha)} |T|\). For \(\alpha = 1/3\): \(h \le \log_{3/2} n = O(\log n)\).</p>
-
-    <h4>Insert / Delete</h4>
-    <ol>
-      <li>Insert or delete as in a regular BST.</li>
-      <li>Let \(w\) = highest node that violates bounded balance \(\alpha\).</li>
-      <li>If \(w\) exists → replace the subtree at \(w\) with a <b>perfectly balanced</b> tree on the same keys.</li>
-    </ol>
-    <p>Single operation cost: \(\Theta(\text{height}(T) + \text{size}(w))\) — worst case <span class="tag b-On">Θ(n)</span> when rebalancing a large subtree.</p>
-
-    <h4>Amortized analysis (\(\alpha = 1/3\), inserts only)</h4>
-    <ul>
-      <li>Real cost of insert = \((\text{height}(T)+1) + \text{size}(w)\).</li>
-      <li>Charge per insert = <b>\(4(\text{height}(T)+1)\)</b>.</li>
-      <li>Pay \(\text{height}(T)+1\) from the charge for the BST walk.</li>
-      <li>Deposit <b>3 dollars</b> at each internal node on the root-to-leaf path (≤ \(3(\text{height}(T)+1)\)).</li>
-      <li>When \(w\) is rebalanced (subtree size \(M\)): at least \(M/3\) inserts happened into \(w\)'s subtree since last rebalance, each adding 3 dollars → \(w\) holds ≥ \(M\) dollars to pay for rebuilding.</li>
-    </ul>
-    <p>Charge \(4(\text{height}(T)+1) \in O(\log n)\) ⟹ \(n\) insertions cost <span class="tag b-Onlog">O(n log n)</span> total, <span class="tag b-Olog">O(log n)</span> amortized per insert — despite \(\Theta(n)\) worst-case single rebalance.</p>
-    <div class="pitfall"><b>BB[\(\alpha\)] vs AVL:</b> both rebalance, but BB[\(\alpha\)] may rebuild an entire subtree (expensive single op, cheap amortized). AVL does local rotations (O(1) per rotation, O(log n) per insert worst-case).</div>
-  </div>
-
   </div>
 </main>
 </div>
