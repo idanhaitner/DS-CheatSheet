@@ -31,8 +31,9 @@
   function avlBf(n) { return n ? avlH(n.left) - avlH(n.right) : 0; }
 
   function avlImbalanceBadge(n) {
-    if (Math.abs(avlBf(n)) <= 1) return null;
-    return avlH(n.left) + ' vs ' + avlH(n.right);
+    var bf = avlBf(n);
+    if (Math.abs(bf) <= 1) return null;
+    return '|h(L)\u2212h(R)| = ' + Math.abs(bf);
   }
 
   function avlUpdateH(n) {
@@ -484,7 +485,7 @@
             frames.push(avlFrame(
               'Insert <b>' + key + '</b> at leaf (path: ' + path.join(' → ') + ').',
               rootRef[0], { inserted: key, path: path.slice(), showBf: true },
-              deferBalance ? 'Press <b>Balance Tree</b> when a node shows red <b>L vs R</b> heights differing by 2+.' : 'Walk back up and rebalance if needed.'));
+              deferBalance ? 'Press <b>Balance Tree</b> when a node shows <b>|h(L)\u2212h(R)| &gt; 1</b>.' : 'Walk back up and rebalance if needed.'));
           }
         } else {
           n.left = insert(n.left);
@@ -496,7 +497,7 @@
             frames.push(avlFrame(
               'Insert <b>' + key + '</b> at leaf (path: ' + path.join(' → ') + ').',
               rootRef[0], { inserted: key, path: path.slice(), showBf: true },
-              deferBalance ? 'Press <b>Balance Tree</b> when a node shows red <b>L vs R</b> heights differing by 2+.' : 'Walk back up and rebalance if needed.'));
+              deferBalance ? 'Press <b>Balance Tree</b> when a node shows <b>|h(L)\u2212h(R)| &gt; 1</b>.' : 'Walk back up and rebalance if needed.'));
           }
         } else {
           n.right = insert(n.right);
@@ -1368,7 +1369,7 @@
             (op === 'insert' ? 'Insert' : 'Delete') + ' <b>' + key + '</b> done.',
             tree,
             op === 'insert' ? { inserted: key, showBf: true } : { deleted: key, showBf: true },
-            'Press <b>Balance Tree</b> when red <b>L vs R</b> heights differ by 2+.')]);
+            'Press <b>Balance Tree</b> when <b>|h(L)\u2212h(R)| &gt; 1</b>.')]);
         }
       } else {
         if (op === 'insert') tree = btInsert(tree, key, steps);

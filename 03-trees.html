@@ -187,7 +187,7 @@
     <div class="note"><b>Mnemonic:</b> the rotation is the <b>opposite</b> of the heavy side. Right-heavy → rotate left; left-heavy → rotate right. Double cases first rotate the child to reduce to a single case.</div>
 
     <h4>Interactive animator</h4>
-    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Insert or delete a key — the node is added/removed <b>without</b> auto-rebalancing. Press <b>Balance Tree</b> when red <b>L vs R</b> heights differ by 2+. Use <b>Fit</b> / <b>+/−</b> or Ctrl+scroll to zoom. <span style="color:#ff6b81"><b>Red L vs R</b></span> = left/right subtree heights · <span style="color:#ff6b81"><b>Red</b></span> = pivot · <span style="color:#a78bfa"><b>Purple</b></span> = rotating subtree · <span style="color:#57e0c0"><b>Teal</b></span> = promoted root · <span style="color:#7c4dff"><b>Violet</b></span> = inserted / deleted.</p>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Insert or delete a key — the node is added/removed <b>without</b> auto-rebalancing. Press <b>Balance Tree</b> when <b>|h(L)−h(R)| &gt; 1</b>. Use <b>Fit</b> / <b>+/−</b> or Ctrl+scroll to zoom. <span style="color:#ff6b81"><b>Red</b></span> = pivot · <span style="color:#a78bfa"><b>Purple</b></span> = rotating subtree · <span style="color:#57e0c0"><b>Teal</b></span> = promoted root · <span style="color:#7c4dff"><b>Violet</b></span> = inserted / deleted.</p>
     <div class="tree-viz-wrap avl-viz-wrap">
       <div class="viz-controls">
         <label>Key: <input type="number" class="viz-key" min="1" max="99" value="25" style="width:56px"></label>
@@ -244,6 +244,6 @@
   </div>
 </main>
 </div>
-<script src="assets/trees.js?v=20260711f" defer></script>
+<script src="assets/trees.js?v=20260711g" defer></script>
 </body>
 </html>
