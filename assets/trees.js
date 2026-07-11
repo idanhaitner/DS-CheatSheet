@@ -30,6 +30,26 @@
   function avlH(n) { return n ? n.h : 0; }
   function avlBf(n) { return n ? avlH(n.left) - avlH(n.right) : 0; }
 
+  function avlImbalanceBadge(n) {
+    var bf = avlBf(n);
+    if (Math.abs(bf) <= 1) return null;
+    var hL = avlH(n.left);
+    var hR = avlH(n.right);
+    var delta = Math.abs(bf);
+    if (bf > 0) {
+      return {
+        tag: '\u2190 left +' + delta,
+        detail: hL + ' vs ' + hR,
+        tip: 'Left subtree is ' + delta + ' level(s) taller. Balance factor = h(left) \u2212 h(right) = +' + bf + '.'
+      };
+    }
+    return {
+      tag: 'right +' + delta + ' \u2192',
+      detail: hL + ' vs ' + hR,
+      tip: 'Right subtree is ' + delta + ' level(s) taller. Balance factor = h(left) \u2212 h(right) = ' + bf + '.'
+    };
+  }
+
   function avlUpdateH(n) {
     n.h = 1 + Math.max(avlH(n.left), avlH(n.right));
   }
@@ -428,10 +448,10 @@
       var x = leafX * spacing;
       leafX++;
       var bf = avlBf(n);
-      var bfStr = Math.abs(bf) > 1 ? (bf > 0 ? '+' + bf : String(bf)) : null;
+      var bfBadge = hi.showBf ? avlImbalanceBadge(n) : null;
       nodes.push({
         id: id, label: String(n.key), x: x, y: depth * rowDy + 40,
-        role: role(n.key), bf: hi.showBf && bfStr ? bfStr : null
+        role: role(n.key), bf: bfBadge
       });
       if (parentId) edges.push([parentId, id]);
       recur(n.right, depth + 1, id);
@@ -479,7 +499,7 @@
             frames.push(avlFrame(
               'Insert <b>' + key + '</b> at leaf (path: ' + path.join(' → ') + ').',
               rootRef[0], { inserted: key, path: path.slice(), showBf: true },
-              deferBalance ? 'Press <b>Balance Tree</b> to rebalance if |bf| &gt; 1.' : 'Walk back up and rebalance if needed.'));
+              deferBalance ? 'Press <b>Balance Tree</b> when a node shows a red imbalance badge (left/right taller by 2+).' : 'Walk back up and rebalance if needed.'));
           }
         } else {
           n.left = insert(n.left);
@@ -491,7 +511,7 @@
             frames.push(avlFrame(
               'Insert <b>' + key + '</b> at leaf (path: ' + path.join(' → ') + ').',
               rootRef[0], { inserted: key, path: path.slice(), showBf: true },
-              deferBalance ? 'Press <b>Balance Tree</b> to rebalance if |bf| &gt; 1.' : 'Walk back up and rebalance if needed.'));
+              deferBalance ? 'Press <b>Balance Tree</b> when a node shows a red imbalance badge (left/right taller by 2+).' : 'Walk back up and rebalance if needed.'));
           }
         } else {
           n.right = insert(n.right);
@@ -556,7 +576,7 @@
         'Checking balance…',
         rootRef[0],
         Object.assign({ showBf: true }, baseHi),
-        'Rotations run where |bf| &gt; 1.'));
+        'Rotations run where one side is 2+ levels taller.'));
     }
     rootRef[0] = balance(rootRef[0]);
     if (frames) {
@@ -564,12 +584,12 @@
         frames[startLen] = avlFrame(
           'Tree is already balanced.',
           rootRef[0], { showBf: true },
-          'All |bf| ≤ 1 — no rotation needed.');
+          'All sides within 1 level — no rotation needed.');
       } else {
         frames.push(avlFrame(
           'Tree balanced.',
           rootRef[0], { showBf: true },
-          'All |bf| ≤ 1.'));
+          'All sides within 1 level.'));
       }
     }
     return rootRef[0];
@@ -1053,28 +1073,67 @@
         t.setAttribute('font-family', FONT);
         t.textContent = n.label;
         g.appendChild(t);
-        var bf = document.createElementNS(SVGNS, 'text');
-        bf.setAttribute('data-bf', '1');
-        bf.setAttribute('font-size', '11');
-        bf.setAttribute('font-weight', '700');
-        g.appendChild(bf);
+        var bfBadge = document.createElementNS(SVGNS, 'g');
+        bfBadge.setAttribute('data-bf-badge', '1');
+        bfBadge.setAttribute('display', 'none');
+        var bfBg = document.createElementNS(SVGNS, 'rect');
+        bfBg.setAttribute('data-bf-bg', '1');
+        bfBg.setAttribute('rx', '5');
+        bfBg.setAttribute('fill', 'rgba(192,83,63,0.92)');
+        bfBg.setAttribute('stroke', '#ff6b81');
+        bfBg.setAttribute('stroke-width', '1');
+        bfBadge.appendChild(bfBg);
+        var bfTag = document.createElementNS(SVGNS, 'text');
+        bfTag.setAttribute('data-bf-tag', '1');
+        bfTag.setAttribute('text-anchor', 'middle');
+        bfTag.setAttribute('font-size', '10');
+        bfTag.setAttribute('font-weight', '700');
+        bfTag.setAttribute('font-family', FONT);
+        bfTag.setAttribute('fill', '#fff');
+        bfBadge.appendChild(bfTag);
+        var bfDetail = document.createElementNS(SVGNS, 'text');
+        bfDetail.setAttribute('data-bf-detail', '1');
+        bfDetail.setAttribute('text-anchor', 'middle');
+        bfDetail.setAttribute('font-size', '9');
+        bfDetail.setAttribute('font-weight', '600');
+        bfDetail.setAttribute('font-family', FONT);
+        bfDetail.setAttribute('fill', 'rgba(255,255,255,0.88)');
+        bfBadge.appendChild(bfDetail);
+        g.appendChild(bfBadge);
         nodeLayer.appendChild(g);
       }
       var c = g.querySelector('circle');
       var t = g.querySelector('text[data-label]') || g.querySelector('text');
-      var bf = g.querySelector('[data-bf]');
+      var bfBadge = g.querySelector('[data-bf-badge]');
       if (!c || !t) return;
       c.setAttribute('cx', n.x); c.setAttribute('cy', n.y);
       c.setAttribute('fill', col.fill); c.setAttribute('stroke', col.stroke);
       t.setAttribute('x', n.x); t.setAttribute('y', n.y + 5);
       t.setAttribute('fill', col.text);
-      if (n.bf) {
-        bf.setAttribute('x', n.x + 22); bf.setAttribute('y', n.y - 14);
-        bf.setAttribute('fill', '#ff6b81'); bf.textContent = 'bf' + n.bf;
-        bf.setAttribute('display', 'inline');
-      } else if (bf) {
-        bf.textContent = '';
-        bf.setAttribute('display', 'none');
+      if (n.bf && bfBadge) {
+        var tagEl = bfBadge.querySelector('[data-bf-tag]');
+        var detailEl = bfBadge.querySelector('[data-bf-detail]');
+        var bgEl = bfBadge.querySelector('[data-bf-bg]');
+        tagEl.textContent = n.bf.tag;
+        detailEl.textContent = 'heights ' + n.bf.detail;
+        var badgeW = Math.max(72, n.bf.tag.length * 6.2 + 14);
+        bgEl.setAttribute('x', String(n.x - badgeW / 2));
+        bgEl.setAttribute('y', String(n.y - 46));
+        bgEl.setAttribute('width', String(badgeW));
+        bgEl.setAttribute('height', '28');
+        tagEl.setAttribute('x', n.x);
+        tagEl.setAttribute('y', n.y - 33);
+        detailEl.setAttribute('x', n.x);
+        detailEl.setAttribute('y', n.y - 22);
+        bfBadge.setAttribute('display', 'inline');
+        var tip = document.createElementNS(SVGNS, 'title');
+        tip.textContent = n.bf.tip;
+        while (bfBadge.firstChild && bfBadge.firstChild.tagName === 'title') {
+          bfBadge.removeChild(bfBadge.firstChild);
+        }
+        bfBadge.insertBefore(tip, bfBadge.firstChild);
+      } else if (bfBadge) {
+        bfBadge.setAttribute('display', 'none');
       }
     });
 
@@ -1359,7 +1418,7 @@
             (op === 'insert' ? 'Insert' : 'Delete') + ' <b>' + key + '</b> done.',
             tree,
             op === 'insert' ? { inserted: key, showBf: true } : { deleted: key, showBf: true },
-            'Press <b>Balance Tree</b> to rebalance if |bf| &gt; 1.')]);
+            'Press <b>Balance Tree</b> when a node shows a red imbalance badge (left/right taller by 2+).')]);
         }
       } else {
         if (op === 'insert') tree = btInsert(tree, key, steps);
