@@ -233,7 +233,7 @@
     var before = avlSnapshotPositions(rootRef[0], baseHi);
     var geomTargets = avlGeomTargets(meta.pivotNode, meta.dir, before.pos);
     var rotated = applyRotate();
-    avlApplyRotationToTree(rootRef, meta.roles, rotated);
+    if (!meta.skipApply) avlApplyRotationToTree(rootRef, meta.roles, rotated);
     var afterHi = Object.assign({}, baseHi, {
       pivot: meta.roles.pivot, newroot: meta.roles.newroot, showBf: true
     });
@@ -267,12 +267,14 @@
         if (frames) {
           var lrChild = n.left;
           avlPushRotationAnim(frames, rootRef, baseHi, function () {
-            n.left = avlRotateLeft(n.left, hi);
-            return rootRef[0];
+            var newLeft = avlRotateLeft(n.left, hi);
+            n.left = newLeft;
+            return newLeft;
           }, {
             roles: avlRotateRolesLeft(lrChild),
             pivotNode: lrChild,
             dir: 'left',
+            skipApply: true,
             descBase: 'LR (1/2): left-rotate child <b>' + lrChild.key + '</b>',
             panel: hi.panel
           });
@@ -312,12 +314,14 @@
         if (frames) {
           var rlChild = n.right;
           avlPushRotationAnim(frames, rootRef, baseHi, function () {
-            n.right = avlRotateRight(n.right, hi);
-            return rootRef[0];
+            var newRight = avlRotateRight(n.right, hi);
+            n.right = newRight;
+            return newRight;
           }, {
             roles: avlRotateRolesRight(rlChild),
             pivotNode: rlChild,
             dir: 'right',
+            skipApply: true,
             descBase: 'RL (1/2): right-rotate child <b>' + rlChild.key + '</b>',
             panel: hi.panel
           });
@@ -1310,7 +1314,6 @@
     }
 
     function balanceTree() {
-      if (playing) { haltPlayback(); return; }
       haltPlayback();
       var steps = [];
       tree = avlBalanceTree(tree, steps, { showBf: true });
