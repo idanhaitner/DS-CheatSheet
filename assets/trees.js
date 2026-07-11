@@ -450,16 +450,18 @@
     return { kind: 'avl', desc: desc, panel: panel || '', nodes: lay.nodes, edges: lay.edges };
   }
 
-  function avlInsert(root, key, frames) {
+  function avlInsert(root, key, frames, deferBalance) {
     var rootRef = [root];
     var path = [];
 
     if (!rootRef[0]) {
       rootRef[0] = avlNode(key);
-      frames.push(avlFrame(
-        'Insert <b>' + key + '</b> as root.',
-        rootRef[0], { inserted: key },
-        'Tree was empty.'));
+      if (frames) {
+        frames.push(avlFrame(
+          'Insert <b>' + key + '</b> as root.',
+          rootRef[0], { inserted: key },
+          'Tree was empty.'));
+      }
       return rootRef[0];
     }
 
@@ -469,40 +471,48 @@
       if (key < n.key) {
         if (!n.left) {
           n.left = avlNode(key);
-          frames.push(avlFrame(
-            'Insert <b>' + key + '</b> at leaf (path: ' + path.join(' → ') + ').',
-            rootRef[0], { inserted: key, path: path.slice() },
-            'Walk back up and rebalance if needed.'));
+          if (frames) {
+            frames.push(avlFrame(
+              'Insert <b>' + key + '</b> at leaf (path: ' + path.join(' → ') + ').',
+              rootRef[0], { inserted: key, path: path.slice(), showBf: true },
+              deferBalance ? 'Press <b>Balance Tree</b> to rebalance if |bf| &gt; 1.' : 'Walk back up and rebalance if needed.'));
+          }
         } else {
           n.left = insert(n.left);
         }
       } else if (key > n.key) {
         if (!n.right) {
           n.right = avlNode(key);
-          frames.push(avlFrame(
-            'Insert <b>' + key + '</b> at leaf (path: ' + path.join(' → ') + ').',
-            rootRef[0], { inserted: key, path: path.slice() },
-            'Walk back up and rebalance if needed.'));
+          if (frames) {
+            frames.push(avlFrame(
+              'Insert <b>' + key + '</b> at leaf (path: ' + path.join(' → ') + ').',
+              rootRef[0], { inserted: key, path: path.slice(), showBf: true },
+              deferBalance ? 'Press <b>Balance Tree</b> to rebalance if |bf| &gt; 1.' : 'Walk back up and rebalance if needed.'));
+          }
         } else {
           n.right = insert(n.right);
         }
       } else {
-        frames.push(avlFrame('<b>' + key + '</b> already in tree.', rootRef[0], { path: path.slice() }));
+        if (frames) {
+          frames.push(avlFrame('<b>' + key + '</b> already in tree.', rootRef[0], { path: path.slice() }));
+        }
         path.pop();
         return n;
       }
 
       avlUpdateH(n);
-      var bf = avlBf(n);
-      if (Math.abs(bf) > 1) {
-        var hi = { showBf: true };
-        var rotated = avlRebalance(n, hi, {
-          frames: frames,
-          rootRef: rootRef,
-          baseHi: { path: path.slice(), pivot: n.key, showBf: true, inserted: key }
-        });
-        path.pop();
-        return rotated;
+      if (!deferBalance) {
+        var bf = avlBf(n);
+        if (Math.abs(bf) > 1) {
+          var hi = { showBf: true };
+          var rotated = avlRebalance(n, hi, {
+            frames: frames,
+            rootRef: rootRef,
+            baseHi: { path: path.slice(), pivot: n.key, showBf: true, inserted: key }
+          });
+          path.pop();
+          return rotated;
+        }
       }
       path.pop();
       return n;
@@ -512,12 +522,61 @@
     return rootRef[0];
   }
 
+  function avlBalanceTree(root, frames, baseHi) {
+    baseHi = baseHi || {};
+    var rootRef = [root];
+    if (!rootRef[0]) {
+      if (frames) frames.push(avlFrame('Empty tree.', null, {}));
+      return null;
+    }
+    var startLen = frames ? frames.length : 0;
+
+    function balance(n) {
+      if (!n) return null;
+      n.left = balance(n.left);
+      n.right = balance(n.right);
+      avlUpdateH(n);
+      if (Math.abs(avlBf(n)) > 1) {
+        var hi = { showBf: true };
+        return avlRebalance(n, hi, {
+          frames: frames,
+          rootRef: rootRef,
+          baseHi: baseHi
+        });
+      }
+      return n;
+    }
+
+    if (frames) {
+      frames.push(avlFrame(
+        'Checking balance…',
+        rootRef[0],
+        Object.assign({ showBf: true }, baseHi),
+        'Rotations run where |bf| &gt; 1.'));
+    }
+    rootRef[0] = balance(rootRef[0]);
+    if (frames) {
+      if (frames.length === startLen + 1) {
+        frames[startLen] = avlFrame(
+          'Tree is already balanced.',
+          rootRef[0], { showBf: true },
+          'All |bf| ≤ 1 — no rotation needed.');
+      } else {
+        frames.push(avlFrame(
+          'Tree balanced.',
+          rootRef[0], { showBf: true },
+          'All |bf| ≤ 1.'));
+      }
+    }
+    return rootRef[0];
+  }
+
   function avlMin(n) {
     while (n.left) n = n.left;
     return n;
   }
 
-  function avlDelete(root, key, frames) {
+  function avlDelete(root, key, frames, deferBalance) {
     if (!root) {
       frames.push(avlFrame('Tree is empty — nothing to delete.', null, {}));
       return null;
@@ -528,6 +587,7 @@
     function rebalanceNode(n) {
       if (!n) return null;
       avlUpdateH(n);
+      if (deferBalance) return n;
       var bf = avlBf(n);
       if (Math.abs(bf) <= 1) return n;
       var hi = { showBf: true };
@@ -1179,6 +1239,8 @@
       updateFrameMeta(fr);
     }
 
+    var playBtnLabel = kind === 'avl' ? 'Balance Tree' : '\u25B6 Play';
+
     function haltPlayback() {
       playing = false;
       if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
@@ -1188,7 +1250,7 @@
       stableBounds = null;
       liveSvg = null;
       var btn = $('.viz-play');
-      if (btn) btn.textContent = '\u25B6 Play';
+      if (btn) btn.textContent = playBtnLabel;
     }
 
     function stop() {
@@ -1242,10 +1304,29 @@
     }
 
     function play() {
+      if (kind === 'avl') {
+        balanceTree();
+        return;
+      }
       if (playing) { haltPlayback(); return; }
       idx = 0;
       render(true);
       startPlayback();
+    }
+
+    function balanceTree() {
+      if (playing) { haltPlayback(); return; }
+      haltPlayback();
+      frames = [];
+      tree = avlBalanceTree(tree, frames, { showBf: true });
+      idx = 0;
+      autoFit = true;
+      zoom = 1;
+      panX = 0;
+      panY = 0;
+      render(true);
+      if (frames.length > 1) startPlayback();
+      else idx = frames.length - 1;
     }
 
     function parseKey() {
@@ -1267,14 +1348,16 @@
       }
       frames = [];
       if (kind === 'avl') {
-        tree = op === 'insert' ? avlInsert(tree, key, frames) : avlDelete(tree, key, frames);
+        tree = op === 'insert'
+          ? avlInsert(tree, key, frames, true)
+          : avlDelete(tree, key, frames, true);
         var lastDesc = frames.length ? frames[frames.length - 1].desc : '';
         if (lastDesc.indexOf('already') < 0 && lastDesc.indexOf('done') < 0 && lastDesc.indexOf('complete') < 0) {
           frames.push(avlFrame(
             (op === 'insert' ? 'Insert' : 'Delete') + ' <b>' + key + '</b> done.',
             tree,
             op === 'insert' ? { inserted: key, showBf: true } : { deleted: key, showBf: true },
-            'Click <b>Play</b> to replay step-by-step.'));
+            'Press <b>Balance Tree</b> to rebalance if |bf| &gt; 1.'));
         }
       } else {
         tree = op === 'insert' ? btInsert(tree, key, frames) : btDelete(tree, key, frames);
@@ -1298,10 +1381,9 @@
       if (kind === 'avl') {
         tree = null;
         initKeys.forEach(function (k) {
-          var fr = [];
-          tree = avlInsert(tree, k, fr);
+          tree = avlInsert(tree, k, null, false);
         });
-        frames = [avlFrame('Reset to [' + initKeys.join(', ') + ']. Insert or delete a key.', tree, {})];
+        frames = [avlFrame('Reset to [' + initKeys.join(', ') + ']. Insert or delete a key.', tree, { showBf: true })];
       } else {
         tree = btFromKeys(initKeys);
         frames = [btFrame('Reset to keys [' + initKeys.join(', ') + ']. Insert or delete a key. (t = 2)', tree, {})];
@@ -1320,7 +1402,13 @@
     $('.viz-play').onclick = play;
     $('.viz-next').onclick = function () { step(1); };
     $('.viz-prev').onclick = function () { step(-1); };
-    $('.viz-speed').oninput = function () { if (playing) { stop(); play(); } };
+    $('.viz-speed').oninput = function () {
+      if (!playing) return;
+      var at = idx;
+      haltPlayback();
+      idx = at;
+      startPlayback();
+    };
     $('.viz-key').addEventListener('keydown', function (e) {
       if (e.key === 'Enter') runOp(e.shiftKey ? 'delete' : 'insert');
     });
@@ -1334,6 +1422,8 @@
     }, { passive: false });
 
     ensureZoomControls();
+    var playBtn = $('.viz-play');
+    if (playBtn && kind === 'avl') playBtn.textContent = 'Balance Tree';
     reset();
   }
 
