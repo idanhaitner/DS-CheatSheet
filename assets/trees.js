@@ -50,6 +50,30 @@
     return y;
   }
 
+  function avlReplaceSubtreeRoot(root, pivotKey, newRoot) {
+    if (!root) return root;
+    if (root.left && root.left.key === pivotKey) {
+      root.left = newRoot;
+      return root;
+    }
+    if (root.right && root.right.key === pivotKey) {
+      root.right = newRoot;
+      return root;
+    }
+    if (root.left) avlReplaceSubtreeRoot(root.left, pivotKey, newRoot);
+    if (root.right) avlReplaceSubtreeRoot(root.right, pivotKey, newRoot);
+    return root;
+  }
+
+  function avlApplyRotationToTree(rootRef, roles, rotated) {
+    if (!rotated) return;
+    if (rootRef[0] && rootRef[0].key === roles.pivot) {
+      rootRef[0] = rotated;
+    } else if (rotated.key !== roles.pivot) {
+      avlReplaceSubtreeRoot(rootRef[0], roles.pivot, rotated);
+    }
+  }
+
   function avlCollectSubtreeKeys(n) {
     if (!n) return {};
     var o = {};
@@ -172,7 +196,8 @@
       var ki = parseInt(k, 10);
       var b = before.pos[k];
       var a = after.pos[k];
-      if (!b) return;
+      if (!b && !a) return;
+      if (!b) b = a;
       var x, y;
       if (!a || t >= 1) {
         x = a ? a.x : b.x;
@@ -196,7 +221,7 @@
       });
     });
 
-    var edges = t <= 0 ? before.edges : after.edges;
+    var edges = t >= 1 ? after.edges : (t <= 0 ? before.edges : after.edges);
     return {
       kind: 'avl', desc: desc, panel: panel || '', nodes: nodes, edges: edges,
       pivotRing: t > 0 && t < 1 ? before.pos[roles.pivot] : null,
@@ -208,9 +233,7 @@
     var before = avlSnapshotPositions(rootRef[0], baseHi);
     var geomTargets = avlGeomTargets(meta.pivotNode, meta.dir, before.pos);
     var rotated = applyRotate();
-    if (rotated && rootRef[0] && rootRef[0].key === meta.roles.pivot) {
-      rootRef[0] = rotated;
-    }
+    avlApplyRotationToTree(rootRef, meta.roles, rotated);
     var afterHi = Object.assign({}, baseHi, {
       pivot: meta.roles.pivot, newroot: meta.roles.newroot, showBf: true
     });
@@ -271,6 +294,12 @@
           descBase: (isLR ? 'LR (2/2)' : 'LL') + ': right-rotate at <b>' + n.key + '</b>',
           panel: hi.panel
         });
+        frames.push(avlFrame(
+          (isLR ? 'LR' : 'LL') + ' rebalance complete.',
+          rootRef[0],
+          { showBf: true, inserted: baseHi.inserted, deleted: baseHi.deleted, path: baseHi.path },
+          hi.panel
+        ));
         return rotated;
       }
       return avlRotateRight(n, hi);
@@ -310,6 +339,12 @@
           descBase: (isRL ? 'RL (2/2)' : 'RR') + ': left-rotate at <b>' + n.key + '</b>',
           panel: hi.panel
         });
+        frames.push(avlFrame(
+          (isRL ? 'RL' : 'RR') + ' rebalance complete.',
+          rootRef[0],
+          { showBf: true, inserted: baseHi.inserted, deleted: baseHi.deleted, path: baseHi.path },
+          hi.panel
+        ));
         return rotated;
       }
       return avlRotateLeft(n, hi);
@@ -922,7 +957,12 @@
     fr.edges.forEach(function (e, i) {
       var a = nm[e[0]], b = nm[e[1]];
       var ln = edgeLayer.querySelector('[data-edge="' + i + '"]');
-      if (!a || !b || !ln) return;
+      if (!ln) return;
+      if (!a || !b) {
+        ln.setAttribute('display', 'none');
+        return;
+      }
+      ln.setAttribute('display', 'inline');
       var heavy = a.role === 'heavy' || b.role === 'heavy' || a.role === 'pivot' || b.role === 'pivot' ||
         a.role === 'subtree' || b.role === 'subtree' || a.role === 'newroot' || b.role === 'newroot';
       ln.setAttribute('x1', a.x); ln.setAttribute('y1', a.y + 18);
