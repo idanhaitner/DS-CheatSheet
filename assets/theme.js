@@ -31,6 +31,22 @@
     }
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectToggle);
-  else injectToggle();
+  function injectFooter() {
+    if (document.querySelector('.site-footer')) return;
+    var main = document.querySelector('main.content');
+    if (!main) return;
+    var footer = document.createElement('footer');
+    footer.className = 'site-footer';
+    footer.innerHTML = '<p><span class="copy-mark" aria-hidden="true">&copy;</span> ' +
+      new Date().getFullYear() + ' Idan Haitner. All rights reserved.</p>';
+    main.appendChild(footer);
+  }
+
+  function initChrome() {
+    injectToggle();
+    injectFooter();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initChrome);
+  else initChrome();
 })();

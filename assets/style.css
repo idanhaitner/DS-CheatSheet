@@ -1273,6 +1273,21 @@ svg text { font-family: "Segoe UI", sans-serif; }
 [data-theme="light"] .backtop { color: #fff; }
 [data-theme="light"] .backtop:hover { color: #fff; }
 
+.site-footer {
+  margin-top: 48px;
+  padding: 22px 0 12px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+.site-footer p { margin: 0; }
+.site-footer .copy-mark {
+  font-size: 14px;
+  margin-right: 3px;
+}
+
 /* ---------- Quiz ---------- */
 .quiz-launch {
   position: relative;
