@@ -513,7 +513,14 @@
     <h4>Pattern 5: Reduce to edge-in-MST test</h4>
     <p>“Is edge \(e\) in some/every MST?” → build subgraph with only lighter (or lighter-or-equal) edges, run BFS/DFS to check if endpoints are connected without \(e\). See <a href="#mst">§6.5</a>.</p>
 
-    <div class="warn"><b>Always write the reduction explicitly in exams:</b> (1) define \(G'=(V',E')\), (2) state the claim (“path exists in \(G\) ⟺ path exists in \(G'\)”), (3) run known algorithm, (4) analyze total time as O(build) + O(algorithm).</div>
+    <div class="warn"><b>Always write the reduction explicitly in exams:</b>
+      <ul style="margin:8px 0 0">
+        <li>Define \(G'=(V',E')\)</li>
+        <li>State the claim (“path exists in \(G\) ⟺ path exists in \(G'\)”)</li>
+        <li>Run known algorithm</li>
+        <li>Analyze total time as O(build) + O(algorithm)</li>
+      </ul>
+    </div>
   </div>
 
   <h2 class="section" id="graph-exam">6.9 Exam Tips &amp; Conclusions</h2>
