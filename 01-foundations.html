@@ -121,7 +121,9 @@
     </table>
     <div class="note"><b>The key exam technique: indicators + linearity:</b> to count expected occurrences of many events, define an indicator \(X_i\) per event, then \(E[\text{total}]=\sum_i P(\text{event }i)\). This proves randomized quicksort/select bounds and skip-list height \(O(\log n)\).</div>
     <ul>
-      <li><b>Bernoulli(p):</b> \(E[X]=p\). Trials until first success (Geometric): \(E=1/p\) (skip-list level: \(p=\tfrac12\Rightarrow\) expected 2 flips).</li>
+      <li><b>Bernoulli(\(p\)):</b> one trial, success with prob. \(p\). \(E[X]=p\).</li>
+      <li><b>Geometric(\(p\)):</b> #trials until first success. \(E[X]=1/p\). Skip-list: \(p=\tfrac12\Rightarrow E=2\) flips until Heads; node height \(H\) satisfies \(E[H]=1\).</li>
+      <li><b>Binomial(\(n,p\)):</b> #successes in \(n\) independent Bernoulli trials. \(E[X]=np\). Skip-list: \(|S_i|\sim\mathrm{Bin}(n,1/2^i)\Rightarrow E[|S_i|]=n/2^i\).</li>
       <li><b>Uniform over m outcomes:</b> each has probability \(1/m\) (basis of simple uniform hashing).</li>
     </ul>
   </div>

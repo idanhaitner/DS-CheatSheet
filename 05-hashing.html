@@ -154,11 +154,79 @@
 
     <table>
       <tr><th>Operation</th><th>Expected</th><th>Worst</th></tr>
-      <tr><td>Search / Insert / Delete</td><td><span class="tag b-Olog">O(log n)</span></td><td><span class="tag b-On">O(n)</span></td></tr>
-      <tr><td>Space</td><td><span class="tag b-On">O(n)</span></td><td><span class="tag b-Onlog">O(n log n)</span></td></tr>
+      <tr><td>Search / Insert</td><td><span class="tag b-Olog">Θ(log n)</span></td><td><span class="tag b-On">O(n)</span></td></tr>
+      <tr><td>Delete (pointer to node given)</td><td><span class="tag b-O1">Θ(1)</span></td><td><span class="tag b-On">O(n)</span> (tall tower)</td></tr>
+      <tr><td>Min / Max / Succ / Pred</td><td colspan="2"><span class="tag b-O1">Θ(1)</span> worst case (doubly linked + sentinels)</td></tr>
+      <tr><td>Space (all towers)</td><td><span class="tag b-On">Θ(n)</span> (= 2n + O(log n))</td><td><span class="tag b-Onlog">O(n log n)</span> if capped</td></tr>
     </table>
-    <div class="note"><b>Expected</b> bounds are over the random coin flips (not over input order). <b>Worst-case time O(n)</b> happens if every node stays on the bottom level only: the structure becomes a sorted linked list and you scan up to n keys. Yes, the list <b>grows forever</b> as you insert, but we always measure cost in terms of the <b>current n</b>: one operation costs at most Θ(n), not worse (not O(n²) per search).</div>
-    <div class="pitfall"><b>Not unbounded per operation:</b> worst case is O(n), not infinite. What grows without bound is <b>n itself</b> as you keep inserting: so absolute time can get arbitrarily large, but it stays <b>linear in the current size</b>. Real implementations also cap tower height at about O(log n), which keeps space near O(n) in practice.</div>
+    <div class="note"><b>Expected</b> bounds are over the random coin flips (not over input order). <b>Worst-case search O(n)</b> happens if every node stays on the bottom level only: the structure becomes a sorted linked list. Yes, the list <b>grows forever</b> as you insert, but we always measure cost in terms of the <b>current n</b>.</div>
+    <div class="pitfall"><b>Not unbounded per operation:</b> worst case is O(n), not infinite. What grows without bound is <b>n itself</b>. Real implementations often cap tower height at about O(log n).</div>
+
+    <h4 id="sl-expectation">Expectation analysis (from lecture)</h4>
+    <p>Coin model: each node starts at height 0; while the flip is <b>Tails</b>, promote one level; stop on <b>Heads</b>. So promotion probability to the next level is \(1/2\).</p>
+
+    <h5>Distributions you need</h5>
+    <table>
+      <tr><th>Name</th><th>Meaning</th><th>Expectation</th></tr>
+      <tr>
+        <td><b>Bernoulli(\(p\))</b></td>
+        <td>One coin flip: success with prob. \(p\)</td>
+        <td>\(E[X]=p\)</td>
+      </tr>
+      <tr>
+        <td><b>Geometric(\(p\))</b></td>
+        <td>Number of trials until first success (incl. the success)</td>
+        <td>\(E[X]=1/p\). With \(p=\tfrac12\): \(E=2\)</td>
+      </tr>
+      <tr>
+        <td><b>Binomial(\(n,p\))</b></td>
+        <td>Number of successes in \(n\) independent Bernoulli(\(p\)) trials</td>
+        <td>\(E[X]=np\)</td>
+      </tr>
+    </table>
+    <p class="case-hint">Some texts define Geometric as “#failures before first success” (then \(E=(1-p)/p\)). In this course: height of a node \(+1\) is Geometric with \(p=\tfrac12\), so \(E[\text{height}+1]=2\) and \(E[\text{height}]=1\).</p>
+
+    <h5>1) Expected height of one node</h5>
+    <p>Insert flips until Heads. Let \(H\) = height of the node. Then \(H+1\sim\mathrm{Geometric}(1/2)\):</p>
+    \[
+      E[H+1]=2 \quad\Rightarrow\quad E[H]=1.
+    \]
+    <p>That is why <b>Delete</b> (given a pointer) is \(\Theta(1)\) expected: you unlink from \(H+1\) lists, and \(E[H+1]=2\).</p>
+
+    <h5>2) Expected size of the whole structure (Binomial + linearity)</h5>
+    <p>An element is in list \(S_i\) iff its first \(i\) flips were Tails → probability \(1/2^i\).</p>
+    <p>\(|S_i|\) (not counting sentinels) is <b>Binomial(\(n, 1/2^i\))</b>, so \(E[|S_i|]=n/2^i\).</p>
+    \[
+      E\!\left[\sum_{i=0}^{\infty}|S_i|\right]
+      =\sum_{i=0}^{\infty} E[|S_i|]
+      =\sum_{i=0}^{\infty}\frac{n}{2^i}
+      = n\cdot 2 = 2n.
+    \]
+    <p>With sentinels: expected total size is \(2n + O(\log n)\).</p>
+
+    <h5>3) Expected height of the skip list</h5>
+    <p>Let \(X_i\) be the indicator “\(S_i\) is non-empty”. Height \(h=\sum_{i\ge 1} X_i\). Then \(E[X_i]\le\min(1, n/2^i)\). Split at \(\lfloor\log n\rfloor\):</p>
+    \[
+      E[h]
+      \le \sum_{i=1}^{\lfloor\log n\rfloor} 1
+      + \sum_{i=\lfloor\log n\rfloor+1}^{\infty}\frac{n}{2^i}
+      \le \log n + 2.
+    \]
+
+    <h5>4) Expected number of rightward steps in Search (Geometric)</h5>
+    <p>Analyze the <b>reverse</b> of the Find path: from the answer at \(S_0\), go up when possible, otherwise left. On each level \(S_i\), the coins of nodes you visit leftward are Heads…Heads… then a Tails (the node where you can go up) — like a Geometric experiment.</p>
+    <p>Let \(R_i\) = #rightward (forward) steps on level \(i\). If \(X\sim\mathrm{Geometric}(1/2)\) counts flips until Heads, then \(R_i \le X-1\), so</p>
+    \[
+      E[R_i]\le E[X]-1 = 2-1 = 1.
+    \]
+    <p>Also \(R_i\le|S_i|\), so \(E[R_i]\le n/2^i\). Total path length \(R = h + \sum_i R_i\):</p>
+    \[
+      E[R]
+      \le E[h] + \sum_{i=0}^{\lfloor\log n\rfloor} 1 + \sum_{i=\lfloor\log n\rfloor+1}^{\infty}\frac{n}{2^i}
+      \le 2\log n + 5.
+    \]
+    <p>Hence Search / Insert are \(\Theta(\log n)\) expected.</p>
+    <div class="note"><b>Exam takeaway:</b> Geometric → one node’s height / right moves per level; Binomial → how many nodes sit on level \(i\); indicators + linearity → height of the whole list and search cost.</div>
   </div>
 
   <h2 class="section" id="hashing">5.2 Hash Tables: the Dictionary ADT</h2>
