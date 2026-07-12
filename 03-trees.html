@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>3 · Structures &amp; Trees</title>
-<link rel="stylesheet" href="assets/style.css?v=20260712ost2">
+<link rel="stylesheet" href="assets/style.css?v=20260712dsmap">
 <script src="assets/theme.js?v=20260712tocmanual"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
@@ -238,7 +238,7 @@
     <p>Search / Min / Max / Succ / Pred stay as in AVL: they ignore <code>size</code>.</p>
 
     <h4>Interactive animator</h4>
-    <p class="ost-lead">Try <b>Select(i)</b> or <b>Rank(k)</b> on the demo tree. Small badge on each node = subtree <code>size</code>.</p>
+    <p class="ost-lead">Try <b>Select(i)</b> or <b>Rank(k)</b> on the demo tree. Small badge on each node = subtree <code>size</code>. For Rank, <b>smaller</b> is the running count of keys already known to be less than k.</p>
     <div class="tree-viz-wrap ost-viz-wrap">
       <div class="ost-toolbar">
         <div class="ost-mode-toggle" role="group" aria-label="Mode">
@@ -337,6 +337,6 @@
 </div>
 <script src="assets/viz-code-helper.js?v=20260712ost" defer></script>
 <script src="assets/trees.js?v=20260711h" defer></script>
-<script src="assets/ost.js?v=20260712ost1b" defer></script>
+<script src="assets/ost.js?v=20260712smaller2" defer></script>
 </body>
 </html>

@@ -17,16 +17,17 @@
 
   var SELECT_LINES = [
     'Select(node, i):              // i-th smallest, i ≥ 1',
-    '  curr = left.size + 1        // 1-based rank in subtree',
+    '  curr = left.size + 1        // 1-based rank of this node in its subtree',
     '  if i == curr: return node',
     '  if i < curr:  go left (same i)',
     '  else: go right with i - curr'
   ];
   var RANK_LINES = [
-    'Rank(node, k):                // 1 = smallest',
-    '  if key == k: return left.size + 1',
-    '  if k < key:  go left',
-    '  else: add left.size + 1, go right'
+    'Rank(node, k, smaller):',
+    '  // start call: Rank(root, k, 0)',
+    '  if key == k: return smaller + left.size + 1',
+    '  if k < key:  Rank(left,  k, smaller)',
+    '  else:        Rank(right, k, smaller + left.size + 1)'
   ];
 
   function sizeOf(n) { return n ? n.size : 0; }
@@ -199,47 +200,48 @@
     }
 
     frames.push(frame(
-      'Rank(<b>k = ' + k + '</b>) → expect <b>' + expected + '</b>. Start at root.',
-      root, {}, 0, { targetKey: k, target: expected }
+      'Rank(<b>k = ' + k + '</b>). Start with <b>smaller = 0</b> (no keys counted yet). Expect rank <b>' + expected + '</b>.',
+      root, {}, 1, { targetKey: k, target: expected, acc: 0 }
     ));
 
-    function go(node, acc) {
+    function go(node, smaller) {
       if (!node) return;
       path.push(node.key);
       var leftSz = sizeOf(node.left);
       var hi = { path: path.slice(), current: node.key };
 
       frames.push(frame(
-        'At <b>' + node.key + '</b>. Acc = <b>' + acc + '</b>, left.size = ' + leftSz + '.',
-        root, hi, 0, { targetKey: k, target: expected, focus: node.key, acc: acc }
+        'At <b>' + node.key + '</b>. So far <b>smaller = ' + smaller + '</b> (keys already known &lt; ' + k + '). left.size = ' + leftSz + '.',
+        root, hi, 0, { targetKey: k, target: expected, focus: node.key, acc: smaller }
       ));
 
       if (node.key === k) {
-        var result = acc + leftSz + 1;
+        var result = smaller + leftSz + 1;
         frames.push(frame(
-          '<b>key == k</b> → Rank = ' + acc + ' + left.size + 1 = <b>' + result + '</b>.',
+          '<b>key == k</b> → return smaller + left.size + 1 = ' + smaller + ' + ' + leftSz + ' + 1 = <b>' + result + '</b>.',
           root, { path: path.slice(), found: node.key, current: node.key },
-          1, { targetKey: k, target: expected, found: node.key, done: true, result: result }
+          2, { targetKey: k, target: expected, found: node.key, done: true, result: result, acc: result - 1 }
         ));
         return;
       }
 
       if (k < node.key) {
         frames.push(frame(
-          '<b>k &lt; key</b> → go left (acc stays ' + acc + ').',
+          '<b>k &lt; key</b> → go left. <b>smaller stays ' + smaller + '</b> (do not count this node or its right side).',
           root, { path: path.slice(), current: node.key, skip: collectSubtreeKeys(node.right, []) },
-          2, { targetKey: k, target: expected, focus: node.key, go: 'left', acc: acc }
+          3, { targetKey: k, target: expected, focus: node.key, go: 'left', acc: smaller }
         ));
-        go(node.left, acc);
+        go(node.left, smaller);
       } else {
         var add = leftSz + 1;
-        var nextAcc = acc + add;
+        var next = smaller + add;
         frames.push(frame(
-          '<b>k &gt; key</b> → add left.size+1 (= ' + add + '), go right. Acc → <b>' + nextAcc + '</b>.',
+          '<b>k &gt; key</b> → go right. Update <b>smaller := ' + smaller + ' + ' + leftSz + ' + 1 = ' + next + '</b> ' +
+          '(add left subtree + this node; both are &lt; k).',
           root, { path: path.slice(), current: node.key, skip: collectSubtreeKeys(node.left, []) },
-          3, { targetKey: k, target: expected, focus: node.key, go: 'right', acc: nextAcc, add: add }
+          4, { targetKey: k, target: expected, focus: node.key, go: 'right', acc: next, add: add }
         ));
-        go(node.right, nextAcc);
+        go(node.right, next);
       }
     }
 
@@ -362,7 +364,10 @@
 
   function renderOrderStrip(el, sorted, orderHi) {
     if (!el) return;
-    el.innerHTML = '<span class="ost-order-label">sorted</span>';
+    var accLabel = (orderHi.acc != null)
+      ? ' · smaller = ' + orderHi.acc + (orderHi.done && orderHi.result != null ? ' → rank ' + orderHi.result : '')
+      : '';
+    el.innerHTML = '<span class="ost-order-label">sorted' + accLabel + '</span>';
     var row = document.createElement('div');
     row.className = 'ost-order-row';
     sorted.forEach(function (key, i) {
@@ -374,8 +379,12 @@
       if (orderHi.target === rank) cell.classList.add('is-target');
       if (orderHi.found === key) cell.classList.add('is-found');
       if (orderHi.focus === key) cell.classList.add('is-focus');
-      if (orderHi.done && rank < (orderHi.result != null ? orderHi.result : orderHi.target)) {
+      /* Keys already counted into r (strictly smaller than k so far). */
+      if (orderHi.acc != null && rank <= orderHi.acc) {
         cell.classList.add('is-smaller');
+      }
+      if (orderHi.done && orderHi.result != null && rank === orderHi.result) {
+        cell.classList.add('is-found');
       }
       if (orderHi.targetKey === key) cell.classList.add('is-target-key');
       cell.innerHTML = '<i>' + rank + '</i><b>' + key + '</b>';

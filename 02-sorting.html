@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2 · Sorting + Animator</title>
-<link rel="stylesheet" href="assets/style.css?v=20260712tocgroups">
+<link rel="stylesheet" href="assets/style.css?v=20260712dsmap">
 <script src="assets/theme.js?v=20260712tocmanual"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
@@ -55,6 +55,7 @@
         <span><span class="sw c-min"></span> key / current min</span>
         <span><span class="sw c-pivot"></span> pivot</span>
         <span><span class="sw c-done"></span> sorted</span>
+        <span><b style="font-family:monospace;color:#57e0c0">i</b> <b style="font-family:monospace;color:#8fb6ff">j</b> <b style="font-family:monospace;color:#c39bff">min/key</b> index labels</span>
       </div>
       <div class="viz-main">
         <div class="viz-bars"></div>
@@ -394,14 +395,51 @@
     </table>
     <span class="code-label">Partition (Lomuto)</span>
 <pre><span class="kw">Partition</span>(A, l, r):
+    pivot = A[r]                 <span class="cm"># last element is the pivot</span>
     i = l - 1
     <span class="kw">for</span> j = l <span class="kw">to</span> r - 1:
-        <span class="kw">if</span> A[j] &lt;= A[r]:
+        <span class="kw">if</span> A[j] &lt;= pivot:
             i = i + 1
             swap(A[i], A[j])
-    swap(A[i + 1], A[r])
+    swap(A[i + 1], A[r])         <span class="cm"># place pivot in its final spot</span>
     <span class="kw">return</span> i + 1                 <span class="cm"># final index of the pivot</span></pre>
+    <div class="note"><b>Where is the pivot?</b> It is always <b>A[r]</b> at the start (the rightmost element of the current range). The code stores it as <code>pivot = A[r]</code>. Comparisons use <code>pivot</code>; the last swap moves that value to index <code>i+1</code>.</div>
     <p>Time <span class="tag b-On">\(\Theta(n)\)</span> for a subarray of length \(n = r-l+1\). After Partition, the pivot’s <b>rank in the subarray</b> is \(k = p - l + 1\) (number of elements in \(A[l..r]\) that are \(\le\) pivot).</p>
+    <h4>Animator</h4>
+    <div class="sort-viz-wrap sel-viz-wrap" data-modes='["partition"]' data-default="partition">
+      <div class="viz-controls">
+        <label class="viz-algo-label">Algorithm: <select class="viz-algo"></select></label>
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <button class="viz-btn viz-shuffle">Shuffle</button>
+        <label>Speed: <input type="range" class="viz-speed" min="60" max="1600" value="1250" step="20"></label>
+      </div>
+      <div class="viz-algo-info"></div>
+      <div class="legend">
+        <span><span class="sw" style="background:#3fb3a0;border:1px solid #57e0c0"></span> ≤ pivot</span>
+        <span><span class="sw" style="background:#7a6bb8;border:1px solid #a78bfa"></span> &gt; pivot</span>
+        <span><span class="sw c-cmp"></span> scanning j</span>
+        <span><span class="sw c-pivot"></span> pivot (A[r])</span>
+        <span><span class="sw c-active"></span> swap</span>
+        <span><span class="sw c-done"></span> placed / found</span>
+        <span><b style="font-family:monospace;color:#57e0c0">i</b> last ≤ index</span>
+        <span><b style="font-family:monospace;color:#8fb6ff">j</b> scan index</span>
+        <span><span class="sw" style="opacity:.32;background:#4a5aa8;border:1px solid #6b78c8"></span> out of range</span>
+        <span><b style="font-family:monospace;color:#57e0c0">i</b> <b style="font-family:monospace;color:#8fb6ff">j</b> <b style="font-family:monospace;color:#ff6b81">pivot/p</b> labels</span>
+
+      </div>
+      <div class="viz-main">
+        <div class="viz-bars"></div>
+        <div class="viz-code"></div>
+      </div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-stats">
+        <span>Step <b class="viz-step">0</b> / <b class="viz-total">0</b></span>
+        <span>Comparisons: <b class="viz-comps">0</b></span>
+        <span>Swaps / writes: <b class="viz-swaps">0</b></span>
+      </div>
+    </div>
   </div>
 
   <h2 class="section" id="sel-rand-partition">2.4.2 Randomized Partition</h2>
@@ -414,6 +452,40 @@
     <span class="kw">return</span> Partition(A, l, r)</pre>
     <p>Used by both <b>Randomized-Quicksort</b> and <b>Randomized-Select</b>. For any fixed distinct input, expected Quicksort time becomes \(\Theta(n\log n)\) (randomness is in the algorithm, not the input).</p>
     <div class="note"><b>Randomized-Quicksort:</b> same as Quicksort, but line (2) calls <code>RandomizedPartition</code> instead of <code>Partition</code>.</div>
+    <h4>Animator</h4>
+    <div class="sort-viz-wrap sel-viz-wrap" data-modes='["randpartition"]' data-default="randpartition">
+      <div class="viz-controls">
+        <label class="viz-algo-label">Algorithm: <select class="viz-algo"></select></label>
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <button class="viz-btn viz-shuffle">Shuffle</button>
+        <label>Speed: <input type="range" class="viz-speed" min="60" max="1600" value="1250" step="20"></label>
+      </div>
+      <div class="viz-algo-info"></div>
+      <div class="legend">
+        <span><span class="sw" style="background:#3fb3a0;border:1px solid #57e0c0"></span> ≤ pivot</span>
+        <span><span class="sw" style="background:#7a6bb8;border:1px solid #a78bfa"></span> &gt; pivot</span>
+        <span><span class="sw c-cmp"></span> scanning j</span>
+        <span><span class="sw c-pivot"></span> pivot</span>
+        <span><span class="sw c-active"></span> swap</span>
+        <span><span class="sw c-done"></span> placed / found</span>
+        <span><span class="sw" style="opacity:.32;background:#4a5aa8;border:1px solid #6b78c8"></span> out of range</span>
+        <span><b style="font-family:monospace;color:#57e0c0">i</b> <b style="font-family:monospace;color:#8fb6ff">j</b> <b style="font-family:monospace;color:#ff6b81">pivot/p</b> labels</span>
+
+
+      </div>
+      <div class="viz-main">
+        <div class="viz-bars"></div>
+        <div class="viz-code"></div>
+      </div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-stats">
+        <span>Step <b class="viz-step">0</b> / <b class="viz-total">0</b></span>
+        <span>Comparisons: <b class="viz-comps">0</b></span>
+        <span>Swaps / writes: <b class="viz-swaps">0</b></span>
+      </div>
+    </div>
   </div>
 
   <h2 class="section" id="sel-rand-select">2.4.3 Randomized-Select</h2>
@@ -433,6 +505,41 @@
         <span class="kw">return</span> RandomizedSelect(A, p + 1, r, i - k)</pre>
     <p><b>Call:</b> <code>RandomizedSelect(A, 0, n-1, i)</code> for the \(i\)-th smallest in the whole array.</p>
     <div class="pitfall"><b>When going right,</b> subtract \(k\): the left side plus the pivot account for the \(k\) smallest elements in the current range, so the target becomes the \((i-k)\)-th in the right side.</div>
+    <h4>Animator</h4>
+    <div class="sort-viz-wrap sel-viz-wrap" data-modes='["quickselect"]' data-default="quickselect">
+      <div class="viz-controls">
+        <label class="viz-algo-label">Algorithm: <select class="viz-algo"></select></label>
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <button class="viz-btn viz-shuffle">Shuffle</button>
+        <label>Speed: <input type="range" class="viz-speed" min="60" max="1600" value="1250" step="20"></label>
+      </div>
+      <div class="viz-algo-info"></div>
+      <div class="legend">
+        <span><span class="sw" style="background:#3fb3a0;border:1px solid #57e0c0"></span> ≤ pivot</span>
+        <span><span class="sw" style="background:#7a6bb8;border:1px solid #a78bfa"></span> &gt; pivot</span>
+        <span><span class="sw c-cmp"></span> scanning j</span>
+        <span><span class="sw c-pivot"></span> pivot</span>
+        <span><span class="sw c-active"></span> swap</span>
+        <span><span class="sw c-done"></span> placed / found</span>
+        <span><span class="sw" style="opacity:.32;background:#4a5aa8;border:1px solid #6b78c8"></span> out of range</span>
+        <span><b style="font-family:monospace;color:#57e0c0">i</b> <b style="font-family:monospace;color:#8fb6ff">j</b> <b style="font-family:monospace;color:#ff6b81">pivot/p</b> labels</span>
+
+        <span><span class="sw c-min"></span> random pivot pick</span>
+
+      </div>
+      <div class="viz-main">
+        <div class="viz-bars"></div>
+        <div class="viz-code"></div>
+      </div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-stats">
+        <span>Step <b class="viz-step">0</b> / <b class="viz-total">0</b></span>
+        <span>Comparisons: <b class="viz-comps">0</b></span>
+        <span>Swaps / writes: <b class="viz-swaps">0</b></span>
+      </div>
+    </div>
   </div>
 
   <h2 class="section" id="sel-rand-analysis">2.4.4 Expected-time analysis</h2>
@@ -492,13 +599,8 @@
     <p>Simplified: \(T(n) = T(n/5) + T(7n/10) + n\). By induction \(T(n) \le cn\) for large enough \(c\) (since \(\tfrac15+\tfrac{7}{10}=\tfrac{9}{10}&lt;1\)).</p>
     <p style="text-align:center"><b>Worst-case</b> <span class="tag b-On">\(\Theta(n)\)</span>.</p>
     <div class="warn"><b>Why groups of 5?</b> Odd size → clean median. Fractions must sum to less than 1. Groups of 3 give \(T(n/3)+T(2n/3)+O(n)=O(n\log n)\): not linear.</div>
-  </div>
-
-  <!-- ===== MEDIAN / SELECTION ANIMATOR ===== -->
-  <h2 class="section" id="median-viz">2.4.6 Selection Visualizer</h2>
-  <div class="card">
-    <p style="margin-top:0">Watch <b>Quickselect</b> (Randomized-Select style) and <b>Median of Medians</b> narrow the array. Eliminated regions fade out.</p>
-    <div class="sort-viz-wrap median-viz-wrap" data-modes='["quickselect","mom"]' data-default="quickselect">
+    <h4>Animator</h4>
+    <div class="sort-viz-wrap sel-viz-wrap" data-modes='["mom"]' data-default="mom">
       <div class="viz-controls">
         <label class="viz-algo-label">Algorithm: <select class="viz-algo"></select></label>
         <button class="viz-btn viz-primary viz-play">▶ Play</button>
@@ -509,13 +611,57 @@
       </div>
       <div class="viz-algo-info"></div>
       <div class="legend">
-        <span><span class="sw" style="background:#4a5aa8;border:1px solid #6b78c8"></span> active range</span>
-        <span><span class="sw c-cmp"></span> comparing</span>
-        <span><span class="sw c-active"></span> swap</span>
-        <span><span class="sw c-min"></span> group median</span>
+        <span><span class="sw" style="background:#3fb3a0;border:1px solid #57e0c0"></span> ≤ pivot</span>
+        <span><span class="sw" style="background:#7a6bb8;border:1px solid #a78bfa"></span> &gt; pivot</span>
+        <span><span class="sw c-cmp"></span> scanning j</span>
         <span><span class="sw c-pivot"></span> pivot</span>
-        <span><span class="sw c-done"></span> answer found</span>
-        <span><span class="sw" style="opacity:.32;background:#4a5aa8;border:1px solid #6b78c8"></span> eliminated</span>
+        <span><span class="sw c-active"></span> swap</span>
+        <span><span class="sw c-done"></span> placed / found</span>
+        <span><span class="sw" style="opacity:.32;background:#4a5aa8;border:1px solid #6b78c8"></span> out of range</span>
+        <span><b style="font-family:monospace;color:#57e0c0">i</b> <b style="font-family:monospace;color:#8fb6ff">j</b> <b style="font-family:monospace;color:#ff6b81">pivot/p</b> labels</span>
+
+        <span><span class="sw c-min"></span> group median</span>
+
+      </div>
+      <div class="viz-main">
+        <div class="viz-bars"></div>
+        <div class="viz-code"></div>
+      </div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-stats">
+        <span>Step <b class="viz-step">0</b> / <b class="viz-total">0</b></span>
+        <span>Comparisons: <b class="viz-comps">0</b></span>
+        <span>Swaps / writes: <b class="viz-swaps">0</b></span>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section" id="median-viz">2.4.6 All selection algorithms</h2>
+  <div class="card">
+    <p style="margin-top:0">Switch between <b>Partition</b>, <b>Randomized Partition</b>, <b>Randomized-Select</b>, and <b>Select (MoM)</b> in one place.</p>
+    <h4>Animator</h4>
+    <div class="sort-viz-wrap sel-viz-wrap" data-modes='["partition","randpartition","quickselect","mom"]' data-default="partition">
+      <div class="viz-controls">
+        <label class="viz-algo-label">Algorithm: <select class="viz-algo"></select></label>
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <button class="viz-btn viz-shuffle">Shuffle</button>
+        <label>Speed: <input type="range" class="viz-speed" min="60" max="1600" value="1250" step="20"></label>
+      </div>
+      <div class="viz-algo-info"></div>
+      <div class="legend">
+        <span><span class="sw" style="background:#3fb3a0;border:1px solid #57e0c0"></span> ≤ pivot</span>
+        <span><span class="sw" style="background:#7a6bb8;border:1px solid #a78bfa"></span> &gt; pivot</span>
+        <span><span class="sw c-cmp"></span> scanning j</span>
+        <span><span class="sw c-pivot"></span> pivot</span>
+        <span><span class="sw c-active"></span> swap</span>
+        <span><span class="sw c-done"></span> placed / found</span>
+        <span><span class="sw" style="opacity:.32;background:#4a5aa8;border:1px solid #6b78c8"></span> out of range</span>
+        <span><b style="font-family:monospace;color:#57e0c0">i</b> <b style="font-family:monospace;color:#8fb6ff">j</b> <b style="font-family:monospace;color:#ff6b81">pivot/p</b> labels</span>
+
+        <span><span class="sw c-min"></span> group / random pick</span>
+
       </div>
       <div class="viz-main">
         <div class="viz-bars"></div>
@@ -534,6 +680,6 @@
 </main>
 </div>
 <script src="assets/viz-code-helper.js"></script>
-<script src="assets/sorting.js" defer></script>
+<script src="assets/sorting.js?v=20260712cm" defer></script>
 </body>
 </html>

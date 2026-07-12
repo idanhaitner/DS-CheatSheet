@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>8 · Exam Reference</title>
-<link rel="stylesheet" href="assets/style.css?v=20260712tocgroups">
+<link rel="stylesheet" href="assets/style.css?v=20260712dsmap">
 <script src="assets/theme.js?v=20260712tocmanual"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
@@ -30,7 +30,7 @@
   <div class="pagehead">
     <div class="crumbs"><a href="index.html">Home</a> › Exam Reference</div>
     <h1>8 · Exam Reference</h1>
-    <p>Master tables · decision guide · pitfalls &amp; strategy</p>
+    <p>Master tables · what to use when · pitfalls &amp; strategy</p>
   </div>
   <div class="inner">
 
@@ -118,62 +118,257 @@
     </table>
   </div>
 
-  <h2 class="section" id="decision">8.2 "Which structure / algorithm?" Decision Guide</h2>
+  <h2 class="section" id="decision">8.2 What to use when (decision map)</h2>
+  <div class="card">
+    <p style="margin-top:0">Start from the <b>question you need answered</b>, not from a structure name. Graphs have their own map in <a href="06-graphs.html#graph-map">§6.0</a>.</p>
+
+    <h4 id="ds-map-main">A. Dynamic dictionary / ordered set</h4>
+    <div class="ds-map">
+      <div class="ds-q">Do you need <b>order</b> (min/max, successor, range, sorted walk)?</div>
+      <div class="ds-branches">
+        <div class="ds-branch">
+          <div class="ds-edge">No — only membership</div>
+          <div class="ds-q">Expected O(1) enough?</div>
+          <div class="ds-branches">
+            <div class="ds-branch">
+              <div class="ds-edge">Yes</div>
+              <div class="ds-leaf"><a href="05-hashing.html#hashing">Hash table</a><span>chaining or probing · no order</span></div>
+            </div>
+            <div class="ds-branch">
+              <div class="ds-edge">Maybe wrong (Bloom)</div>
+              <div class="ds-leaf"><a href="05-hashing.html#bloom">Bloom filter</a><span>space · false positives OK</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="ds-branch">
+          <div class="ds-edge">Yes — need order</div>
+          <div class="ds-q">Also need Select / Rank / prefix sums?</div>
+          <div class="ds-branches">
+            <div class="ds-branch">
+              <div class="ds-edge">Yes</div>
+              <div class="ds-leaf"><a href="03-trees.html#ost">OST</a> or <b>indexable skip list</b><span>AVL/skip list + <code>size</code> (+ optional <code>sum</code>)</span></div>
+            </div>
+            <div class="ds-branch">
+              <div class="ds-edge">No — just ordered dict</div>
+              <div class="ds-q">Worst-case O(log n) required?</div>
+              <div class="ds-branches">
+                <div class="ds-branch">
+                  <div class="ds-edge">Yes</div>
+                  <div class="ds-leaf"><a href="03-trees.html#avl">AVL</a><span>balanced BST · rotations</span></div>
+                </div>
+                <div class="ds-branch">
+                  <div class="ds-edge">Expected OK</div>
+                  <div class="ds-leaf"><a href="05-hashing.html#skiplist">Skip list</a><span>Θ(log n) expected · Delete Θ(1) expected with pointer</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h4>B. Need <b>both</b> fast lookup and order / priority</h4>
+    <div class="ds-map">
+      <div class="ds-q">Combine primitives (classic exam design)</div>
+      <div class="ds-branches ds-branches--flat">
+        <div class="ds-leaf"><b>Hash + AVL / skip list</b><span>Search O(1) expected · Succ / range via tree</span></div>
+        <div class="ds-leaf"><b>Hash + heap</b><span>Search O(1) · DeleteMax / DeleteMin O(log n)</span></div>
+        <div class="ds-leaf"><b>Hash + OST</b><span>Search O(1) · Select / Rank O(log n)</span></div>
+        <div class="ds-leaf"><b>Two heaps</b> (or dual sorted halves)<span>Median / SelectN in O(1) when size is bounded</span></div>
+      </div>
+    </div>
+
+    <h4>C. Sequences, stacks, lists (no search key)</h4>
+    <div class="ds-map">
+      <div class="ds-q">What is the access pattern?</div>
+      <div class="ds-branches">
+        <div class="ds-branch">
+          <div class="ds-edge">Index access O(1)</div>
+          <div class="ds-leaf"><a href="03-trees.html#linkedlist">Array / dynamic array</a><span>insert mid = O(n) · doubling amortized O(1)</span></div>
+        </div>
+        <div class="ds-branch">
+          <div class="ds-edge">Insert/delete at ends</div>
+          <div class="ds-leaf"><a href="03-trees.html#stackqueue">Stack / Queue</a><span>LIFO / FIFO · O(1)</span></div>
+        </div>
+        <div class="ds-branch">
+          <div class="ds-edge">Splice given a node pointer</div>
+          <div class="ds-leaf"><a href="03-trees.html#linkedlist">Doubly linked list</a><span>Delete O(1) with pointer · no index</span></div>
+        </div>
+        <div class="ds-branch">
+          <div class="ds-edge">Sorted, static / rare inserts</div>
+          <div class="ds-leaf">Sorted array<span>binary search O(log n) · insert O(n)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h4>D. Priority / extremes only</h4>
+    <div class="ds-map">
+      <div class="ds-branches ds-branches--flat">
+        <div class="ds-leaf"><a href="04-heaps.html#heap">Binary heap</a><span>Insert / ExtractMin O(log n) · FindMin O(1) · build O(n)</span></div>
+        <div class="ds-leaf">Sorted array / AVL min<span>if you also need full order</span></div>
+      </div>
+    </div>
+
+    <h4>E. Huge data on disk / external memory</h4>
+    <div class="ds-map">
+      <div class="ds-branches ds-branches--flat">
+        <div class="ds-leaf"><a href="03-trees.html#btree">B-tree</a><span>minimize disk I/O · high branching · 1-pass / 2-pass inserts</span></div>
+      </div>
+    </div>
+
+    <h4>F. Connectivity while edges arrive</h4>
+    <div class="ds-map">
+      <div class="ds-branches ds-branches--flat">
+        <div class="ds-leaf"><a href="07-advanced.html#unionfind">Union-Find</a><span>union / find · pair with hash to reach elements · Kruskal</span></div>
+      </div>
+    </div>
+
+    <h4 id="ds-map-sort">G. Sorting / selection (one-shot on an array)</h4>
+    <div class="ds-map">
+      <div class="ds-q">Sorting?</div>
+      <div class="ds-branches">
+        <div class="ds-branch">
+          <div class="ds-edge">Yes</div>
+          <div class="ds-q">Keys are integers / floats with extra structure?</div>
+          <div class="ds-branches">
+            <div class="ds-branch">
+              <div class="ds-edge">Range \(k=O(n)\)</div>
+              <div class="ds-leaf"><a href="02-sorting.html#counting">Counting sort</a><span>Θ(n+k) · stable</span></div>
+            </div>
+            <div class="ds-branch">
+              <div class="ds-edge">Few digits \(d=o(\log n)\)</div>
+              <div class="ds-leaf"><a href="02-sorting.html#radix">Radix sort</a><span>stable digit passes</span></div>
+            </div>
+            <div class="ds-branch">
+              <div class="ds-edge">Uniform in [0,1)</div>
+              <div class="ds-leaf"><a href="02-sorting.html#bucket">Bucket sort</a><span>avg O(n) · worst O(n²)</span></div>
+            </div>
+            <div class="ds-branch">
+              <div class="ds-edge">No / general comparable</div>
+              <div class="ds-q">Need?</div>
+              <div class="ds-branches">
+                <div class="ds-branch">
+                  <div class="ds-edge">Stable + worst Θ(n log n)</div>
+                  <div class="ds-leaf"><a href="02-sorting.html#merge">Merge sort</a></div>
+                </div>
+                <div class="ds-branch">
+                  <div class="ds-edge">In-place avg fast</div>
+                  <div class="ds-leaf"><a href="02-sorting.html#quick">Quicksort</a> (randomized)</div>
+                </div>
+                <div class="ds-branch">
+                  <div class="ds-edge">In-place worst Θ(n log n)</div>
+                  <div class="ds-leaf"><a href="02-sorting.html#heapsort">Heapsort</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ds-branch">
+          <div class="ds-edge">Only i-th / median</div>
+          <div class="ds-branches">
+            <div class="ds-branch">
+              <div class="ds-edge">Expected O(n)</div>
+              <div class="ds-leaf"><a href="02-sorting.html#sel-rand-select">Randomized-Select</a></div>
+            </div>
+            <div class="ds-branch">
+              <div class="ds-edge">Worst-case O(n)</div>
+              <div class="ds-leaf"><a href="02-sorting.html#sel-deterministic">Median of medians</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h4>H. Compression</h4>
+    <div class="ds-map">
+      <div class="ds-branches ds-branches--flat">
+        <div class="ds-leaf"><a href="04-heaps.html#huffman">Huffman</a><span>known symbol frequencies · optimal prefix code</span></div>
+        <div class="ds-leaf"><a href="04-heaps.html#lz">LZ78</a><span>adaptive dictionary · no prior frequencies</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section" id="ds-catalog">8.2.1 Catalog: every structure (one-liner)</h2>
+  <div class="card">
+    <div class="ds-catalog">
+      <a class="ds-cat" href="03-trees.html#linkedlist"><b>Array</b><span>index O(1) · search/insert mid O(n)</span></a>
+      <a class="ds-cat" href="03-trees.html#linkedlist"><b>Dynamic array</b><span>amortized insert O(1) at end</span></a>
+      <a class="ds-cat" href="03-trees.html#linkedlist"><b>Sorted array</b><span>search O(log n) · insert O(n)</span></a>
+      <a class="ds-cat" href="03-trees.html#linkedlist"><b>Singly LL</b><span>head ops O(1) · no back pointer</span></a>
+      <a class="ds-cat" href="03-trees.html#linkedlist"><b>Doubly LL</b><span>delete given node O(1)</span></a>
+      <a class="ds-cat" href="03-trees.html#stackqueue"><b>Stack / Queue</b><span>LIFO / FIFO only</span></a>
+      <a class="ds-cat" href="03-trees.html#bst"><b>Plain BST</b><span>O(h) · can be O(n)</span></a>
+      <a class="ds-cat" href="03-trees.html#avl"><b>AVL</b><span>ordered dict · worst O(log n)</span></a>
+      <a class="ds-cat" href="03-trees.html#ost"><b>OST</b><span>AVL + size · Select / Rank</span></a>
+      <a class="ds-cat" href="03-trees.html#btree"><b>B-tree</b><span>disk / large branching</span></a>
+      <a class="ds-cat" href="04-heaps.html#heap"><b>Binary heap</b><span>priority queue · not a search tree</span></a>
+      <a class="ds-cat" href="05-hashing.html#skiplist"><b>Skip list</b><span>ordered · expected O(log n)</span></a>
+      <a class="ds-cat" href="05-hashing.html#skiplist"><b>Indexable skip list</b><span>skip list + size · like OST</span></a>
+      <a class="ds-cat" href="05-hashing.html#hashing"><b>Hash (chaining)</b><span>expected O(1) · DLL or AVL buckets</span></a>
+      <a class="ds-cat" href="05-hashing.html#openaddr"><b>Hash (probing)</b><span>α&lt;1 · tombstones on delete</span></a>
+      <a class="ds-cat" href="05-hashing.html#bloom"><b>Bloom filter</b><span>maybe-in-set · tiny space</span></a>
+      <a class="ds-cat" href="07-advanced.html#unionfind"><b>Union-Find</b><span>components · no Search alone</span></a>
+      <a class="ds-cat" href="02-sorting.html#counting"><b>Counting / Radix / Bucket</b><span>linear sorts under constraints</span></a>
+    </div>
+    <div class="note" style="margin-top:14px"><b>AVL vs skip list vs OST vs indexable skip list:</b> AVL and skip list are both ordered dictionaries. Add <code>size</code> on every node/level → OST or indexable skip list for Select/Rank. Prefer AVL when the exam wants worst-case O(log n); skip list when expected analysis / Delete-with-pointer Θ(1) expected matters.</div>
+  </div>
+
+  <h2 class="section" id="decision-table">8.2.2 Quick lookup table</h2>
   <div class="card">
     <table>
       <tr><th>Requirement</th><th>Reach for</th></tr>
       <tr><td>O(1) membership, no order needed</td><td>Hash table</td></tr>
-      <tr><td>Ordered ops (successor, range) O(log n)</td><td>AVL / balanced BST / skip list</td></tr>
-      <tr><td>Select \(i\)-th / Rank in a <b>dynamic</b> ordered set, \(\Theta(\log n)\)</td><td><a href="03-trees.html#ost">Order statistic tree</a> (AVL + <code>size</code>)</td></tr>
-      <tr><td>i-th smallest / median in an <b>array</b>, O(n)</td><td><a href="02-sorting.html#selection-problem">Randomized-Select</a> / <a href="02-sorting.html#sel-deterministic">median of medians</a></td></tr>
-      <tr><td>Fast min/max + insert</td><td>Binary heap</td></tr>
-      <tr><td>Fast lookup <b>and</b> order/range</td><td>Hash + AVL (combine)</td></tr>
-      <tr><td>Sort integers in small range \([0, O(n)]\)</td><td><a href="02-sorting.html#counting">Counting sort</a></td></tr>
-      <tr><td>Sort integers with \(d = o(\log n)\) digits</td><td><a href="02-sorting.html#radix">Radix sort</a> (stable digit sort per pass)</td></tr>
-      <tr><td>Sort floats uniformly in \([0,1)\)</td><td><a href="02-sorting.html#bucket">Bucket sort</a></td></tr>
-      <tr><td>\(L = n\) binary digits: pick best worst-case sort</td><td>Merge sort \(\Theta(n\log n)\): radix is \(\Theta(n^2)\)</td></tr>
-      <tr><td>\(L = o(\log n)\) binary digits: pick best worst-case sort</td><td>Radix sort: beats merge</td></tr>
-      <tr><td>Sort list in \(\Theta(N)\) but <b>no bound on max key \(K\)</b></td><td><b>Impossible in \(\Theta(N)\)</b>: comparison lower bound \(\Omega(N\log N)\). Use merge/heap (not counting/radix)</td></tr>
-      <tr><td>Guaranteed O(n log n) + stable</td><td>Merge sort</td></tr>
-      <tr><td>In-place fast average sort</td><td>Quick sort (randomized)</td></tr>
-      <tr><td>Shortest path, unweighted</td><td><a href="06-graphs.html#bfs">BFS</a></td></tr>
-      <tr><td>Shortest path, weighted ≥ 0</td><td><a href="06-graphs.html#dijkstra">Dijkstra</a></td></tr>
-      <tr><td>Shortest path, negative weights</td><td><a href="06-graphs.html#bellman">Bellman-Ford</a></td></tr>
-      <tr><td>Dependency ordering</td><td><a href="06-graphs.html#toposort">Topological sort</a> (DFS on DAG)</td></tr>
-      <tr><td>Connect all vertices, min total weight</td><td><a href="06-graphs.html#mst">Kruskal / Prim</a> (MST)</td></tr>
-      <tr><td>MST, weights in [1, V] integers</td><td>Kruskal + counting sort → O(E·α(V))</td></tr>
-      <tr><td>MST, weights in [1, W] constant W</td><td>Prim + bucket PQ → O(E)</td></tr>
-      <tr><td>Dynamic connectivity / Kruskal</td><td><a href="07-advanced.html#unionfind">Union-Find</a></td></tr>
-      <tr><td>Graph variant (sets, colors, edge in MST?)</td><td><a href="06-graphs.html#reductions">Reduction</a> → standard algorithm</td></tr>
+      <tr><td>Ordered ops (successor, range) O(log n) worst</td><td>AVL</td></tr>
+      <tr><td>Ordered ops, expected O(log n) OK</td><td>Skip list</td></tr>
+      <tr><td>Select \(i\)-th / Rank / prefix sums (dynamic)</td><td><a href="03-trees.html#ost">OST</a> or indexable skip list</td></tr>
+      <tr><td>Median / SelectN in \(O(1)\) with \(n\le O(N)\)</td><td>Two heaps / two sorted halves + rebuild batches</td></tr>
+      <tr><td>Search \(O(1)\) expected + DeleteMax / Select</td><td>Hash + heap / AVL / OST</td></tr>
+      <tr><td>i-th smallest in an <b>array</b>, O(n)</td><td><a href="02-sorting.html#selection-problem">Randomized-Select</a> / MoM</td></tr>
+      <tr><td>Fast min/max + insert only</td><td>Binary heap</td></tr>
+      <tr><td>Delete given node pointer O(1)</td><td>Doubly linked list (or skip-list Delete with ptr)</td></tr>
+      <tr><td>Binary search, rare updates</td><td>Sorted array</td></tr>
       <tr><td>Data on disk, huge dataset</td><td>B-tree</td></tr>
+      <tr><td>Sort integers in \([0,O(n)]\)</td><td>Counting sort</td></tr>
+      <tr><td>Sort with \(d=o(\log n)\) digits</td><td>Radix sort</td></tr>
+      <tr><td>Sort floats uniform in [0,1)</td><td>Bucket sort</td></tr>
+      <tr><td>Stable worst Θ(n log n)</td><td>Merge sort</td></tr>
+      <tr><td>Dynamic connectivity / Kruskal</td><td>Union-Find (+ hash to find elements)</td></tr>
+      <tr><td>Shortest path / MST / topo / …</td><td><a href="06-graphs.html#graph-map">§6.0 graph map</a></td></tr>
     </table>
-    <div class="note"><b>Design tip:</b> when ops need both O(1) lookup <b>and</b> order, combine a <b>hash table</b> (key → node) with an <b>AVL / skip list</b>. Union-Find has no search: always pair it with a hash map to reach elements.</div>
+    <div class="note"><b>Design tip:</b> write <b>fields</b> first, then each op, then the bound. If the hard op needs an augment (<code>size</code>, <code>sum</code>, max pointer), say so up front. Union-Find has no search: always pair it with a hash map.</div>
   </div>
 
   <h2 class="section" id="exam-tips">8.3 Exam Strategy &amp; Common Pitfalls</h2>
   <div class="card">
     <h4>How the exam asks questions (from past papers)</h4>
     <ul>
-        <li><b>"Best time to implement operation X on structure Y"</b>: know each structure's operation costs cold. E.g. skip-list <b>Delete</b> (with a pointer) is \(\Theta(1)\) expected because \(E[\text{node height}]=1\); Search without a pointer is \(\Theta(\log n)\) expected / \(O(n)\) worst.</li>
-        <li><b>Sorting best/worst fill-ins</b>: given constraints (e.g. each element within \(n^{0.4}\) of its index), work out Insertion/Merge/Quick/Counting behavior. Insertion is O(n·shift-distance); deterministic Quick's worst is on sorted input. For <b>linear sorts</b>, check whether \(k=O(n)\) or \(d=o(\log n)\): see <a href="02-sorting.html#linear-sorting">§2.3 decision guide</a>.</li>
-        <li><b>"Best algorithm to sort \(n\) integers with \(L\) binary digits"</b>: compare Radix \(\Theta(L\cdot n)\) vs Merge \(\Theta(n\log n)\). Radix when \(L=o(\log n)\); Merge when \(L=\Omega(\log n)\).</li>
-      <li><b>Design a structure meeting target complexities</b>: combine primitives: hash table (O(1) contains) + sorted array/AVL (order/median) + auxiliary arrays. State fields, describe each op, analyze.</li>
-        <li><b>Graph counting / proof</b>: e.g. “number of distinct BFS trees”, "is \(e_{\min}\) in every MST?", "is edge \(e\) in some MST?": see <a href="06-graphs.html#graph-exam">§6.9 graph exam tips</a>.</li>
+      <li>Warm-up asymptotics / Master Theorem; a large <b>always / sometimes / never</b> block; then one or two <b>design-a-structure</b> questions (often with a cheaper partial-credit variant). Default analysis is <b>worst-case</b>; use expected / amortized only when stated. Cite lecture theorems by name.</li>
+      <li><b>"Best time to implement operation X on structure Y"</b>: know each structure's operation costs cold. E.g. skip-list <b>Delete</b> (with a pointer) is \(\Theta(1)\) expected because \(E[\text{node height}]=1\); Search without a pointer is \(\Theta(\log n)\) expected / \(O(n)\) worst.</li>
+      <li><b>Sorting best/worst fill-ins</b>: given constraints (e.g. each element within \(n^{0.4}\) of its index), work out Insertion/Merge/Quick/Counting behavior. Insertion is O(n·shift-distance); deterministic Quick's worst is on sorted input. For <b>linear sorts</b>, check whether \(k=O(n)\) or \(d=o(\log n)\): see <a href="02-sorting.html#linear-sorting">§2.3 decision guide</a>. Mixed constraints (most keys in a poly(\(n\)) range, few outliers): split → linear-ish sort + comparison sort → merge.</li>
+      <li><b>"Best algorithm to sort \(n\) integers with \(L\) binary digits"</b>: compare Radix \(\Theta(L\cdot n)\) vs Merge \(\Theta(n\log n)\). Radix when \(L=o(\log n)\); Merge when \(L=\Omega(\log n)\).</li>
+      <li><b>Design a structure meeting target complexities</b>: first write the <b>fields</b> (what is stored where), then each op in 3–5 lines, then the bound. Combine primitives: hash (O(1) membership) + AVL / skip list / heap (order, Select, DeleteMax); OST + <code>size</code>/<code>sum</code> for Rank / Select / prefix sums; two heaps or dual sorted halves when Median / SelectN must be \(O(1)\) under a size bound. Hard ops (SumValues, fast Select for small \(i\)) are where full points live.</li>
+      <li><b>Amortized design</b>: growing binary counter (\(f(k)=2k\) vs \(k+1\)); token/accounting proofs; Insert amortized \(O(1)\) via periodic mass rebuilds / deletes. See <a href="07-advanced.html#amortized">§7 amortized</a>.</li>
+      <li><b>Compression</b>: LZ78 (shortest / longest string with a fixed number of blocks); Huffman vs optimal prefix codes (two rarest symbols need not be siblings in every optimal tree). See <a href="04-heaps.html#huffman">Huffman</a> · <a href="04-heaps.html#lz">LZ</a>.</li>
+      <li><b>Graph counting / proof</b>: e.g. “number of distinct BFS trees”, "is \(e_{\min}\) in every MST?", "is edge \(e\) in some MST?": see <a href="06-graphs.html#graph-exam">§6.9 graph exam tips</a>. DFS back edges &amp; discovery times; connected undirected DFS forest has one tree; BFS tree depends on neighbor order.</li>
       <li><b>Graph reductions</b>: super-source/sink, vertex splitting, reverse graph, reduce to MST. Always define \(G'\) and analyze build + algorithm time.</li>
+      <li><b>Union-Find shape questions</b>: union by rank + path compression; when ranks are equal, know the lecture tie-break (which root becomes parent).</li>
     </ul>
     <h4>Top pitfalls to avoid</h4>
     <div class="pitfall">
       <ul style="margin:0">
         <li><b>buildHeap is O(n)</b>, not O(n log n). Heapsort overall is O(n log n).</li>
-        <li><b>Quicksort worst = O(n²)</b> (deterministic pivot on sorted input); average = O(n log n).</li>
+        <li><b>Heap order ≠ BST order:</b> “every left-subtree key &lt; every right-subtree key” is never required. Small values are often leaves, not always for every \(n\).</li>
+        <li><b>Quicksort worst = O(n²)</b> (deterministic pivot on sorted input); average = O(n log n). Sorted → always \(\Theta(n^2)\); “not sorted ascending/descending” → \(\Theta(n^2)\) only sometimes.</li>
         <li><b>Counting sort is O(n+k)</b>: only linear when <b>\(k = O(n)\)</b>; it is <b>stable</b>, radix depends on that. Without a bound on max key \(K\), you cannot sort in \(\Theta(N)\) with counting/radix.</li>
         <li><b>Radix sort is \(\Theta(d(n+b))\)</b>: needs stable digit sort. With \(L\) binary digits and 1-bit passes: \(\Theta(L\cdot n)\). Compare to merge before answering "best sort".</li>
-        <li><b>Bucket sort average = O(n)</b> but <b>worst = O(n²)</b> when all elements fall in one bucket.</li>
+        <li><b>Bucket sort average = O(n)</b> but <b>worst = O(n²)</b> when all elements fall in one bucket (true even without a uniform-[0,1] promise); \(\Theta(n)\) worst-case does not hold.</li>
         <li><b>Dijkstra breaks on negative edges</b>: use Bellman-Ford.</li>
-        <li><b>BFS ≠ shortest path on weighted graphs</b>: only unweighted hop count.</li>
+        <li><b>BFS ≠ shortest path on weighted graphs</b>: only unweighted hop count. With all weights \(=1\), BFS distances match shortest paths, but the <b>tree/path</b> need not equal Prim’s MST path.</li>
         <li><b>Spanning tree ≠ MST</b>: MST additionally minimizes total weight; cycle/cut properties for proofs.</li>
-        <li><b>Plain BST is O(n) worst</b>: only AVL/balanced guarantees O(log n).</li>
-        <li><b>Hash chaining:</b> insert always O(1); search Θ(1+α) expected, O(n) worst. <b>Probing:</b> expected O(1) probes, worst O(n); needs α&lt;1.</li>
+        <li><b>Plain BST is O(n) worst</b>: only AVL/balanced guarantees O(log n). You can still build a BST from a <b>sorted</b> array in \(O(n)\) by picking medians (not by left-to-right inserts).</li>
+        <li><b>Hash chaining:</b> insert always O(1); search Θ(1+α) expected, O(n) worst. DLL vs AVL in each cell changes per-bucket search, not global Successor. <b>Probing:</b> expected O(1) probes, worst O(n); needs α&lt;1. Tombstones (delete method 1) inflate \(\alpha'\) vs \(\alpha\); method 2 reinserts the probe block.</li>
+        <li><b>AVL-per-bucket hash</b> improves worst-case search in a cell to \(O(\log n)\), but does <b>not</b> give global Successor in \(O(\log n)\) by itself (must know which bucket / scan buckets).</li>
+        <li><b>Huffman’s algorithm</b> always yields an optimal prefix code for that algorithm; optimal prefix trees in general need not make the two rarest symbols siblings.</li>
         <li><b>Master Theorem gap:</b> doesn't apply when f differs by only a log factor.</li>
         <li><b>Θ vs O:</b> give Θ for a tight bound; O suffices for an upper bound unless stated.</li>
         <li>State <b>which theorem</b> you invoke (lecture results allowed, homework results not).</li>
