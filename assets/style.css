@@ -1765,6 +1765,188 @@ svg text { font-family: "Segoe UI", sans-serif; }
   .quiz-confetti-piece { animation: none; display: none; }
 }
 
+/* ---------- Page navigation: folds, TOC, back-to-top ---------- */
+.page-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 12px 28px 0;
+}
+.page-tools-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-right: 4px;
+}
+.page-tool-btn {
+  background: var(--viz-btn-bg);
+  border: 1px solid var(--viz-btn-border);
+  color: var(--viz-btn-ink);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.page-tool-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.page-toc {
+  max-width: 1240px;
+  margin: 12px auto 0;
+  padding: 14px 28px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.page-toc-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+.page-toc-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.page-toc-links a {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card);
+}
+.page-toc-links a:hover,
+.page-toc-links a.active {
+  color: var(--ink);
+  border-color: var(--accent);
+  background: rgba(124, 156, 255, 0.12);
+}
+
+.sidebar .subnav-page {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.sidebar .subnav-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0 10px 6px;
+}
+.sidebar .subnav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 42vh;
+  overflow: auto;
+}
+.sidebar .subnav-links a {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 5px 10px;
+  color: var(--muted);
+  text-decoration: none;
+  border-radius: 8px;
+}
+.sidebar .subnav-links a:hover,
+.sidebar .subnav-links a.active {
+  color: var(--ink);
+  background: var(--nav-hover);
+}
+
+.sec-fold {
+  margin: 18px 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: transparent;
+  overflow: clip;
+}
+.sec-fold-summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+.sec-fold-summary::-webkit-details-marker { display: none; }
+.sec-fold-summary::marker { content: ''; }
+.sec-fold-summary h2.section {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sec-fold-summary h2.section::after {
+  content: '▾';
+  margin-left: auto;
+  font-size: 16px;
+  color: var(--muted);
+  transition: transform 0.15s ease;
+}
+.sec-fold:not([open]) .sec-fold-summary h2.section::after {
+  transform: rotate(-90deg);
+}
+.sec-fold-body {
+  padding: 4px 12px 16px;
+  border-top: 1px solid var(--line);
+}
+.sec-fold-body > *:first-child { margin-top: 12px; }
+
+.backtop {
+  position: fixed;
+  right: 20px;
+  bottom: 24px;
+  z-index: 60;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity 0.2s, transform 0.2s;
+  background: var(--accent2);
+  color: var(--backtop-ink);
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: 800;
+  font-size: 14px;
+  box-shadow: 0 8px 24px var(--shadow);
+  cursor: pointer;
+}
+.backtop.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+.backtop:hover { filter: brightness(1.05); }
+
+@media (max-width: 900px) {
+  .page-toc, .page-tools { padding-left: 16px; padding-right: 16px; }
+  .page-toc { position: static; }
+}
+
+@media print {
+  .page-tools, .page-toc, .backtop, .subnav-page { display: none !important; }
+  .sec-fold, .sec-fold-body { display: block !important; }
+  .sec-fold-summary h2.section::after { display: none; }
+}
+
 @media print {
   body { background: #fff; color: #000; font-size: 12px; }
   .sidebar, .backtop, .menu-toggle, .viz-controls, .theme-toggle, .quiz-overlay { display: none; }
