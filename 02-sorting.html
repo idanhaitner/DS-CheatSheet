@@ -241,11 +241,7 @@
       <tr>
         <td>Integers in \([0, N^2]\), need <b>time</b> \(\Theta(N)\)</td>
         <td><b>Radix sort</b> (base \(N\))</td>
-        <td>
-          Write each key in <b>base \(N\)</b>: \(x = a\cdot N + b\) with digits \(a=\lfloor x/N\rfloor\) and \(b=x\bmod N\), each in \(\{0,\ldots,N-1\}\). So every key has <b>2 digits</b>.
-          Counting-sort by the low digit, then by the high digit: \(2\) passes × \(\Theta(N+N)=\Theta(N)\) → total \(\Theta(N)\).
-          Example (\(N=10\)): key \(47\) → digits \((4,7)\); sort on \(7\), then on \(4\).
-        </td>
+        <td>In base \(N\), each key has 2 digits (each in \(\{0,\ldots,N-1\}\)). Two counting passes: \(\Theta(2(N+N))=\Theta(N)\).</td>
       </tr>
       <tr>
         <td>Each \(A[i]\) is within \(n^{0.4}\) of its sorted index (\(i \le A[i] \le i + n^{0.4}\))</td>
