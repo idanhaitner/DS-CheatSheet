@@ -213,84 +213,94 @@
   function injectDocsToc() {
     var headings = getHeadings();
     if (headings.length < 2) return;
-    if (document.querySelector('.docs-toc')) return;
 
-    document.body.classList.add('has-docs-toc');
+    var sidebarNav = document.querySelector('.sidebar nav');
+    var activeLink = sidebarNav && sidebarNav.querySelector('a.active');
+    if (!activeLink || document.querySelector('.sidebar-page')) return;
 
     var tree = buildTocTree(headings);
     var flat = flattenToc(tree);
 
-    var aside = document.createElement('aside');
-    aside.className = 'docs-toc';
-    aside.setAttribute('aria-label', 'On this page');
-
-    var details = document.createElement('details');
-    details.className = 'docs-toc-card';
-    details.open = localStorage.getItem('ds-toc-open') !== '0';
-
-    function syncTocLayout() {
-      document.body.classList.toggle('toc-open', details.open);
-      localStorage.setItem('ds-toc-open', details.open ? '1' : '0');
-    }
-    syncTocLayout();
+    /* Wrap the current chapter link so it unfolds to page sections. */
+    var page = document.createElement('details');
+    page.className = 'sidebar-page';
+    page.open = localStorage.getItem('ds-sidebar-toc-open') !== '0';
 
     var summary = document.createElement('summary');
-    summary.className = 'docs-toc-summary';
-    summary.innerHTML =
-      '<span class="docs-toc-title">On this page</span>' +
-      '<span class="docs-toc-chevron" aria-hidden="true"></span>';
-    details.appendChild(summary);
+    summary.className = 'sidebar-page-summary';
+    activeLink.parentNode.insertBefore(page, activeLink);
+    summary.appendChild(activeLink);
+    /* Chapter link navigates; chevron / summary toggles unfold. */
+    activeLink.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+    var chev = document.createElement('span');
+    chev.className = 'sidebar-page-chevron';
+    chev.setAttribute('aria-hidden', 'true');
+    summary.appendChild(chev);
+    page.appendChild(summary);
 
-    details.addEventListener('toggle', syncTocLayout);
+    page.addEventListener('toggle', function () {
+      localStorage.setItem('ds-sidebar-toc-open', page.open ? '1' : '0');
+    });
 
     var list = document.createElement('nav');
-    list.className = 'docs-toc-nav';
+    list.className = 'subnav sidebar-toc';
+    list.setAttribute('aria-label', 'On this page');
 
     function navigateTo(node) {
       history.replaceState(null, '', '#' + node.id);
       node.el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setActive(node.id);
+      /* Keep mobile menu usable after jump */
+      var sidebar = document.getElementById('sidebar');
+      if (sidebar && window.matchMedia('(max-width: 900px)').matches) {
+        sidebar.classList.remove('open');
+      }
     }
 
     renderTocTree(tree, list, 0, navigateTo, loadTocGroupState());
-    details.appendChild(list);
-    aside.appendChild(details);
-    document.body.appendChild(aside);
+    page.appendChild(list);
 
-    var jumper = document.createElement('div');
-    jumper.className = 'docs-toc-mobile';
-    var label = document.createElement('label');
-    label.innerHTML = '<span class="docs-toc-mobile-label">On this page</span>';
-    var sel = document.createElement('select');
-    sel.setAttribute('aria-label', 'Jump to section');
-    var opt0 = document.createElement('option');
-    opt0.value = '';
-    opt0.textContent = 'Jump to section…';
-    sel.appendChild(opt0);
-    flat.forEach(function (item) {
-      var n = item.node;
-      var pad = item.depth ? new Array(item.depth + 1).join('··') + ' ' : '';
-      var opt = document.createElement('option');
-      opt.value = n.id;
-      opt.textContent = pad + (n.extras.length
-        ? n.title + ' (' + n.extras.join(', ') + ')'
-        : n.title);
-      sel.appendChild(opt);
-    });
-    sel.addEventListener('change', function () {
-      if (!sel.value) return;
-      var h2 = document.getElementById(sel.value);
-      if (!h2) return;
-      history.replaceState(null, '', '#' + sel.value);
-      h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setActive(sel.value);
-    });
-    label.appendChild(sel);
-    jumper.appendChild(label);
-    var pagehead = document.querySelector('.pagehead');
-    if (pagehead && pagehead.parentNode) {
-      pagehead.parentNode.insertBefore(jumper, pagehead.nextSibling);
+    /* Compact jump select for very small screens (sidebar closed). */
+    if (!document.querySelector('.docs-toc-mobile')) {
+      var jumper = document.createElement('div');
+      jumper.className = 'docs-toc-mobile';
+      var label = document.createElement('label');
+      label.innerHTML = '<span class="docs-toc-mobile-label">On this page</span>';
+      var sel = document.createElement('select');
+      sel.setAttribute('aria-label', 'Jump to section');
+      var opt0 = document.createElement('option');
+      opt0.value = '';
+      opt0.textContent = 'Jump to section…';
+      sel.appendChild(opt0);
+      flat.forEach(function (item) {
+        var n = item.node;
+        var pad = item.depth ? new Array(item.depth + 1).join('··') + ' ' : '';
+        var opt = document.createElement('option');
+        opt.value = n.id;
+        opt.textContent = pad + (n.extras.length
+          ? n.title + ' (' + n.extras.join(', ') + ')'
+          : n.title);
+        sel.appendChild(opt);
+      });
+      sel.addEventListener('change', function () {
+        if (!sel.value) return;
+        var h2 = document.getElementById(sel.value);
+        if (!h2) return;
+        history.replaceState(null, '', '#' + sel.value);
+        h2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setActive(sel.value);
+      });
+      label.appendChild(sel);
+      jumper.appendChild(label);
+      var pagehead = document.querySelector('.pagehead');
+      if (pagehead && pagehead.parentNode) {
+        pagehead.parentNode.insertBefore(jumper, pagehead.nextSibling);
+      }
     }
+
+    var sel = document.querySelector('.docs-toc-mobile select');
 
     function setActive(id) {
       list.querySelectorAll('a').forEach(function (a) {
@@ -300,8 +310,9 @@
         var childActive = !!g.querySelector('.docs-toc-children a.active');
         var selfActive = !!g.querySelector(':scope > .docs-toc-group-summary > a.active');
         g.classList.toggle('has-active', childActive || selfActive);
+        if (childActive || selfActive) g.open = true;
       });
-      if (sel.value !== id) sel.value = id || '';
+      if (sel && sel.value !== id) sel.value = id || '';
     }
 
     function onScroll() {
