@@ -95,11 +95,22 @@
     var aside = document.createElement('aside');
     aside.className = 'docs-toc';
     aside.setAttribute('aria-label', 'On this page');
-    aside.innerHTML =
-      '<div class="docs-toc-card">' +
-      '<div class="docs-toc-title">On this page</div>' +
-      '</div>';
-    var card = aside.firstChild;
+
+    var details = document.createElement('details');
+    details.className = 'docs-toc-card';
+    details.open = localStorage.getItem('ds-toc-open') !== '0';
+
+    var summary = document.createElement('summary');
+    summary.className = 'docs-toc-summary';
+    summary.innerHTML =
+      '<span class="docs-toc-title">On this page</span>' +
+      '<span class="docs-toc-chevron" aria-hidden="true"></span>';
+    details.appendChild(summary);
+
+    details.addEventListener('toggle', function () {
+      localStorage.setItem('ds-toc-open', details.open ? '1' : '0');
+    });
+
     var list = document.createElement('nav');
     list.className = 'docs-toc-nav';
 
@@ -126,7 +137,8 @@
       });
       list.appendChild(a);
     });
-    card.appendChild(list);
+    details.appendChild(list);
+    aside.appendChild(details);
     document.body.appendChild(aside);
 
     var jumper = document.createElement('div');
