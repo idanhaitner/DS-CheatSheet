@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2 · Sorting + Animator</title>
-<link rel="stylesheet" href="assets/style.css?v=20260712docs3">
-<script src="assets/theme.js?v=20260712docs3"></script>
+<link rel="stylesheet" href="assets/style.css?v=20260712tocgroups">
+<script src="assets/theme.js?v=20260712tocmanual"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
@@ -30,7 +30,7 @@
   <div class="pagehead">
     <div class="crumbs"><a href="index.html">Home</a> › Sorting</div>
     <h1>2 · Sorting Algorithms</h1>
-    <p>Interactive animators · complexity tables · visual traces</p>
+    <p>Sorting · Partition · Selection problem · interactive animators</p>
   </div>
   <div class="inner">
 
@@ -178,7 +178,7 @@
       <tr><td>Best / Average</td><td><span class="tag b-Onlog">Θ(n log n)</span></td></tr>
       <tr><td>Worst (sorted + last-pivot)</td><td><span class="tag b-On2">Θ(n²)</span></td></tr>
     </table>
-    <div class="pitfall"><b>Worst case</b> occurs when the pivot is always min/max → splits of size (n−1, 0): \(T(n)=T(n-1)+\Theta(n)=\Theta(n^2)\). A deterministic last-element pivot triggers this on already-sorted input. Fix with a <b>random</b> or median-of-three pivot.</div>
+    <div class="pitfall"><b>Worst case</b> occurs when the pivot is always min/max → splits of size (n−1, 0): \(T(n)=T(n-1)+\Theta(n)=\Theta(n^2)\). A deterministic last-element pivot triggers this on already-sorted input. Fix with <a href="#sel-rand-partition"><b>RandomizedPartition</b></a> (or median-of-three).</div>
   </div>
 
   <!-- ===== HEAP ===== -->
@@ -358,10 +358,146 @@
     <div class="note"><b>Conclusion:</b> Merge/Heap sort are asymptotically <b>optimal</b> comparison sorts. Counting/Radix/Bucket beat this only by not being comparison-based.</div>
   </div>
 
-  <!-- ===== MEDIAN / SELECTION ANIMATOR ===== -->
-  <h2 class="section" id="median-viz">2.12 Median &amp; Order Statistics Visualizer</h2>
+  <!-- ===== 2.4 THE SELECTION PROBLEM ===== -->
+  <h2 class="section" id="selection-problem">2.4 The Selection Problem</h2>
+  <div class="card" id="selection-median">
+    <p><b>Input:</b> array \(A\) of \(n\) distinct numbers and an integer \(i\).<br>
+    <b>Goal:</b> return the <b>\(i\)-th smallest</b> element of \(A\) (the \(i\)-th order statistic).</p>
+    <ul>
+      <li>\(i = 1\) → minimum (easy linear scan).</li>
+      <li>\(i = n\) → maximum.</li>
+      <li>\(i = \lceil n/2\rceil\) → <b>median</b>.</li>
+    </ul>
+    <p>Sorting then indexing costs \(O(n\log n)\). Selection can be done in <b>linear</b> time: expected \(\Theta(n)\) with randomization, or worst-case \(\Theta(n)\) with median-of-medians.</p>
+    <table>
+      <tr><th>Tool</th><th>Setting</th><th>Time</th></tr>
+      <tr><td><a href="#sel-rand-select">Randomized-Select</a></td><td>static array</td><td>expected \(\Theta(n)\); worst \(O(n^2)\)</td></tr>
+      <tr><td><a href="#sel-deterministic">Select (MoM)</a></td><td>static array</td><td>worst-case \(\Theta(n)\)</td></tr>
+      <tr><td><a href="03-trees.html#ost">Order statistic tree</a></td><td>dynamic set</td><td>\(\Theta(\log n)\) per Select / Rank</td></tr>
+    </table>
+  </div>
+
+  <h2 class="section" id="sel-partition">2.4.1 Partition</h2>
   <div class="card">
-    <p style="margin-top:0">Find the <b>median</b> (or i-th smallest) in <b>linear time</b>: without fully sorting. Eliminated regions fade out as the algorithm narrows the search.</p>
+    <p>Same primitive as in <a href="#quick">Quicksort</a>. Pivot starts at \(A[r]\). After Partition, the pivot sits at index \(p\) and:</p>
+    <ul>
+      <li>every element in \(A[l..p-1]\) is \(\le\) pivot,</li>
+      <li>every element in \(A[p+1..r]\) is \(>\) pivot.</li>
+    </ul>
+    <p>During the scan there are <b>four zones</b>:</p>
+    <table>
+      <tr><th>Zone</th><th>Meaning</th></tr>
+      <tr><td>\(A[r]\)</td><td>pivot (moved into place at the end)</td></tr>
+      <tr><td>\(A[j..r-1]\)</td><td>not yet examined</td></tr>
+      <tr><td>\(A[i+1..j-1]\)</td><td>elements \(>\) pivot</td></tr>
+      <tr><td>\(A[l..i]\)</td><td>elements \(\le\) pivot</td></tr>
+    </table>
+    <span class="code-label">Partition (Lomuto)</span>
+<pre><span class="kw">Partition</span>(A, l, r):
+    i = l - 1
+    <span class="kw">for</span> j = l <span class="kw">to</span> r - 1:
+        <span class="kw">if</span> A[j] &lt;= A[r]:
+            i = i + 1
+            swap(A[i], A[j])
+    swap(A[i + 1], A[r])
+    <span class="kw">return</span> i + 1                 <span class="cm"># final index of the pivot</span></pre>
+    <p>Time <span class="tag b-On">\(\Theta(n)\)</span> for a subarray of length \(n = r-l+1\). After Partition, the pivot’s <b>rank in the subarray</b> is \(k = p - l + 1\) (number of elements in \(A[l..r]\) that are \(\le\) pivot).</p>
+  </div>
+
+  <h2 class="section" id="sel-rand-partition">2.4.2 Randomized Partition</h2>
+  <div class="card">
+    <p>A fixed pivot (e.g. last element) can always be the min/max → terrible splits. <b>RandomizedPartition</b> picks a uniform random index in \([l,r]\), swaps it to the end, then runs ordinary Partition.</p>
+    <span class="code-label">pseudocode</span>
+<pre><span class="kw">RandomizedPartition</span>(A, l, r):
+    i = Random(l, r)             <span class="cm"># uniform in [l..r]</span>
+    swap(A[i], A[r])
+    <span class="kw">return</span> Partition(A, l, r)</pre>
+    <p>Used by both <b>Randomized-Quicksort</b> and <b>Randomized-Select</b>. For any fixed distinct input, expected Quicksort time becomes \(\Theta(n\log n)\) (randomness is in the algorithm, not the input).</p>
+    <div class="note"><b>Randomized-Quicksort:</b> same as Quicksort, but line (2) calls <code>RandomizedPartition</code> instead of <code>Partition</code>.</div>
+  </div>
+
+  <h2 class="section" id="sel-rand-select">2.4.3 Randomized-Select</h2>
+  <div class="card">
+    <p>Like Quicksort’s divide step, but recurse into <b>only one side</b>: the side that still contains the \(i\)-th element.</p>
+    <span class="code-label">pseudocode (lecture)</span>
+<pre><span class="kw">RandomizedSelect</span>(A, l, r, i):   <span class="cm"># i-th smallest in A[l..r], 1-based</span>
+    <span class="kw">if</span> l == r:
+        <span class="kw">return</span> A[l]
+    p = RandomizedPartition(A, l, r)
+    k = p - l + 1                <span class="cm"># rank of pivot in this subarray</span>
+    <span class="kw">if</span> i == k:
+        <span class="kw">return</span> A[p]
+    <span class="kw">elif</span> i &lt; k:
+        <span class="kw">return</span> RandomizedSelect(A, l, p - 1, i)
+    <span class="kw">else</span>:
+        <span class="kw">return</span> RandomizedSelect(A, p + 1, r, i - k)</pre>
+    <p><b>Call:</b> <code>RandomizedSelect(A, 0, n-1, i)</code> for the \(i\)-th smallest in the whole array.</p>
+    <div class="pitfall"><b>When going right,</b> subtract \(k\): the left side plus the pivot account for the \(k\) smallest elements in the current range, so the target becomes the \((i-k)\)-th in the right side.</div>
+  </div>
+
+  <h2 class="section" id="sel-rand-analysis">2.4.4 Expected-time analysis</h2>
+  <div class="card">
+    <p>Same green/red coloring idea as in the randomized Quicksort analysis:</p>
+    <ul>
+      <li>A node \(v\) is <b>green</b> if it is the root, or \(\mathrm{size}(v) \le \tfrac34 \cdot \mathrm{size}(\mathrm{parent})\). Otherwise <b>red</b>.</li>
+      <li>A green node has at most one red child; \(\Pr[\text{red child}] \le 1/2\).</li>
+      <li>For green \(v\): \(E[\mathrm{cost}(v)] \le 2\cdot\mathrm{size}(v)\).</li>
+    </ul>
+    <p>Along the unique path of green nodes \(u_0,u_1,\ldots\) in a Select recursion tree:</p>
+    \[
+      \mathrm{size}(u_i) \le \Bigl(\tfrac34\Bigr)^i n
+      \qquad\Rightarrow\qquad
+      E\Bigl[\sum_i \mathrm{cost}(u_i)\Bigr]
+        \le 2\sum_i\Bigl(\tfrac34\Bigr)^i n
+        = O(n).
+    \]
+    <p>So expected time of Randomized-Select is <span class="tag b-On">\(\Theta(n)\)</span>. Worst case is still <span class="tag b-On2">\(O(n^2)\)</span> if every pivot is extreme (low probability).</p>
+  </div>
+
+  <h2 class="section" id="sel-deterministic">2.4.5 Deterministic Select (median of medians)</h2>
+  <div class="card">
+    <p>Same skeleton as Randomized-Select, but the pivot is chosen by <b>ChoosePivot</b> so every split is “good enough” in the worst case.</p>
+    <span class="code-label">Select</span>
+<pre><span class="kw">Select</span>(A, l, r, i):
+    <span class="kw">if</span> l == r: <span class="kw">return</span> A[l]
+    j = ChoosePivot(A, l, r)
+    swap(A[j], A[r])
+    p = Partition(A, l, r)
+    k = p - l + 1
+    <span class="kw">if</span> i == k:     <span class="kw">return</span> A[p]
+    <span class="kw">elif</span> i &lt; k:  <span class="kw">return</span> Select(A, l, p - 1, i)
+    <span class="kw">else</span>:          <span class="kw">return</span> Select(A, p + 1, r, i - k)</pre>
+
+    <h4>ChoosePivot (groups of 5)</h4>
+    <ol>
+      <li>If \(n = r-l+1 \le 10\), return \(r\) (small case).</li>
+      <li>Split \(A[l..r]\) into \(\lceil n/5\rceil\) groups of 5 (last group may be smaller).</li>
+      <li>Sort each group; copy the group medians into array \(B\).</li>
+      <li>\(x = \mathrm{Select}(B,\, \lceil |B|/2\rceil)\) — the <b>median of medians</b>.</li>
+      <li>Return the index of \(x\) in \(A\).</li>
+    </ol>
+
+    <h4>Why the pivot is good</h4>
+    <p>At least roughly half of the group-medians are \(\ge x\), and each such group contributes at least 3 elements \(\ge x\). Same for elements \(\le x\). Lecture bound:</p>
+    \[
+      \#\{ \text{elements } > x \} \;\ge\; \tfrac{3}{10}n - 6
+      \qquad\text{(and likewise for }{<}\,x\text{)}.
+    \]
+    <p>So the recursive Select call works on at most \(\tfrac{7}{10}n + 6\) elements.</p>
+
+    <h4>Recurrence</h4>
+    \[
+      T(n) = T\bigl(\lceil n/5\rceil\bigr) + T\bigl(\tfrac{7}{10}n + 6\bigr) + \Theta(n).
+    \]
+    <p>Simplified: \(T(n) = T(n/5) + T(7n/10) + n\). By induction \(T(n) \le cn\) for large enough \(c\) (since \(\tfrac15+\tfrac{7}{10}=\tfrac{9}{10}&lt;1\)).</p>
+    <p style="text-align:center"><b>Worst-case</b> <span class="tag b-On">\(\Theta(n)\)</span>.</p>
+    <div class="warn"><b>Why groups of 5?</b> Odd size → clean median. Fractions must sum to less than 1. Groups of 3 give \(T(n/3)+T(2n/3)+O(n)=O(n\log n)\): not linear.</div>
+  </div>
+
+  <!-- ===== MEDIAN / SELECTION ANIMATOR ===== -->
+  <h2 class="section" id="median-viz">2.4.6 Selection Visualizer</h2>
+  <div class="card">
+    <p style="margin-top:0">Watch <b>Quickselect</b> (Randomized-Select style) and <b>Median of Medians</b> narrow the array. Eliminated regions fade out.</p>
     <div class="sort-viz-wrap median-viz-wrap" data-modes='["quickselect","mom"]' data-default="quickselect">
       <div class="viz-controls">
         <label class="viz-algo-label">Algorithm: <select class="viz-algo"></select></label>
@@ -392,32 +528,6 @@
         <span>Swaps / writes: <b class="viz-swaps">0</b></span>
       </div>
     </div>
-  </div>
-
-  <!-- ===== SELECTION / MEDIAN THEORY ===== -->
-  <h2 class="section" id="selection-median">Selection &amp; Median (order statistics)</h2>
-  <div class="card">
-    <p>Find the \(i\)-th smallest element (the <b>median</b> is \(i=\lfloor n/2\rfloor\)). Sorting takes \(O(n\log n)\), but selection can be done in <b>linear time</b>. Use the <a href="#median-viz">visualizer above</a> to watch Quickselect and Median-of-Medians.</p>
-    <h4>Randomized Select (Quickselect): expected O(n)</h4>
-    <p>Like quicksort but recurse into <b>only one side</b>.</p>
-    <span class="code-label">pseudocode</span>
-<pre><span class="kw">RandSelect</span>(A, lo, hi, i):
-    <span class="kw">if</span> lo == hi:
-        <span class="kw">return</span> A[lo]
-    q = RandPartition(A, lo, hi)
-    k = q - lo + 1               <span class="cm"># rank of pivot within range</span>
-    <span class="kw">if</span>   i == k: <span class="kw">return</span> A[q]
-    <span class="kw">elif</span> i &lt; k:  <span class="kw">return</span> RandSelect(A, lo,  q-1, i)
-    <span class="kw">else</span>:       <span class="kw">return</span> RandSelect(A, q+1, hi,  i-k)</pre>
-    <p>Expected <span class="tag b-On">O(n)</span> from \(T(n)\le T(3n/4)+O(n)\); worst <span class="tag b-On2">O(n²)</span>.</p>
-    <h4>Deterministic Select: median of medians: worst-case O(n)</h4>
-    <ol>
-      <li>Divide into groups of <b>5</b>; find each group's median (O(n) total).</li>
-      <li><b>Recursively</b> find the median \(x\) of those \(\lceil n/5\rceil\) medians.</li>
-      <li>Partition around \(x\); recurse into the correct side.</li>
-    </ol>
-    <p style="text-align:center">\(T(n) \le T(n/5) + T(7n/10) + O(n) \Rightarrow T(n)=O(n)\) &nbsp; (since \(\tfrac15+\tfrac{7}{10}&lt;1\))</p>
-    <div class="warn"><b>Why groups of 5?</b> Odd size gives a clean median and keeps the two recursion fractions summing below 1. Groups of 3 give \(T(n/3)+T(2n/3)+O(n)=O(n\log n)\): fails.</div>
   </div>
 
   </div>

@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>3 · Structures &amp; Trees</title>
-<link rel="stylesheet" href="assets/style.css?v=20260712docs3">
-<script src="assets/theme.js?v=20260712docs3"></script>
+<link rel="stylesheet" href="assets/style.css?v=20260712ost2">
+<script src="assets/theme.js?v=20260712tocmanual"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
@@ -213,12 +213,12 @@
     <h4>New operations</h4>
     <table>
       <tr><th>Operation</th><th>Meaning</th><th>Time</th></tr>
-      <tr><td><b>Select(S, i)</b></td><td>Return the element of <b>rank \(i\)</b> (the \(i\)-th smallest; ranks are <b>0-based</b> in the tutorial)</td><td><span class="tag b-Olog">\(\Theta(\log n)\)</span></td></tr>
-      <tr><td><b>Rank(S, k)</b></td><td>Given a key \(k\) that exists in \(S\), return its order (how many keys are strictly smaller)</td><td><span class="tag b-Olog">\(\Theta(\log n)\)</span></td></tr>
+      <tr><td><b>Select(S, i)</b></td><td>Return the <b>\(i\)-th smallest</b> key (\(i=1\) is the minimum)</td><td><span class="tag b-Olog">\(\Theta(\log n)\)</span></td></tr>
+      <tr><td><b>Rank(S, k)</b></td><td>Return the rank of key \(k\) in \(S\) (\(1\) = smallest)</td><td><span class="tag b-Olog">\(\Theta(\log n)\)</span></td></tr>
     </table>
     <div class="note">
       <b>Example:</b> \(S=\{2,9,3,8,20,1,5\}\) sorted is \(1,2,3,5,8,9,20\).<br>
-      \(\mathrm{Select}(S,0)=1\), \(\mathrm{Select}(S,2)=3\), \(\mathrm{Rank}(S,5)=3\), \(\mathrm{Rank}(S,20)=6\).
+      \(\mathrm{Select}(S,1)=1\), \(\mathrm{Select}(S,3)=3\), \(\mathrm{Rank}(S,5)=4\), \(\mathrm{Rank}(S,20)=7\).
     </div>
 
     <h4>The extra field: <code>size</code></h4>
@@ -237,28 +237,40 @@
     </ul>
     <p>Search / Min / Max / Succ / Pred stay as in AVL: they ignore <code>size</code>.</p>
 
-    <h4>Select(S, i) — find the element of rank \(i\)</h4>
-<span class="code-label">pseudocode</span>
-<pre><span class="kw">Select</span>(node, i):
-    curr = node.left.size          <span class="cm"># 0 if no left child</span>
-    <span class="kw">if</span> i == curr: <span class="kw">return</span> node
-    <span class="kw">if</span> i &lt; curr:  <span class="kw">return</span> Select(node.left, i)
-    <span class="kw">return</span> Select(node.right, i - curr - 1)
+    <h4>Interactive animator</h4>
+    <p class="ost-lead">Try <b>Select(i)</b> or <b>Rank(k)</b> on the demo tree. Small badge on each node = subtree <code>size</code>.</p>
+    <div class="tree-viz-wrap ost-viz-wrap">
+      <div class="ost-toolbar">
+        <div class="ost-mode-toggle" role="group" aria-label="Mode">
+          <button type="button" class="ost-mode-btn is-on" data-mode="select">Select(i)</button>
+          <button type="button" class="ost-mode-btn" data-mode="rank">Rank(k)</button>
+        </div>
+        <label class="viz-arg-label"><input type="number" class="viz-arg" min="1" max="7" value="3"></label>
+        <div class="ost-toolbar-actions">
+          <button type="button" class="viz-btn viz-primary viz-run">▶ Run</button>
+          <button type="button" class="viz-btn viz-prev" title="Previous step">◀</button>
+          <button type="button" class="viz-btn viz-next" title="Next step">▶</button>
+          <button type="button" class="viz-btn viz-reset" title="Reset">Reset</button>
+        </div>
+        <label class="ost-speed-label">Speed <input type="range" class="viz-speed" min="100" max="1800" value="1200" step="20"></label>
+      </div>
 
-<span class="kw">Select</span>(i): <span class="kw">return</span> Select(root, i)</pre>
-    <p>Idea: \(\mathit{curr}\) = rank of the current node inside its subtree. Go left if \(i\) is smaller; go right and subtract \(\mathit{curr}+1\) (skip the left subtree and the node itself).</p>
+      <div class="tree-stage ost-stage"></div>
 
-    <h4>Rank(S, k) — order of key \(k\)</h4>
-<span class="code-label">pseudocode</span>
-<pre><span class="kw">Rank</span>(node, k):
-    <span class="kw">if</span> node.key == k: <span class="kw">return</span> node.left.size
-    <span class="kw">if</span> k &lt; node.key:  <span class="kw">return</span> Rank(node.left, k)
-    <span class="kw">return</span> Rank(node.right, k) + node.left.size + 1
+      <div class="ost-statusbar">
+        <p class="viz-desc ost-status-text">Loading…</p>
+        <span class="ost-step">Step <b class="viz-step">0</b>/<b class="viz-total">0</b></span>
+      </div>
 
-<span class="kw">Rank</span>(k): <span class="kw">return</span> Rank(root, k)</pre>
-    <p>When going right, add \(1 + \mathit{left.size}\) (the current node and its whole left subtree are smaller than \(k\)).</p>
+      <div class="ost-order-strip" aria-label="Sorted order"></div>
 
-    <div class="note"><b>Exam takeaway:</b> Order statistic tree = AVL + <code>size</code>. Gives Select and Rank in \(\Theta(\log n)\) without slowing other ops. Do not confuse with Quickselect (array, expected \(O(n)\), not dynamic).</div>
+      <details class="ost-code-fold" open>
+        <summary>Pseudocode</summary>
+        <pre class="viz-code" aria-label="Select / Rank pseudocode"></pre>
+      </details>
+    </div>
+
+    <div class="note"><b>Exam takeaway:</b> Order statistic tree = AVL + <code>size</code>. Gives Select and Rank in \(\Theta(\log n)\) without slowing other ops. Do not confuse with <a href="02-sorting.html#selection-problem">Randomized-Select / median of medians</a> (array, linear time, not a dynamic structure).</div>
   </div>
 
   <h2 class="section" id="btree">3.7 B-Tree (minimum degree t)</h2>
@@ -323,6 +335,8 @@
   </div>
 </main>
 </div>
+<script src="assets/viz-code-helper.js?v=20260712ost" defer></script>
 <script src="assets/trees.js?v=20260711h" defer></script>
+<script src="assets/ost.js?v=20260712ost1b" defer></script>
 </body>
 </html>
