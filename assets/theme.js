@@ -72,6 +72,19 @@
     update();
   }
 
+  function tocLabel(h2) {
+    var clone = h2.cloneNode(true);
+    var tags = clone.querySelectorAll('.tag');
+    var extras = [];
+    Array.prototype.forEach.call(tags, function (tag) {
+      var t = (tag.textContent || '').replace(/\s+/g, ' ').trim();
+      if (t) extras.push(t);
+      tag.remove();
+    });
+    var title = (clone.textContent || '').replace(/\s+/g, ' ').trim();
+    return { title: title, extras: extras };
+  }
+
   function injectDocsToc() {
     var headings = getHeadings();
     if (headings.length < 2) return;
@@ -82,14 +95,29 @@
     var aside = document.createElement('aside');
     aside.className = 'docs-toc';
     aside.setAttribute('aria-label', 'On this page');
-    aside.innerHTML = '<div class="docs-toc-title">On this page</div>';
+    aside.innerHTML =
+      '<div class="docs-toc-card">' +
+      '<div class="docs-toc-title">On this page</div>' +
+      '</div>';
+    var card = aside.firstChild;
     var list = document.createElement('nav');
     list.className = 'docs-toc-nav';
 
     headings.forEach(function (h2) {
+      var meta = tocLabel(h2);
       var a = document.createElement('a');
       a.href = '#' + h2.id;
-      a.textContent = h2.textContent.replace(/\s+/g, ' ').trim();
+      a.className = 'docs-toc-link';
+      var title = document.createElement('span');
+      title.className = 'docs-toc-link-title';
+      title.textContent = meta.title;
+      a.appendChild(title);
+      if (meta.extras.length) {
+        var badge = document.createElement('span');
+        badge.className = 'docs-toc-link-meta';
+        badge.textContent = meta.extras.join(' · ');
+        a.appendChild(badge);
+      }
       a.addEventListener('click', function (e) {
         e.preventDefault();
         history.replaceState(null, '', '#' + h2.id);
@@ -98,24 +126,26 @@
       });
       list.appendChild(a);
     });
-    aside.appendChild(list);
+    card.appendChild(list);
     document.body.appendChild(aside);
 
-    // Compact mobile jumper (select)
     var jumper = document.createElement('div');
     jumper.className = 'docs-toc-mobile';
     var label = document.createElement('label');
-    label.textContent = 'Jump to section';
+    label.innerHTML = '<span class="docs-toc-mobile-label">On this page</span>';
     var sel = document.createElement('select');
     sel.setAttribute('aria-label', 'Jump to section');
     var opt0 = document.createElement('option');
     opt0.value = '';
-    opt0.textContent = 'On this page…';
+    opt0.textContent = 'Jump to section…';
     sel.appendChild(opt0);
     headings.forEach(function (h2) {
+      var meta = tocLabel(h2);
       var opt = document.createElement('option');
       opt.value = h2.id;
-      opt.textContent = h2.textContent.replace(/\s+/g, ' ').trim();
+      opt.textContent = meta.extras.length
+        ? meta.title + ' (' + meta.extras.join(', ') + ')'
+        : meta.title;
       sel.appendChild(opt);
     });
     sel.addEventListener('change', function () {
