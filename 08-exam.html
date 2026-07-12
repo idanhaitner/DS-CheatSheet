@@ -157,7 +157,7 @@
         <li><b>Sorting best/worst fill-ins</b>: given constraints (e.g. each element within \(n^{0.4}\) of its index), work out Insertion/Merge/Quick/Counting behavior. Insertion is O(n·shift-distance); deterministic Quick's worst is on sorted input. For <b>linear sorts</b>, check whether \(k=O(n)\) or \(d=o(\log n)\): see <a href="02-sorting.html#linear-sorting">§2.3 decision guide</a>.</li>
         <li><b>"Best algorithm to sort \(n\) integers with \(L\) binary digits"</b>: compare Radix \(\Theta(L\cdot n)\) vs Merge \(\Theta(n\log n)\). Radix when \(L=o(\log n)\); Merge when \(L=\Omega(\log n)\).</li>
       <li><b>Design a structure meeting target complexities</b>: combine primitives: hash table (O(1) contains) + sorted array/AVL (order/median) + auxiliary arrays. State fields, describe each op, analyze.</li>
-      <li><b>Graph counting / proof</b>: e.g. "# distinct BFS trees", "is \(e_{\min}\) in every MST?", "is edge \(e\) in some MST?": see <a href="06-graphs.html#graph-exam">§6.9 graph exam tips</a>.</li>
+        <li><b>Graph counting / proof</b>: e.g. “number of distinct BFS trees”, "is \(e_{\min}\) in every MST?", "is edge \(e\) in some MST?": see <a href="06-graphs.html#graph-exam">§6.9 graph exam tips</a>.</li>
       <li><b>Graph reductions</b>: super-source/sink, vertex splitting, reverse graph, reduce to MST. Always define \(G'\) and analyze build + algorithm time.</li>
     </ul>
     <h4>Top pitfalls to avoid</h4>

@@ -184,7 +184,7 @@
         <td>\(E[X]=np\)</td>
       </tr>
     </table>
-    <p class="case-hint">Some texts define Geometric as “#failures before first success” (then \(E=(1-p)/p\)). In this course: height of a node \(+1\) is Geometric with \(p=\tfrac12\), so \(E[\text{height}+1]=2\) and \(E[\text{height}]=1\).</p>
+    <p class="case-hint">Some texts define Geometric as “number of failures before first success” (then \(E=(1-p)/p\)). In this course: height of a node \(+1\) is Geometric with \(p=\tfrac12\), so \(E[\text{height}+1]=2\) and \(E[\text{height}]=1\).</p>
 
     <h5>1) Expected height of one node</h5>
     <p>Insert flips until Heads. Let \(H\) = height of the node. Then \(H+1\sim\mathrm{Geometric}(1/2)\):</p>
@@ -215,7 +215,7 @@
 
     <h5>4) Expected number of rightward steps in Search (Geometric)</h5>
     <p>Analyze the <b>reverse</b> of the Find path: from the answer at \(S_0\), go up when possible, otherwise left. On each level \(S_i\), the coins of nodes you visit leftward are Heads…Heads… then a Tails (the node where you can go up) — like a Geometric experiment.</p>
-    <p>Let \(R_i\) = #rightward (forward) steps on level \(i\). If \(X\sim\mathrm{Geometric}(1/2)\) counts flips until Heads, then \(R_i \le X-1\), so</p>
+    <p>Let \(R_i\) = number of rightward (forward) steps on level \(i\). If \(X\sim\mathrm{Geometric}(1/2)\) counts flips until Heads, then \(R_i \le X-1\), so</p>
     \[
       E[R_i]\le E[X]-1 = 2-1 = 1.
     \]
