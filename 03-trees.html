@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>3 · Structures &amp; Trees</title>
-<link rel="stylesheet" href="assets/style.css?v=20260712dsmap">
+<link rel="stylesheet" href="assets/style.css?v=20260712dictdown">
 <script src="assets/theme.js?v=20260712tocmanual"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
@@ -24,6 +24,7 @@
     <a href="06-graphs.html">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
+    <a href="09-assignments.html">9 · Homework</a>
   </nav>
 </aside>
 <main class="content">
@@ -271,6 +272,15 @@
     </div>
 
     <div class="note"><b>Exam takeaway:</b> Order statistic tree = AVL + <code>size</code>. Gives Select and Rank in \(\Theta(\log n)\) without slowing other ops. Do not confuse with <a href="02-sorting.html#selection-problem">Randomized-Select / median of medians</a> (array, linear time, not a dynamic structure).</div>
+
+    <h4>OST vs Indexable Skip List — when to pick which</h4>
+    <table>
+      <tr><th></th><th>OST (AVL + <code>size</code>)</th><th><a href="05-hashing.html#indexable-skiplist">Indexable skip list</a> (<code>width</code>)</th></tr>
+      <tr><td>Insert / Delete / Search / Select</td><td>worst-case \(\Theta(\log n)\)</td><td>expected \(O(\log n)\)</td></tr>
+      <tr><td>Rank</td><td>natural with <code>size</code></td><td>same idea via widths</td></tr>
+      <tr><td>Prefer when…</td><td>need <b>worst-case</b> bounds</td><td>expected time is enough</td></tr>
+    </table>
+    <div class="pitfall"><b>Wrong “median BST”:</b> forcing every node to be the median of its subtree does <b>not</b> give cheap Insert/Delete. Use <b>local</b> aux fields (<code>size</code> / <code>width</code>), not absolute indices.</div>
   </div>
 
   <h2 class="section" id="btree">3.7 B-Tree (minimum degree t)</h2>

@@ -70,16 +70,24 @@
       return tx;
     }
     var COL = {
-      def: ['#4a5aa8', '#6b78c8', '#fff'],
-      sentinel: ['#455a9e', '#5a6a9e', '#eaf0ff'],
-      cur: ['#6366f1', '#818cf8', '#fff'],
-      path: ['#3f5bd6', '#8fb6ff', '#fff'],
-      found: ['#2f8f5f', '#43c483', '#eafff4'],
-      new: ['#0d9488', '#57e0c0', '#04121a'],
-      edge: '#3a4278',
-      edgePath: '#6366f1',
-      edgeActive: '#818cf8',
-      tower: '#5a6a9e'
+      node: '#4f46e5',
+      nodeStroke: '#6366f1',
+      nodeText: '#ffffff',
+      sentFill: '#eef2ff',
+      sentStroke: '#818cf8',
+      sentText: '#3730a3',
+      cur: '#7c3aed',
+      curStroke: '#a78bfa',
+      found: '#0f766e',
+      foundStroke: '#14b8a6',
+      foundText: '#ffffff',
+      neu: '#0f766e',
+      neuStroke: '#14b8a6',
+      edge: '#c7d2fe',
+      edgeHot: '#7c3aed',
+      tower: '#e0e7ff',
+      rank: '#64748b',
+      lane: '#e2e8f0'
     };
 
     var frames = [], idx = 0, timer = null, playing = false;
@@ -262,12 +270,7 @@
     }
 
     function layout(nodes, maxLevel) {
-      var NW = 46;
-      var NH = 30;
-      var W = 62;
-      var x0 = 44;
-      var y0 = 32;
-      var lh = 44;
+      var R = 15, W = 70, x0 = 48, y0 = 28, lh = 44;
       var pos = nodes.map(function (_, i) { return { x: x0 + i * W, ys: [] }; });
       for (var lv = 0; lv < maxLevel; lv++) {
         var y = y0 + (maxLevel - 1 - lv) * lh;
@@ -276,9 +279,9 @@
         }
       }
       return {
-        pos: pos, x0: x0, y0: y0, lh: lh, W: W, NW: NW, NH: NH,
-        width: pos[nodes.length - 1].x + NW + 20,
-        height: y0 + (maxLevel - 1) * lh + NH + 20
+        pos: pos, x0: x0, y0: y0, lh: lh, W: W, R: R,
+        width: pos[nodes.length - 1].x + R + 28,
+        height: y0 + (maxLevel - 1) * lh + R + 20
       };
     }
 
@@ -298,18 +301,18 @@
       svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
       svg.setAttribute('width', '100%');
       svg.style.height = 'auto';
-      svg.style.maxHeight = '270px';
+      svg.style.maxHeight = '280px';
 
-      var NW = lay.NW;
-      var NH = lay.NH;
-      var midY = NH / 2;
+      var R = lay.R;
+      function cx(i) { return lay.pos[i].x; }
+      function cy(i, lv) { return lay.pos[i].ys[lv]; }
 
-      function nodeFill(i) {
-        if (f.found === i) return COL.found;
-        if (f.cur && f.cur.ni === i) return COL.cur;
-        if (nodes[i].isNew) return COL.new;
-        if (nodes[i].sentinel) return COL.sentinel;
-        return COL.def;
+      function nodeStyle(i) {
+        if (f.found === i) return { fill: COL.found, stroke: COL.foundStroke, text: COL.foundText };
+        if (f.cur && f.cur.ni === i) return { fill: COL.cur, stroke: COL.curStroke, text: '#fff' };
+        if (nodes[i].isNew) return { fill: COL.neu, stroke: COL.neuStroke, text: '#fff' };
+        if (nodes[i].sentinel) return { fill: COL.sentFill, stroke: COL.sentStroke, text: COL.sentText };
+        return { fill: COL.node, stroke: COL.nodeStroke, text: COL.nodeText };
       }
 
       function nodeLabel(node) {
@@ -317,52 +320,31 @@
         return String(node.key);
       }
 
-      function boxMetrics(i, lv) {
-        return {
-          x: lay.pos[i].x,
-          y: lay.pos[i].ys[lv],
-          w: NW,
-          h: NH,
-          cx: lay.pos[i].x + NW / 2
-        };
-      }
-
       for (var lv = 0; lv < ml; lv++) {
-        var y = lay.y0 + (ml - 1 - lv) * lay.lh;
-        var gl = document.createElementNS(SVGNS, 'line');
-        gl.setAttribute('x1', lay.x0 - 8);
-        gl.setAttribute('y1', y + midY);
-        gl.setAttribute('x2', lay.width - 6);
-        gl.setAttribute('y2', y + midY);
-        gl.setAttribute('stroke', 'var(--line)');
-        gl.setAttribute('stroke-width', '1.5');
-        svg.appendChild(gl);
-
-        var lbl = document.createElementNS(SVGNS, 'text');
-        lbl.setAttribute('x', '10');
-        lbl.setAttribute('y', String(y + midY));
-        lbl.setAttribute('fill', 'var(--muted)');
-        lbl.setAttribute('font-size', '13');
-        lbl.setAttribute('font-weight', '700');
-        lbl.setAttribute('font-family', FONT);
-        lbl.setAttribute('dominant-baseline', 'central');
-        lbl.textContent = 'L' + lv;
-        svg.appendChild(lbl);
+        var ly = lay.y0 + (ml - 1 - lv) * lay.lh;
+        var lane = document.createElementNS(SVGNS, 'line');
+        lane.setAttribute('x1', 28);
+        lane.setAttribute('y1', ly);
+        lane.setAttribute('x2', lay.width - 6);
+        lane.setAttribute('y2', ly);
+        lane.setAttribute('stroke', COL.lane);
+        lane.setAttribute('stroke-width', '1');
+        lane.setAttribute('stroke-dasharray', '2 6');
+        svg.appendChild(lane);
+        addSvgText(svg, 10, ly, 'L' + lv, COL.rank, 11, '600', 'start');
       }
 
       for (var i = 0; i < nodes.length; i++) {
         if (nodes[i].h <= 1) continue;
-        var b0 = boxMetrics(i, 0);
-        var bTop = boxMetrics(i, nodes[i].h - 1);
-        var px = b0.cx;
-        var tower = document.createElementNS(SVGNS, 'line');
-        tower.setAttribute('x1', px);
-        tower.setAttribute('y1', b0.y + midY);
-        tower.setAttribute('x2', px);
-        tower.setAttribute('y2', bTop.y + midY);
-        tower.setAttribute('stroke', COL.tower);
-        tower.setAttribute('stroke-width', '2.5');
-        svg.appendChild(tower);
+        var spine = document.createElementNS(SVGNS, 'line');
+        spine.setAttribute('x1', cx(i));
+        spine.setAttribute('y1', cy(i, 0));
+        spine.setAttribute('x2', cx(i));
+        spine.setAttribute('y2', cy(i, nodes[i].h - 1));
+        spine.setAttribute('stroke', COL.tower);
+        spine.setAttribute('stroke-width', '3');
+        spine.setAttribute('stroke-linecap', 'round');
+        svg.appendChild(spine);
       }
 
       for (lv = 0; lv < ml; lv++) {
@@ -370,52 +352,34 @@
           if (!nodeAtLevel(nodes, j, lv)) continue;
           var nx = nextOnLevel(nodes, j, lv);
           if (nx === j) continue;
-          var bj = boxMetrics(j, lv);
-          var bn = boxMetrics(nx, lv);
+          var isPath = f.cur && f.cur.lv === lv && (f.cur.ni === j || f.cur.ni === nx);
           var ln = document.createElementNS(SVGNS, 'line');
-          ln.setAttribute('x1', bj.x + bj.w);
-          ln.setAttribute('y1', bj.y + midY);
-          ln.setAttribute('x2', bn.x + 3);
-          ln.setAttribute('y2', bn.y + midY);
-          ln.setAttribute('stroke', COL.edge);
-          ln.setAttribute('stroke-width', '2.5');
+          ln.setAttribute('x1', cx(j) + R);
+          ln.setAttribute('y1', cy(j, lv));
+          ln.setAttribute('x2', cx(nx) - R);
+          ln.setAttribute('y2', cy(nx, lv));
+          ln.setAttribute('stroke', isPath ? COL.edgeHot : COL.edge);
+          ln.setAttribute('stroke-width', isPath ? '2.5' : '1.75');
+          ln.setAttribute('stroke-linecap', 'round');
           svg.appendChild(ln);
         }
       }
 
       for (i = 0; i < nodes.length; i++) {
-        var col = nodeFill(i);
+        var st = nodeStyle(i);
         var label = nodeLabel(nodes[i]);
         for (lv = 0; lv < nodes[i].h; lv++) {
-          var box = boxMetrics(i, lv);
           var isCur = f.cur && f.cur.ni === i && f.cur.lv === lv;
-          if (isCur) {
-            var ring = document.createElementNS(SVGNS, 'rect');
-            ring.setAttribute('x', box.x - 4);
-            ring.setAttribute('y', box.y - 4);
-            ring.setAttribute('width', String(box.w + 8));
-            ring.setAttribute('height', String(box.h + 8));
-            ring.setAttribute('rx', '10');
-            ring.setAttribute('fill', 'none');
-            ring.setAttribute('stroke', col[1]);
-            ring.setAttribute('stroke-width', '3.5');
-            ring.setAttribute('opacity', '0.9');
-            svg.appendChild(ring);
-          }
-          var rect = document.createElementNS(SVGNS, 'rect');
-          rect.setAttribute('x', box.x);
-          rect.setAttribute('y', box.y);
-          rect.setAttribute('width', String(box.w));
-          rect.setAttribute('height', String(box.h));
-          rect.setAttribute('rx', '7');
-          rect.setAttribute('fill', col[0]);
-          rect.setAttribute('stroke', col[1]);
-          rect.setAttribute('stroke-width', isCur ? '4' : '2');
-          svg.appendChild(rect);
-
-          var cy = box.y + box.h / 2;
-          var fs = nodes[i].sentinel ? 12 : 15;
-          addSvgText(svg, box.cx, cy, label, col[2], isCur ? fs + 1 : fs, isCur ? '900' : '800');
+          var c = document.createElementNS(SVGNS, 'circle');
+          c.setAttribute('cx', cx(i));
+          c.setAttribute('cy', cy(i, lv));
+          c.setAttribute('r', isCur ? R + 1.5 : R);
+          c.setAttribute('fill', st.fill);
+          c.setAttribute('stroke', st.stroke);
+          c.setAttribute('stroke-width', isCur ? '3' : (nodes[i].sentinel ? '1.75' : '0'));
+          svg.appendChild(c);
+          addSvgText(svg, cx(i), cy(i, lv), label, st.text,
+            nodes[i].sentinel ? 10 : 13, isCur ? '800' : '700');
         }
       }
 

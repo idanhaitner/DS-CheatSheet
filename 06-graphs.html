@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>6 · Graphs + Animator</title>
-<link rel="stylesheet" href="assets/style.css?v=20260712dsmap">
+<link rel="stylesheet" href="assets/style.css?v=20260712dictdown">
 <script src="assets/theme.js?v=20260712tocmanual"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
@@ -24,6 +24,7 @@
     <a href="06-graphs.html" class="active">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
+    <a href="09-assignments.html">9 · Homework</a>
   </nav>
 </aside>
 <main class="content">
@@ -257,13 +258,50 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
 
     <h4>Edge types (directed graph)</h4>
     <table>
-      <tr><th>Edge (u → v)</th><th>Meaning</th></tr>
-      <tr><td><b>Tree</b></td><td>\(v\) white when explored from \(u\): discovery edge in DFS forest.</td></tr>
-      <tr><td><b>Back</b></td><td>\(v\) is gray (ancestor of \(u\)): <b>cycle</b> in directed graph.</td></tr>
-      <tr><td><b>Forward</b></td><td>\(v\) black, \(v\) descendant of \(u\), not a tree edge.</td></tr>
-      <tr><td><b>Cross</b></td><td>\(v\) black, not ancestor/descendant: between different branches.</td></tr>
+      <tr><th>Edge (u → v)</th><th>Color of v when explored</th><th>Meaning</th></tr>
+      <tr><td><b>Tree</b></td><td>white</td><td>First discovery of \(v\): edge of the DFS forest.</td></tr>
+      <tr><td><b>Back</b></td><td>gray</td><td>\(v\) is an <b>ancestor</b> of \(u\) still on the recursion stack.</td></tr>
+      <tr><td><b>Forward</b></td><td>black, and \(d[u] &lt; d[v]\)</td><td>\(v\) is a <b>descendant</b> of \(u\), but not via this edge (shortcut down the tree).</td></tr>
+      <tr><td><b>Cross</b></td><td>black, and \(d[u] &gt; d[v]\)</td><td>\(v\) already finished in <b>another</b> branch (or earlier tree): not ancestor/descendant.</td></tr>
     </table>
-    <p class="case-hint">In an <b>undirected</b> graph DFS only has <b>tree</b> and <b>back</b> edges (back = to an already discovered ancestor).</p>
+    <p class="case-hint">In an <b>undirected</b> graph DFS only has <b>tree</b> and <b>back</b> edges (no forward/cross). Animation below is a <b>digraph</b> so you can see all four.</p>
+
+    <h4>Exam: when do I see back / forward / cross?</h4>
+    <table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr>
+        <td>Is there a <b>directed cycle</b>?</td>
+        <td><b>Yes ⟺ at least one back edge</b> (edge to a gray vertex). Forward and cross alone do <b>not</b> prove a cycle.</td>
+      </tr>
+      <tr>
+        <td>Is the digraph a <b>DAG</b>?</td>
+        <td>Yes ⟺ DFS finds <b>no back edges</b>. Then topo sort is possible (decreasing \(f[\cdot]\)).</td>
+      </tr>
+      <tr>
+        <td>When do I see a <b>forward</b> edge?</td>
+        <td>Extra edge from an ancestor to a descendant that DFS already discovered via a longer path (e.g. tree \(A\to B\to D\), then edge \(A\to D\)). Same “family,” no new cycle by itself.</td>
+      </tr>
+      <tr>
+        <td>When do I see a <b>cross</b> edge?</td>
+        <td>Edge into a finished vertex in another branch (e.g. tree \(A\to B\to D\) and \(A\to C\), then \(C\to D\)). Links sibling subtrees; still no cycle by itself.</td>
+      </tr>
+      <tr>
+        <td>Undirected cycle?</td>
+        <td>A non-parent edge to an already discovered (gray/black) vertex is a <b>back</b> edge ⟹ undirected cycle.</td>
+      </tr>
+      <tr>
+        <td><b>Strongly connected</b> (SCC)?</td>
+        <td>Vertices on a directed cycle (joined by a <b>back</b> edge) are in the <b>same SCC</b>. Listing all SCCs needs Kosaraju/Tarjan — not just edge typing.</td>
+      </tr>
+    </table>
+    <div class="note">
+      <b>30-second color checklist (digraph):</b>
+      white → <b>tree</b> ·
+      gray → <b>back</b> (= cycle) ·
+      black + \(d[u]&lt;d[v]\) → <b>forward</b> ·
+      black + \(d[u]&gt;d[v]\) → <b>cross</b>.
+      Watch the animation: <b>E→B</b> back (cycle), <b>A→D</b> forward, <b>C→D</b> cross.
+    </div>
 
     <div class="note"><b>Exam mnemonic:</b> “cycles, topo sort, finish times, components” → <b>DFS</b>. Same <span class="tag b-On">O(V + E)</span> time as BFS with adjacency list.</div>
     <div class="graph-viz-wrap" data-modes='["dfs"]' data-default="dfs">
@@ -278,6 +316,8 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
         <span class="leg-wgb"><span class="sw" style="background:#ffffff;border:1px solid #94a3b8"></span><span class="sw" style="background:#9ca3af;border:1px solid #6b7280"></span><span class="sw" style="background:#1a1a1a;border:1px solid #000"></span> white → gray → black</span>
         <span class="leg-tree"><span class="sw" style="background:#57e0c0"></span> tree edge</span>
         <span class="leg-back" style="display:none"><span class="sw" style="background:#ff6b81"></span> back edge</span>
+        <span class="leg-forward" style="display:none"><span class="sw" style="background:#f59e0b"></span> forward edge</span>
+        <span class="leg-cross" style="display:none"><span class="sw" style="background:#a78bfa"></span> cross edge</span>
         <span class="leg-reject" style="display:none"><span class="sw" style="background:#ff6b81"></span> rejected</span>
       </div>
       <p class="gviz-legend-note"></p>
@@ -292,12 +332,15 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
     d[u] = ++time
     <span class="kw">for</span> v <span class="kw">in</span> Adj[u]:
         <span class="kw">if</span> color[v] == white:
-            parent[v] = u   <span class="cm"># u discovered v (DFS tree edge)</span>
+            parent[v] = u   <span class="cm"># tree edge</span>
             DFS-Visit(v)
+        <span class="kw">elif</span> color[v] == gray:   <span class="cm"># back edge (cycle)</span>
+        <span class="kw">elif</span> d[u] &lt; d[v]:     <span class="cm"># forward (to descendant)</span>
+        <span class="kw">else</span>:                   <span class="cm"># cross edge</span>
     color[u] = black
     f[u] = ++time</pre>
     <p>Time <span class="tag b-On">O(V + E)</span> · Space <span class="tag b-On">O(V)</span> (recursion/stack depth up to \(O(V)\)).</p>
-    <div class="warn"><b>Cycle detection:</b> in a <b>directed</b> graph, a <b>back edge</b> (to a gray node) ⟺ cycle. In undirected graphs, back edge to parent’s ancestor also indicates a cycle.</div>
+    <div class="warn"><b>Pitfall:</b> forward/cross ≠ “no cycle.” Only a <b>back</b> edge (to gray) proves a directed cycle. A DAG can still have forward and cross edges—just never back.</div>
     <div class="note"><b>White-path theorem:</b> \(v\) is a descendant of \(u\) in the DFS forest ⟺ at time \(d[u]\) there is an all-<b>white</b> path \(u\rightsquigarrow v\).</div>
 
     <h4>BFS vs DFS: exam quick compare</h4>
@@ -752,6 +795,6 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
 </main>
 </div>
 <script src="assets/viz-code-helper.js"></script>
-<script src="assets/graph.js?v=20260711dijk15" defer></script>
+<script src="assets/graph.js?v=20260712dfs-fwd" defer></script>
 </body>
 </html>

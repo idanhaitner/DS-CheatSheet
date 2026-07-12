@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2 · Sorting + Animator</title>
-<link rel="stylesheet" href="assets/style.css?v=20260712dsmap">
+<link rel="stylesheet" href="assets/style.css?v=20260712dictdown">
 <script src="assets/theme.js?v=20260712tocmanual"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
@@ -24,6 +24,7 @@
     <a href="06-graphs.html">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
+    <a href="09-assignments.html">9 · Homework</a>
   </nav>
 </aside>
 <main class="content">
@@ -370,12 +371,48 @@
       <li>\(i = \lceil n/2\rceil\) → <b>median</b>.</li>
     </ul>
     <p>Sorting then indexing costs \(O(n\log n)\). Selection can be done in <b>linear</b> time: expected \(\Theta(n)\) with randomization, or worst-case \(\Theta(n)\) with median-of-medians.</p>
+
+    <h4 id="order-stat-toolkit">Which tool? Static vs dynamic order statistics</h4>
     <table>
-      <tr><th>Tool</th><th>Setting</th><th>Time</th></tr>
-      <tr><td><a href="#sel-rand-select">Randomized-Select</a></td><td>static array</td><td>expected \(\Theta(n)\); worst \(O(n^2)\)</td></tr>
-      <tr><td><a href="#sel-deterministic">Select (MoM)</a></td><td>static array</td><td>worst-case \(\Theta(n)\)</td></tr>
-      <tr><td><a href="03-trees.html#ost">Order statistic tree</a></td><td>dynamic set</td><td>\(\Theta(\log n)\) per Select / Rank</td></tr>
+      <tr><th>Tool</th><th>Setting</th><th>Select time</th><th>Prefer when…</th></tr>
+      <tr>
+        <td><a href="#sel-rand-select">Randomized-Select</a></td>
+        <td>static array (one-shot)</td>
+        <td>expected \(\Theta(n)\); worst \(O(n^2)\)</td>
+        <td>Fixed array; need one (or few) order statistics; expected linear is OK.</td>
+      </tr>
+      <tr>
+        <td><a href="#sel-deterministic">Select (MoM)</a></td>
+        <td>static array</td>
+        <td>worst-case \(\Theta(n)\)</td>
+        <td>Same as above, but must guarantee linear worst-case.</td>
+      </tr>
+      <tr>
+        <td>Sort + index</td>
+        <td>static array</td>
+        <td>\(O(n\log n)\) once, then \(O(1)\)</td>
+        <td>Many Select queries on an unchanging array.</td>
+      </tr>
+      <tr>
+        <td><a href="03-trees.html#ost">Order statistic tree</a> (AVL + <code>size</code>)</td>
+        <td>dynamic ordered set</td>
+        <td>worst-case \(\Theta(\log n)\)</td>
+        <td>Repeated Insert / Delete / Search <b>and</b> Select / Rank; need <b>worst-case</b> bounds.</td>
+      </tr>
+      <tr>
+        <td><a href="05-hashing.html#indexable-skiplist">Indexable skip list</a> (<code>width</code>)</td>
+        <td>dynamic ordered set</td>
+        <td>expected \(O(\log n)\)</td>
+        <td>Same ADT with <b>expected</b> times; Select via <code>width</code> (from the skip-list HW).</td>
+      </tr>
     </table>
+    <div class="note">
+      <b>Exam rule of thumb:</b>
+      static one-shot → Rand-Select / MoM ·
+      dynamic + Select/Rank, <b>worst-case</b> → <b>OST</b> ·
+      dynamic + Select/Rank, <b>expected</b> OK → <b>IndexableSkipList</b>.
+    </div>
+    <div class="pitfall"><b>Do not store absolute index</b> on each node (position in the sorted order). Updating it after insert/delete is non-local → not \(O(\log n)\). Use <b>local</b> fields only: subtree <code>size</code> (OST) or skip <code>width</code> (indexable skip list).</div>
   </div>
 
   <h2 class="section" id="sel-partition">2.4.1 Partition</h2>

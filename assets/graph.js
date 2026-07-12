@@ -41,9 +41,25 @@
     ],
     edges: [[0, 1], [0, 2], [1, 3], [2, 3], [3, 4], [4, 5]]
   };
-  var SCENARIOS = { traverse: TRAVERSE, weighted: WEIGHTED, 'dijkstra-w': DIJKSTRA_W, dag: DAG };
+  // Directed DFS demo: tree + back + forward + cross from A.
+  // Tree: A→B→D→E, A→C. Back: E→B. Forward: A→D. Cross: C→D.
+  var DFS_DIR = {
+    id: 'dfs-dir', directed: true, weighted: false,
+    nodes: [
+      { id: 0, label: 'A', x: 70, y: 150 },
+      { id: 1, label: 'B', x: 200, y: 70 },
+      { id: 2, label: 'C', x: 200, y: 230 },
+      { id: 3, label: 'D', x: 360, y: 150 },
+      { id: 4, label: 'E', x: 510, y: 150 }
+    ],
+    edges: [[0, 1], [0, 2], [0, 3], [1, 3], [2, 3], [3, 4], [4, 1]]
+  };
+  var SCENARIOS = {
+    traverse: TRAVERSE, weighted: WEIGHTED, 'dijkstra-w': DIJKSTRA_W,
+    dag: DAG, 'dfs-dir': DFS_DIR
+  };
   var ALGO_SCENARIO = {
-    bfs: 'traverse', dfs: 'traverse', topo: 'dag',
+    bfs: 'traverse', dfs: 'dfs-dir', topo: 'dag',
     kruskal: 'weighted', prim: 'weighted', dijkstra: 'dijkstra-w'
   };
   var ALGO_LABELS = {
@@ -59,12 +75,13 @@
   };
   var ECOL = {
     def: '#2a3058', tree: '#57e0c0', look: '#7c9cff',
-    back: '#ff6b81', reject: '#ff6b81', mst: '#57e0c0', cand: '#64748b'
+    back: '#ff6b81', forward: '#f59e0b', cross: '#a78bfa',
+    reject: '#ff6b81', mst: '#57e0c0', cand: '#64748b'
   };
-  var MARKER_KINDS = ['def', 'tree', 'look', 'back', 'reject', 'mst', 'cand'];
+  var MARKER_KINDS = ['def', 'tree', 'look', 'back', 'forward', 'cross', 'reject', 'mst', 'cand'];
   var NOTES = {
     bfs: 'Each node shows <b>d</b> (hop distance). Undiscovered = <b>\u221E</b>.',
-    dfs: 'Each node shows <b>d/f</b>. <span style="color:#ff6b81">Red</span> = back edge (cycle).',
+    dfs: 'Each node shows <b>d/f</b>. <span style="color:#57e0c0">Teal</span> = tree · <span style="color:#ff6b81">red</span> = back · <span style="color:#f59e0b">amber</span> = forward · <span style="color:#a78bfa">purple</span> = cross.',
     topo: 'DFS on a DAG. When a node turns black, it is prepended to the topological order.',
     kruskal: '<span style="color:#57e0c0">Teal</span> = in MST. <span style="color:#ff6b81">Red</span> = skipped (would form cycle). Panel shows <b>Union-Find</b> components after each step.',
     prim: '<span style="color:#57e0c0"><b>Bold teal</b></span> = MST edge. <span style="color:#64748b">Gray dashed</span> = current candidate. <span style="color:#1a1a1a"><b>Black</b></span> = not chosen.',
@@ -335,20 +352,30 @@
     function genDFS(start) {
       resetState();
       var time = { t: 0 }, stack = [];
+      var directed = !!scenario.directed;
       (function visit(u, parent) {
         time.t++; dval[u] = time.t; nc[u] = 'gray'; stack.push(u);
         rec('Discover ' + NAME[u] + ', d = ' + dval[u] + '.', panelStack(stack, u));
         ADJ[u].forEach(function (v) {
-          if (v === parent) return;
+          if (!directed && v === parent) return;
           var prev = ec[edgeKeys(u, v)[0]] || 'def';
           setEdge(u, v, 'look');
-          rec('Explore edge to ' + NAME[v] + '.', panelStack(stack, u));
+          rec('Explore ' + NAME[u] + (directed ? ' \u2192 ' : '\u2013') + NAME[v] + '.', panelStack(stack, u));
           if (nc[v] === 'white') {
-            setEdge(u, v, 'tree'); visit(v, u); nc[u] = 'gray';
+            setEdge(u, v, 'tree');
+            rec('Tree edge ' + NAME[u] + (directed ? ' \u2192 ' : '\u2013') + NAME[v] + '.', panelStack(stack, u));
+            visit(v, u); nc[u] = 'gray';
             rec('Back at ' + NAME[u] + '.', panelStack(stack, u));
           } else if (nc[v] === 'gray') {
             setEdge(u, v, 'back');
-            rec('Back edge to ' + NAME[v] + ' (cycle!).', panelStack(stack, u));
+            rec('Back edge to ' + NAME[v] + ' (ancestor / cycle).', panelStack(stack, u));
+          } else if (directed && dval[u] < dval[v]) {
+            // v finished and discovered after u → descendant of u
+            setEdge(u, v, 'forward');
+            rec('Forward edge to ' + NAME[v] + ' (descendant, d[' + NAME[u] + '] &lt; d[' + NAME[v] + ']).', panelStack(stack, u));
+          } else if (directed) {
+            setEdge(u, v, 'cross');
+            rec('Cross edge to ' + NAME[v] + ' (other branch).', panelStack(stack, u));
           } else {
             setEdge(u, v, (prev === 'tree' || prev === 'back' || prev === 'mst') ? prev : 'def');
             rec(NAME[v] + ' finished.', panelStack(stack, u));
@@ -357,7 +384,7 @@
         time.t++; fval[u] = time.t; nc[u] = 'black'; stack.pop();
         rec('Finish ' + NAME[u] + ', f = ' + fval[u] + '.', panelStack(stack));
       })(start, -1);
-      rec('DFS complete.', panelStack([]));
+      rec('DFS complete · tree / back / forward / cross classified.', panelStack([]));
       return out;
     }
 
@@ -725,7 +752,8 @@
 
     function updateLegend() {
       var wgb = $('.leg-wgb'), tree = $('.leg-tree');
-      var back = $('.leg-back'), reject = $('.leg-reject');
+      var back = $('.leg-back'), forward = $('.leg-forward'), cross = $('.leg-cross');
+      var reject = $('.leg-reject');
       var cand = $('.leg-cand');
       var notree = $('.leg-notree');
       var note = $('.gviz-legend-note');
@@ -764,6 +792,8 @@
       var look = $('.leg-look');
       if (look) look.style.display = mode === 'dijkstra' ? 'inline-flex' : 'none';
       if (back) back.style.display = mode === 'dfs' ? 'inline-flex' : 'none';
+      if (forward) forward.style.display = mode === 'dfs' ? 'inline-flex' : 'none';
+      if (cross) cross.style.display = mode === 'dfs' ? 'inline-flex' : 'none';
       if (reject) reject.style.display = mode === 'kruskal' ? 'inline-flex' : 'none';
       if (note) note.innerHTML = NOTES[mode] || '';
     }
@@ -798,10 +828,12 @@
         ln.setAttribute('stroke-width',
           kind === 'mst' ? '4' :
           kind === 'tree' ? '3' :
-          kind === 'back' || kind === 'reject' ? '3.5' :
+          kind === 'back' || kind === 'forward' || kind === 'cross' || kind === 'reject' ? '3.5' :
           kind === 'look' ? '3' :
           kind === 'cand' ? '2' : '2');
-        ln.setAttribute('stroke-dasharray', kind === 'cand' ? '7 5' : 'none');
+        ln.setAttribute('stroke-dasharray',
+          kind === 'cand' ? '7 5' :
+          kind === 'forward' || kind === 'cross' ? '6 4' : 'none');
         ln.setAttribute('opacity', '1');
         if (scenario.directed) {
           var mk = ECOL[kind] ? kind : 'def';

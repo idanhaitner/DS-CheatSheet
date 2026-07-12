@@ -19,10 +19,12 @@
   };
 
   /* ── Huffman ── */
+  // AAAAABBBCEEED → A=5, B=3, C=1, D=1, E=3 (B and E share freq 3)
+  var HUFFMAN_INPUT = 'AAAAABBBCEEED';
   var HUFFMAN_LEAVES = [
     { char: 'C', freq: 1 },
     { char: 'D', freq: 1 },
-    { char: 'B', freq: 2 },
+    { char: 'B', freq: 3 },
     { char: 'E', freq: 3 },
     { char: 'A', freq: 5 }
   ];
@@ -70,7 +72,7 @@
 
     push(
       'Start with one <b>leaf per character</b> and its frequency. All nodes go into a <b>min-heap</b> ordered by frequency.',
-      'Example: A=5, B=2, C=1, D=1, E=3. The two smallest are always merged first.',
+      'Input string: <b>' + HUFFMAN_INPUT + '</b> → A=5, B=3, C=1, D=1, E=3 (B and E same freq). The two smallest are always merged first.',
       forest,
       { heap: true }
     );

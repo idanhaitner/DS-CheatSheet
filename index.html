@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DS Cheat Sheet: Home</title>
-<link rel="stylesheet" href="assets/style.css?v=20260712dsmap">
+<link rel="stylesheet" href="assets/style.css?v=20260712dictdown">
 <script src="assets/theme.js?v=20260712tocmanual"></script>
 </head>
 <body>
@@ -22,6 +22,7 @@
     <a href="06-graphs.html">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
+    <a href="09-assignments.html">9 · Homework</a>
   </nav>
 </aside>
 <main class="content">
@@ -35,7 +36,7 @@
         <h2>Master Data Structures for Your Exam</h2>
         <p>A complete visual study guide with interactive slow-motion animations, complexity tables, and practice quizzes.</p>
         <div class="hero-stats">
-          <span class="hero-stat"><b>8</b>chapters</span>
+          <span class="hero-stat"><b>9</b>chapters</span>
           <span class="hero-stat"><b>6+</b>animators</span>
           <span class="hero-stat"><b>100</b>quiz questions</span>
         </div>
@@ -53,7 +54,7 @@
       Key pages with <b>interactive animations</b>:
       <a href="02-sorting.html">Sorting</a>, <a href="03-trees.html">Trees</a>, <a href="04-heaps.html">Heaps &amp; Compression</a>,
       <a href="05-hashing.html">Skip Lists &amp; Hashing</a>, and <a href="06-graphs.html">Graphs</a>.
-      Try the <a href="08-exam.html#quiz">Practice Quiz</a> on the exam page.
+      Try the <a href="08-exam.html#quiz">Practice Quiz</a> on the exam page. Review <a href="09-assignments.html">Homework 2 &amp; 3</a> for design patterns that show up on exams.
     </div>
 
     <h2 class="section">Complexity color key</h2>
@@ -95,6 +96,7 @@
           <li>Counting, Radix, Bucket + <a href="02-sorting.html#linear-sorting">linear-sort decision guide</a></li>
           <li>Comparison lower bound</li>
           <li><a href="02-sorting.html#selection-problem">Selection problem</a>: Partition, Randomized-Select, median of medians</li>
+          <li><a href="02-sorting.html#order-stat-toolkit">Order-stat toolkit</a>: static vs OST vs indexable skip list</li>
         </ul>
       </div>
       <div class="card topic-card">
@@ -107,7 +109,7 @@
           <li>Tree definitions &amp; traversals</li>
           <li>Binary Search Trees</li>
           <li>AVL trees (rotations)</li>
-          <li>Order statistic trees (Select / Rank)</li>
+          <li>Order statistic trees (Select / Rank) · <a href="03-trees.html#ost">when vs skip list</a></li>
           <li>B-trees</li>
         </ul>
       </div>
@@ -128,7 +130,7 @@
           <h4><a href="05-hashing.html">Skip Lists &amp; Hashing</a></h4>
         </div>
         <ul>
-          <li>Skip lists</li>
+          <li>Skip lists · <a href="05-hashing.html#indexable-skiplist">IndexableSkipList</a> (Select)</li>
           <li>Hash tables &amp; chaining</li>
           <li>Open addressing (probing)</li>
           <li>Bloom filters</li>
@@ -165,8 +167,19 @@
         </div>
         <ul>
           <li>Master complexity tables</li>
-          <li><a href="08-exam.html#decision">What to use when</a> (decision map)</li>
+          <li><a href="08-exam.html#decision">What to use when</a></li>
           <li>Practice quiz &amp; common pitfalls</li>
+        </ul>
+      </div>
+      <div class="card topic-card">
+        <div class="topic-card-head">
+          <span class="topic-num">9</span>
+          <h4><a href="09-assignments.html">Homework</a></h4>
+        </div>
+        <ul>
+          <li><a href="09-assignments.html#hw2">Assignment 2</a>: AVL+list, product stats</li>
+          <li><a href="09-assignments.html#hw3">Assignment 3</a>: hashing, IndexableSkipList</li>
+          <li><a href="09-assignments.html#hw-exam">Exam map</a>: HW idea → structure</li>
         </ul>
       </div>
     </div>
