@@ -222,35 +222,27 @@
       <li><b>Delete (hard):</b> node is minimal (\(t-1\) keys) → <b>borrow</b> (shift) from a sibling or <b>merge</b> with a sibling before deleting.</li>
     </ul>
 
-    <h4 id="btree-passes">1-pass vs 2-pass (from lecture)</h4>
-    <p>Both variants keep the B-tree legal. They differ in <em>when</em> you fix full / minimal nodes on the root-to-leaf path.</p>
+    <h4 id="btree-passes">1-pass vs 2-pass</h4>
+    <p>Both keep the B-tree legal. The only difference is <b>when</b> you fix full or almost-empty nodes.</p>
     <table>
       <tr><th></th><th><b>1-pass</b></th><th><b>2-pass</b></th></tr>
       <tr>
-        <td><b>Insert idea</b></td>
-        <td>On the way <b>down</b>: before entering a node, if it is <b>full</b> (\(2t-1\) keys), <b>split it now</b>. Then the leaf always has room, so you insert in one descent.</td>
-        <td>First descent: find the leaf, and remember the <b>lowest non-full</b> ancestor \(w\) (\(\le 2t-2\) keys). If the leaf is full, <b>split only</b> the path from the child of \(w\) down to the leaf, then insert.</td>
+        <td><b>Insert</b></td>
+        <td>Going down: if a node is full, <b>split it right away</b>. Then the leaf always has space.</td>
+        <td>First find the leaf. If it is full, go back and <b>split only the nodes that need it</b>, then insert.</td>
       </tr>
       <tr>
-        <td><b>Delete idea</b></td>
-        <td>On the way <b>down</b>: before entering a non-root node with only \(t-1\) keys, <b>borrow or merge</b> so it has at least \(t\) keys. Then delete is safe.</td>
-        <td>First find the key / leaf; fix (borrow/merge) only the <b>needed</b> suffix of the path from the last safe ancestor, then delete.</td>
+        <td><b>Delete</b></td>
+        <td>Going down: if a node has too few keys, <b>borrow or merge now</b>. Then delete is safe.</td>
+        <td>First find the key. Then <b>borrow or merge only where needed</b>, then delete.</td>
       </tr>
       <tr>
-        <td><b>Splits / merges</b></td>
-        <td>May split/merge <b>every</b> full/minimal node on the path (eager).</td>
-        <td>Splits/merges only from the last roomy ancestor down (lazy / only when needed).</td>
-      </tr>
-      <tr>
-        <td><b>Disk I/O intuition</b></td>
-        <td>One root-to-leaf trip that already fixes nodes.</td>
-        <td>Search pass, then a fix pass on part of the path (still \(O(\log_t n)\) disk accesses).</td>
+        <td><b>Simple idea</b></td>
+        <td>Fix problems on the way down.</td>
+        <td>Find first, fix only what you must.</td>
       </tr>
     </table>
-    <div class="note">
-      <b>Why 1-pass insert works:</b> if the parent were full, you could not push a median up into it. Splitting full nodes <em>before</em> entering them guarantees the parent always has a free slot for the median.<br>
-      <b>Exam mnemonic:</b> <b>1-pass = fix on the way down</b> (eager). <b>2-pass = find first, then fix only the necessary path</b> (lazy). Same asymptotic cost; different when work happens.
-    </div>
+    <div class="note"><b>Remember:</b> 1-pass = fix while going down. 2-pass = look first, then fix. Same big-O time.</div>
     <div class="note">A "2-3-4 tree" is a B-tree with \(t = 2\). Best answer when the exam says "data on disk" or "minimize block accesses."</div>
 
     <h4>Interactive animator</h4>
