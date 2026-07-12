@@ -241,7 +241,13 @@
       <tr>
         <td>Integers in \([0, N^2]\), need <b>time</b> \(\Theta(N)\)</td>
         <td><b>Radix sort</b> (base \(N\))</td>
-        <td>Keys have \(d = \log_N(N^2) = 2\) digits. Two counting passes: \(\Theta(2(N+N)) = \Theta(N)\). Counting alone is \(\Theta(N+N^2) = \Theta(N^2)\).</td>
+        <td>
+          <b>Why counting fails:</b> range \(k=N^2\), so counting is \(\Theta(N+N^2)=\Theta(N^2)\).<br>
+          <b>Trick:</b> write each key in <b>base \(N\)</b>. Then every key has only <b>2 digits</b>
+          (high digit \(\lfloor x/N\rfloor\), low digit \(x\bmod N\)), each digit in \(\{0,\ldots,N-1\}\).<br>
+          <b>Radix:</b> counting-sort by low digit, then by high digit → \(2\) passes, each \(\Theta(N+N)=\Theta(N)\) → total \(\Theta(N)\).<br>
+          <b>Example (\(N=10\)):</b> keys in \([0,100]\). Key \(47\) → digits \((4,7)\). Sort on \(7\), then on \(4\).
+        </td>
       </tr>
       <tr>
         <td>Each \(A[i]\) is within \(n^{0.4}\) of its sorted index (\(i \le A[i] \le i + n^{0.4}\))</td>
