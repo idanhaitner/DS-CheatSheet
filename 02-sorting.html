@@ -240,8 +240,8 @@
       </tr>
       <tr>
         <td>Integers in \([0, N^2]\), need <b>time</b> \(\Theta(N)\)</td>
-        <td><b>Counting sort</b></td>
-        <td>Still \(\Theta(N)\) time, but <b>space</b> jumps to \(\Theta(N^2)\): mention both!</td>
+        <td><b>Radix sort</b> (base \(N\))</td>
+        <td>Keys have \(d = \log_N(N^2) = 2\) digits. Two counting passes: \(\Theta(2(N+N)) = \Theta(N)\). Counting alone is \(\Theta(N+N^2) = \Theta(N^2)\).</td>
       </tr>
       <tr>
         <td>Each \(A[i]\) is within \(n^{0.4}\) of its sorted index (\(i \le A[i] \le i + n^{0.4}\))</td>
@@ -296,7 +296,7 @@
     <div class="pitfall">
       <b>Top traps for linear sorts:</b>
       <ul style="margin:0">
-        <li>Counting is only \(\Theta(n)\) when <b>\(k = O(n)\)</b>. If \(k = n^2\), time is still \(\Theta(n)\) but space is \(\Theta(n^2)\): and some graders treat it as not "linear" overall.</li>
+        <li>Counting is \(\Theta(n+k)\). If \(k = n^2\), both <b>time and space</b> are \(\Theta(n^2)\) — not linear. For range \([0,n^2]\) with \(\Theta(n)\) time, use <b>radix</b> (base \(n\), \(d=2\)).</li>
         <li>Radix <b>requires a stable</b> digit sort (counting sort works). Without stability, radix breaks.</li>
         <li>Bucket sort worst case is \(\Theta(n^2)\): never claim worst-case \(\Theta(n)\) without the uniform-distribution assumption.</li>
         <li>Don't confuse <b>linear probing</b> (hashing) with <b>linear sorting</b> (counting/radix/bucket).</li>
