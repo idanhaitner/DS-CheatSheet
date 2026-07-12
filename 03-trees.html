@@ -206,7 +206,62 @@
     </div>
   </div>
 
-  <h2 class="section" id="btree">3.6 B-Tree (minimum degree t)</h2>
+  <h2 class="section" id="ost">3.6 Order Statistic Tree</h2>
+  <div class="card">
+    <p>An <b>order statistic tree</b> is an AVL (or any balanced BST) extended with a <code>size</code> field on every node. It implements a <b>Dynamic Ordered Set</b>: all usual ordered-set ops, plus <b>Select</b> and <b>Rank</b>, each in \(\Theta(\log n)\).</p>
+
+    <h4>New operations</h4>
+    <table>
+      <tr><th>Operation</th><th>Meaning</th><th>Time</th></tr>
+      <tr><td><b>Select(S, i)</b></td><td>Return the element of <b>rank \(i\)</b> (the \(i\)-th smallest; ranks are <b>0-based</b> in the tutorial)</td><td><span class="tag b-Olog">\(\Theta(\log n)\)</span></td></tr>
+      <tr><td><b>Rank(S, k)</b></td><td>Given a key \(k\) that exists in \(S\), return its order (how many keys are strictly smaller)</td><td><span class="tag b-Olog">\(\Theta(\log n)\)</span></td></tr>
+    </table>
+    <div class="note">
+      <b>Example:</b> \(S=\{2,9,3,8,20,1,5\}\) sorted is \(1,2,3,5,8,9,20\).<br>
+      \(\mathrm{Select}(S,0)=1\), \(\mathrm{Select}(S,2)=3\), \(\mathrm{Rank}(S,5)=3\), \(\mathrm{Rank}(S,20)=6\).
+    </div>
+
+    <h4>The extra field: <code>size</code></h4>
+    <p>For every node \(u\):</p>
+    \[
+      u.\mathit{size} = 1 + u.\mathit{left}.\mathit{size} + u.\mathit{right}.\mathit{size}
+    \]
+    <p>(missing child ⇒ size \(0\)). A leaf has \(\mathit{size}=1\). Extra memory \(\Theta(n)\).</p>
+    <p><b>Why this helps:</b> in a BST, keys smaller than a node sit in its left subtree, and also in left subtrees of ancestors when the search path went right. With <code>size</code>, you can count those keys in \(O(1)\) per node along a root-to-leaf path.</p>
+
+    <h4>Maintaining <code>size</code> on insert / delete</h4>
+    <ul>
+      <li>Insert a leaf with \(\mathit{size}=1\).</li>
+      <li>After insert/delete/rotations, recompute \(\mathit{size}\) bottom-up on the affected path (and rotated nodes).</li>
+      <li>The formula is local and \(O(1)\), so insert/delete stay \(\Theta(\log n)\).</li>
+    </ul>
+    <p>Search / Min / Max / Succ / Pred stay as in AVL: they ignore <code>size</code>.</p>
+
+    <h4>Select(S, i) — find the element of rank \(i\)</h4>
+<span class="code-label">pseudocode</span>
+<pre><span class="kw">Select</span>(node, i):
+    curr = node.left.size          <span class="cm"># 0 if no left child</span>
+    <span class="kw">if</span> i == curr: <span class="kw">return</span> node
+    <span class="kw">if</span> i &lt; curr:  <span class="kw">return</span> Select(node.left, i)
+    <span class="kw">return</span> Select(node.right, i - curr - 1)
+
+<span class="kw">Select</span>(i): <span class="kw">return</span> Select(root, i)</pre>
+    <p>Idea: \(\mathit{curr}\) = rank of the current node inside its subtree. Go left if \(i\) is smaller; go right and subtract \(\mathit{curr}+1\) (skip the left subtree and the node itself).</p>
+
+    <h4>Rank(S, k) — order of key \(k\)</h4>
+<span class="code-label">pseudocode</span>
+<pre><span class="kw">Rank</span>(node, k):
+    <span class="kw">if</span> node.key == k: <span class="kw">return</span> node.left.size
+    <span class="kw">if</span> k &lt; node.key:  <span class="kw">return</span> Rank(node.left, k)
+    <span class="kw">return</span> Rank(node.right, k) + node.left.size + 1
+
+<span class="kw">Rank</span>(k): <span class="kw">return</span> Rank(root, k)</pre>
+    <p>When going right, add \(1 + \mathit{left.size}\) (the current node and its whole left subtree are smaller than \(k\)).</p>
+
+    <div class="note"><b>Exam takeaway:</b> Order statistic tree = AVL + <code>size</code>. Gives Select and Rank in \(\Theta(\log n)\) without slowing other ops. Do not confuse with Quickselect (array, expected \(O(n)\), not dynamic).</div>
+  </div>
+
+  <h2 class="section" id="btree">3.7 B-Tree (minimum degree t)</h2>
   <div class="card">
     <p>Balanced search tree optimized for <b>disk</b> (minimize block reads). Each node holds many keys, so the tree is very <b>shallow</b>. Every node except root has between <b>t−1</b> and <b>2t−1</b> keys; an internal node with k keys has k+1 children.</p>
     <table>

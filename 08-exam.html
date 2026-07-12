@@ -123,7 +123,9 @@
     <table>
       <tr><th>Requirement</th><th>Reach for</th></tr>
       <tr><td>O(1) membership, no order needed</td><td>Hash table</td></tr>
-      <tr><td>Ordered ops (successor, range, median) O(log n)</td><td>AVL / balanced BST / skip list</td></tr>
+      <tr><td>Ordered ops (successor, range) O(log n)</td><td>AVL / balanced BST / skip list</td></tr>
+      <tr><td>Select \(i\)-th / Rank in a <b>dynamic</b> ordered set, \(\Theta(\log n)\)</td><td><a href="03-trees.html#ost">Order statistic tree</a> (AVL + <code>size</code>)</td></tr>
+      <tr><td>i-th smallest / median in an <b>array</b>, O(n)</td><td>Quickselect / median-of-medians</td></tr>
       <tr><td>Fast min/max + insert</td><td>Binary heap</td></tr>
       <tr><td>Fast lookup <b>and</b> order/range</td><td>Hash + AVL (combine)</td></tr>
       <tr><td>Sort integers in small range \([0, O(n)]\)</td><td><a href="02-sorting.html#counting">Counting sort</a></td></tr>
@@ -134,7 +136,6 @@
       <tr><td>Sort list in \(\Theta(N)\) but <b>no bound on max key \(K\)</b></td><td><b>Impossible in \(\Theta(N)\)</b>: comparison lower bound \(\Omega(N\log N)\). Use merge/heap (not counting/radix)</td></tr>
       <tr><td>Guaranteed O(n log n) + stable</td><td>Merge sort</td></tr>
       <tr><td>In-place fast average sort</td><td>Quick sort (randomized)</td></tr>
-      <tr><td>i-th smallest / median in O(n)</td><td>Quickselect / median-of-medians</td></tr>
       <tr><td>Shortest path, unweighted</td><td><a href="06-graphs.html#bfs">BFS</a></td></tr>
       <tr><td>Shortest path, weighted ≥ 0</td><td><a href="06-graphs.html#dijkstra">Dijkstra</a></td></tr>
       <tr><td>Shortest path, negative weights</td><td><a href="06-graphs.html#bellman">Bellman-Ford</a></td></tr>
