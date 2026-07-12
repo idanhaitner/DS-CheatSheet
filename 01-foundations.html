@@ -60,7 +60,7 @@
       <li><b>Polynomial vs log:</b> \(\log^k n = O(n^\epsilon)\) for any \(k,\epsilon&gt;0\).</li>
       <li><b>Polynomial vs exponential:</b> \(n^k = O(c^n)\) for \(c&gt;1\).</li>
       <li><b>Limit test:</b> \(\lim f/g = 0 \Rightarrow f=O(g)\); \(=\infty \Rightarrow g=O(f)\); constant \(\Rightarrow f=O(g)\) and \(g=O(f)\).</li>
-      <li>\(\log(n!) = O(n\log n)\) (Stirling): gives the comparison-sort lower bound.</li>
+      <li>\(\log(n!) = \Theta(n\log n)\) (Stirling): so comparison sorting needs \(\Omega(n\log n)\).</li>
     </ul>
     <div class="pitfall"><b>Pitfall:</b> \(O\) is an <b>upper</b> bound, so "worst case is \(O(n^2)\)" and "worst case is \(O(n^3)\)" can both be true. If asked for a <b>tight</b> bound, use \(\Theta\).</div>
   </div>

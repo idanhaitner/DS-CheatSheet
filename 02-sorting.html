@@ -214,7 +214,7 @@
       <tr>
         <td><b><a href="#radix">Radix</a></b></td>
         <td><span class="tag b-On">Θ(d(n + b))</span></td>
-        <td>\(d = O(1)\), or \(d\cdot b = O(n)\)</td>
+        <td>\(d = O(1)\) <b>and</b> \(b = O(n)\) (so \(d(n+b)=O(n)\))</td>
         <td>\(d\) digits in base \(b\); digit sort must be <b>stable</b></td>
         <td>Yes</td>
         <td>O(n + b)</td>
@@ -255,13 +255,13 @@
       </tr>
       <tr>
         <td>Each number has exactly \(L\) binary digits; \(L = (\log n)^{1/2}\)</td>
-        <td><b>Radix sort</b> \(\Theta(n)\)</td>
+        <td><b>Radix sort</b> \(\Theta(n(\log n)^{1/2})\)</td>
         <td>\(L\cdot n = n(\log n)^{1/2} = o(n\log n)\). Radix beats merge.</td>
       </tr>
       <tr>
         <td>Each number has exactly \(L\) binary digits; \(L = (\log n)^{3/2}\)</td>
-        <td><b>Radix sort</b> \(\Theta(n(\log n)^{1/2})\)</td>
-        <td>Still beats merge \(\Theta(n\log n)\) because \(L = o(\log n)\).</td>
+        <td><b>Merge sort</b> \(\Theta(n\log n)\)</td>
+        <td>\(L = (\log n)^{3/2} = \omega(\log n)\), so 1-bit radix costs \(\Theta(n(\log n)^{3/2})\): worse than merge.</td>
       </tr>
       <tr>
         <td>Each number has exactly \(L\) binary digits; \(L = (\log n)^3\)</td>
@@ -280,8 +280,8 @@
       </tr>
       <tr>
         <td>Need to sort list \(L\) in \(\Theta(N)\) but <b>no bound on \(K\)</b> (max key)</td>
-        <td><b>Do NOT use counting/radix</b></td>
-        <td>Without \(K = O(N)\), linear sorts are not \(\Theta(N)\). Use AVL + hash instead.</td>
+        <td><b>Impossible in \(\Theta(N)\)</b></td>
+        <td>Comparison lower bound \(\Omega(N\log N)\). Do not use counting/radix; use merge/heap/AVL insert-all (\(\Theta(N\log N)\)).</td>
       </tr>
     </table>
 
@@ -289,7 +289,7 @@
     <p>Radix (with counting per digit, base \(b\)): <b>\(\Theta(d\cdot(n+b))\)</b>. Merge: <b>\(\Theta(n\log n)\)</b>.</p>
     <ul>
       <li><b>Radix wins</b> when \(d\cdot n = o(n\log n)\), i.e. \(d = o(\log n)\).</li>
-      <li><b>Merge wins</b> when \(d = \Omega(\log n)\) (e.g. \(d = n\) or \(d = (\log n)^3\)).</li>
+      <li><b>Merge wins</b> when \(d = \omega(\log n)\) (e.g. \(d = (\log n)^{3/2}\), \(d = n\), or \(d = (\log n)^3\)). If \(d = \Theta(\log n)\), both are \(\Theta(n\log n)\).</li>
       <li><b>Counting wins</b> over radix when there is a <b>single digit</b> (one pass) and \(k = O(n)\).</li>
     </ul>
 

@@ -61,12 +61,12 @@
         <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span><span class="tag b-Olog">O(log n)</span></span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-On">O(n)</span></span></div></td>
         <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span><span class="tag b-Olog">O(log n)</span></span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-On">O(n)</span></span></div></td>
         <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span><span class="tag b-Olog">O(log n)</span></span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-On">O(n)</span></span></div></td>
-        <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span><span class="tag b-Olog">O(log n)</span></span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-On">O(n)</span></span></div></td>
-        <td>randomized</td></tr>
+        <td><div class="case-stack"><span class="exp-line"><span class="case-tag">Min</span><span class="tag b-O1">O(1)</span></span><span class="worst-line"><span class="case-tag">Max</span><span class="tag b-Olog">O(log n)</span> exp / <span class="tag b-On">O(n)</span></span></div></td>
+        <td>Min = first after −∞; Max needs search (or a tail pointer)</td></tr>
       <tr><td>Hash: <b>chaining</b></td>
         <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span><span class="tag b-O1">Θ(1+α)</span></span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-On">O(n)</span></span></div></td>
         <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span><span class="tag b-O1">O(1)</span></span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-O1">O(1)</span></span></div></td>
-        <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span><span class="tag b-O1">O(1)</span></span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-On">O(n)</span></span></div></td>
+        <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span><span class="tag b-O1">Θ(1+α)</span></span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-On">O(n)</span></span></div></td>
         <td><div class="case-stack"><span class="exp-line"><span class="case-tag">expected</span><span class="tag b-On">O(n)</span></span><span class="worst-line"><span class="case-tag">worst</span><span class="tag b-On">O(n)</span></span></div></td>
         <td>no order; α=n/m</td></tr>
       <tr><td>Hash: <b>probing</b></td>
@@ -131,7 +131,7 @@
       <tr><td>Sort floats uniformly in \([0,1)\)</td><td><a href="02-sorting.html#bucket">Bucket sort</a></td></tr>
       <tr><td>\(L = n\) binary digits: pick best worst-case sort</td><td>Merge sort \(\Theta(n\log n)\): radix is \(\Theta(n^2)\)</td></tr>
       <tr><td>\(L = o(\log n)\) binary digits: pick best worst-case sort</td><td>Radix sort: beats merge</td></tr>
-      <tr><td>Sort list in \(\Theta(N)\) but <b>no bound on max key \(K\)</b></td><td>Do <b>not</b> use counting/radix: use AVL + hash</td></tr>
+      <tr><td>Sort list in \(\Theta(N)\) but <b>no bound on max key \(K\)</b></td><td><b>Impossible in \(\Theta(N)\)</b>: comparison lower bound \(\Omega(N\log N)\). Use merge/heap (not counting/radix)</td></tr>
       <tr><td>Guaranteed O(n log n) + stable</td><td>Merge sort</td></tr>
       <tr><td>In-place fast average sort</td><td>Quick sort (randomized)</td></tr>
       <tr><td>i-th smallest / median in O(n)</td><td>Quickselect / median-of-medians</td></tr>
@@ -153,7 +153,7 @@
   <div class="card">
     <h4>How the exam asks questions (from past papers)</h4>
     <ul>
-      <li><b>"Best time to implement operation X on structure Y"</b>: know each structure's operation costs cold. E.g. <i>DeleteLast</i> is O(1) on a hash chain but O(log n) worst on a skip list.</li>
+        <li><b>"Best time to implement operation X on structure Y"</b>: know each structure's operation costs cold. E.g. <i>DeleteLast</i> is O(1) on a hash chain (with a pointer / head insert) but <b>O(n) worst</b> / expected O(log n) on a skip list.</li>
         <li><b>Sorting best/worst fill-ins</b>: given constraints (e.g. each element within \(n^{0.4}\) of its index), work out Insertion/Merge/Quick/Counting behavior. Insertion is O(n·shift-distance); deterministic Quick's worst is on sorted input. For <b>linear sorts</b>, check whether \(k=O(n)\) or \(d=o(\log n)\): see <a href="02-sorting.html#linear-sorting">§2.3 decision guide</a>.</li>
         <li><b>"Best algorithm to sort \(n\) integers with \(L\) binary digits"</b>: compare Radix \(\Theta(L\cdot n)\) vs Merge \(\Theta(n\log n)\). Radix when \(L=o(\log n)\); Merge when \(L=\Omega(\log n)\).</li>
       <li><b>Design a structure meeting target complexities</b>: combine primitives: hash table (O(1) contains) + sorted array/AVL (order/median) + auxiliary arrays. State fields, describe each op, analyze.</li>

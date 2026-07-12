@@ -197,7 +197,7 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
     <ul>
       <li><b>Weighted</b> shortest path → use <b>Dijkstra</b> (non-negative) or Bellman-Ford (negative OK).</li>
       <li><b>Cycle detection in directed graphs</b> → prefer <b>DFS</b> (back edge is easier to spot).</li>
-      <li><b>Topological order</b> → DFS on a DAG, not BFS.</li>
+      <li><b>Topological order</b> → DFS finish times (this course) or Kahn’s algorithm (indegree queue, BFS-style).</li>
     </ul>
 
     <div class="note"><b>Exam mnemonic:</b> “shortest path, all edges cost 1” → <b>BFS</b>. Complexity always <span class="tag b-On">O(V + E)</span> with adjacency list: each vertex and edge touched once.</div>
@@ -224,15 +224,17 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
     <span class="code-label">pseudocode</span>
 <pre><span class="kw">BFS</span>(G, s):
     color all white, dist = infinity, parent[*] = nil
-    dist[s] = 0
+    color[s] = gray, dist[s] = 0
     enqueue(s)
     <span class="kw">while</span> Q not empty:
         u = dequeue()
         <span class="kw">for</span> v <span class="kw">in</span> Adj[u]:
             <span class="kw">if</span> color[v] == white:
+                color[v] = gray
                 dist[v] = dist[u] + 1
                 parent[v] = u   <span class="cm"># u discovered v (BFS tree edge)</span>
-                enqueue(v)</pre>
+                enqueue(v)
+        color[u] = black</pre>
     <p>Time <span class="tag b-On">O(V + E)</span> · Space <span class="tag b-On">O(V)</span> (queue + color/dist/parent arrays).</p>
     <div class="note"><b>BFS tree:</b> edges used when first discovering a white vertex form a tree. <b>Not every shortest path</b> is a tree edge: but tree distance equals shortest distance. Exams sometimes ask how many <b>distinct BFS trees</b> exist (depends on tie-breaking when enqueueing neighbors).</div>
   </div>
@@ -339,7 +341,7 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
     <div class="note"><b>Multiple valid orders:</b> a DAG may have many topological sorts: any order respecting all edges is valid. DFS finish-time order is one canonical choice.</div>
     <div class="warn"><b>Cycle = failure:</b> if DFS finds a back edge, the graph is not a DAG and topological sort is impossible. Always check for cycles first.</div>
     <h4>Longest path in a DAG (exam variant)</h4>
-    <p>On a DAG, the <b>longest path</b> from \(s\) to \(t\) can be found by: (1) topological sort, (2) process vertices in topo order, (3) relax edges like Dijkstra but take <b>max</b> instead of min. Time <span class="tag b-On">O(V + E)</span>. Works because topo order guarantees all predecessors of \(v\) are processed before \(v\).</p>
+    <p>On a DAG, the <b>longest path</b> from \(s\) to \(t\) can be found by: (1) topological sort, (2) process vertices in topo order, (3) relax with <b>max</b> instead of min (<code>dist[v] = max(dist[v], dist[u] + w(u,v))</code>). This is <b>DAG DP</b>, not Dijkstra (no priority queue). Time <span class="tag b-On">O(V + E)</span>. Works because topo order guarantees all predecessors of \(v\) are processed before \(v\).</p>
   </div>
 
   <h2 class="section" id="mst">6.5 Minimum Spanning Tree (MST)</h2>
@@ -503,6 +505,11 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
         <td><span class="tag b-On">O(E · α(V))</span><br><span style="font-size:13px;color:var(--muted)">Sort becomes O(E + V); Union-Find dominates</span></td>
       </tr>
       <tr>
+        <td>Integer edge weights in <b>\([0, E^{3/2}-1]\)</b></td>
+        <td><b>Kruskal</b> + <b>radix sort</b> (base \(E\), \(d = O(1)\) digit passes)</td>
+        <td><span class="tag b-On">O(E · α(E))</span><br><span style="font-size:13px;color:var(--muted)">Sorting is O(E); counting alone would be O(E^{3/2})</span></td>
+      </tr>
+      <tr>
         <td>All edge weights are small integers in <b>[1, W]</b>, and <b>W is fixed</b> (e.g. only weights 1–10, no matter how big the graph is)</td>
         <td><b>Prim</b>, but swap the binary heap for a <b>bucket queue</b>: keep <b>W + 1 linked lists</b>; list <b>i</b> stores every fringe vertex whose current <code>key</code> is <b>i</b>. To extract-min, scan lists 0, 1, 2, … until you find a non-empty one.</td>
         <td><span class="tag b-On">O(E)</span><br><span style="font-size:13px;color:var(--muted)">Only W+1 buckets exist, so find-min and move a vertex to a new bucket are O(1); W is constant</span></td>
@@ -628,7 +635,9 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
         <h4>Super-source / super-sink</h4>
       </div>
       <p><b>Problem:</b> find shortest distance between two <b>sets</b> of vertices \(V_1\) and \(V_2\) (not just two vertices).</p>
-      <p><b>Reduction:</b> add dummy vertex \(s\), connect \(s \to u\) for all \(u \in V_1\) (weight 0); add dummy \(t\), connect \(v \to t\) for all \(v \in V_2\) (weight 0). Run BFS/Dijkstra from \(s\). Answer = \(dist[t] - 2\) (subtract the two dummy hops).</p>
+      <p><b>Reduction:</b> add dummy vertex \(s\), connect \(s \to u\) for all \(u \in V_1\); add dummy \(t\), connect \(v \to t\) for all \(v \in V_2\). Run BFS (unweighted hops) or Dijkstra (weights) from \(s\).<br>
+      • <b>BFS / hop count:</b> use weight-1 dummies (or treat as unweighted) → answer = \(dist[t] - 2\).<br>
+      • <b>Dijkstra / weighted:</b> use weight-0 dummies → answer = \(dist[t]\) (do <b>not</b> subtract 2).</p>
       <p>Time: building \(G'\) is <span class="tag b-On">O(V + E)</span>; BFS on \(G'\) is <span class="tag b-On">O(V + E)</span>.</p>
     </div>
 
@@ -698,7 +707,7 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
       <tr><th>Algorithm</th><th>Time</th><th>When analyzing, mention…</th></tr>
       <tr><td>BFS / DFS</td><td><span class="tag b-On">O(V + E)</span></td><td>Each vertex enqueued/visited once; each edge examined once</td></tr>
       <tr><td>Topological sort</td><td><span class="tag b-On">O(V + E)</span></td><td>One DFS pass</td></tr>
-      <tr><td>Kruskal</td><td><span class="tag b-Onlog">O(E log V)</span></td><td>Sort dominates; or counting sort if weights ∈ [1,V]</td></tr>
+      <tr><td>Kruskal</td><td><span class="tag b-Onlog">O(E log V)</span></td><td>Sort dominates; counting if weights ∈ [1,V]; radix if weights ∈ [0, E^{3/2}] → O(E·α(E))</td></tr>
       <tr><td>Prim (binary heap)</td><td><span class="tag b-Onlog">O(E log V)</span></td><td>V extract-min + E decrease-key</td></tr>
       <tr><td>Dijkstra (binary heap)</td><td><span class="tag b-Onlog">O((V+E) log V)</span></td><td>Same heap analysis as Prim</td></tr>
       <tr><td>Bellman-Ford</td><td><span class="tag b-On2">O(VE)</span></td><td>(V−1) rounds × E edges</td></tr>
