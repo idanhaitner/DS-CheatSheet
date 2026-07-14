@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2 · Sorting + Animator</title>
-<link rel="stylesheet" href="assets/style.css?v=20260713sidebartoc2">
+<link rel="stylesheet" href="assets/style.css?v=20260713digitfix">
 <script src="assets/theme.js?v=20260713sidebartoc2"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
@@ -319,23 +319,121 @@
     <span class="kw">for</span> j = n-1 <span class="kw">downto</span> 0:                       <span class="cm"># right to left = stable</span>
         C[A[j]] = C[A[j]] - 1
         B[C[A[j]]] = A[j]</pre>
-    <div class="steprow"><span class="steplabel">counts (k=5)</span><div class="arr"><div class="cell">1</div><div class="cell">0</div><div class="cell">2</div><div class="cell">2</div><div class="cell">0</div><div class="cell">1</div></div></div>
-    <div class="steprow"><span class="steplabel">prefix sums</span><div class="arr"><div class="cell c-active">1</div><div class="cell c-active">1</div><div class="cell c-active">3</div><div class="cell c-active">5</div><div class="cell c-active">5</div><div class="cell c-active">6</div></div></div>
-    <div class="steprow"><span class="steplabel">output</span><div class="arr"><div class="cell c-done">0</div><div class="cell c-done">2</div><div class="cell c-done">2</div><div class="cell c-done">3</div><div class="cell c-done">3</div><div class="cell c-done">5</div></div></div>
+
+    <div class="sort-viz-wrap linear-viz-wrap" data-modes='["counting"]' data-default="counting">
+      <div class="viz-controls">
+        <label class="viz-algo-label">Algorithm: <select class="viz-algo"></select></label>
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <button class="viz-btn viz-shuffle">Shuffle</button>
+        <label>Speed: <input type="range" class="viz-speed" min="60" max="1600" value="1100" step="20"></label>
+      </div>
+      <div class="viz-algo-info"></div>
+      <div class="legend">
+        <span><span class="sw" style="background:#4a5aa8;border:1px solid #6b78c8"></span> input A</span>
+        <span><span class="sw c-cmp"></span> counting from A</span>
+        <span><span class="sw c-active"></span> placing into B</span>
+        <span><span class="sw c-done"></span> sorted / written</span>
+        <span>Bottom panel = <b>C</b> counts / prefix, then output <b>B</b></span>
+      </div>
+      <div class="viz-main">
+        <div class="viz-bars"></div>
+        <div class="viz-aux" hidden></div>
+        <div class="viz-code"></div>
+      </div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-stats">
+        <span>Step <b class="viz-step">0</b> / <b class="viz-total">0</b></span>
+        <span>Reads: <b class="viz-comps">0</b></span>
+        <span>Writes: <b class="viz-swaps">0</b></span>
+      </div>
+    </div>
+
     <div class="pitfall">Only <b>Θ(n)</b> when \(k=O(n)\). If \(k=n^2\) it degrades to \(\Theta(n^2)\).</div>
   </div>
 
   <!-- ===== RADIX ===== -->
-  <h2 class="section" id="radix">2.3.2 Radix Sort <span class="tag b-On" style="font-size:11px">O(d(n + k))</span></h2>
+  <h2 class="section" id="radix">2.3.2 Radix Sort <span class="tag b-On" style="font-size:11px">O(d(n + b))</span></h2>
   <div class="card">
     <p><b>Idea.</b> Sort digit-by-digit with a <b>stable</b> sort (counting sort), from the <b>least</b> significant digit up. Stability is essential so earlier digit order survives.</p>
     <span class="code-label">pseudocode</span>
 <pre><span class="kw">RadixSort</span>(A, d):
     <span class="kw">for</span> i = 1 <span class="kw">to</span> d:                 <span class="cm"># least significant digit first</span>
         stable-sort A on digit i</pre>
-    <div class="steprow"><span class="steplabel">by 1's</span><div class="arr"><div class="cell">720</div><div class="cell">355</div><div class="cell">436</div><div class="cell">457</div><div class="cell">657</div><div class="cell">329</div></div></div>
-    <div class="steprow"><span class="steplabel">by 10's</span><div class="arr"><div class="cell">720</div><div class="cell">329</div><div class="cell">436</div><div class="cell">355</div><div class="cell">457</div><div class="cell">657</div></div></div>
-    <div class="steprow"><span class="steplabel">by 100's</span><div class="arr"><div class="cell c-done">329</div><div class="cell c-done">355</div><div class="cell c-done">436</div><div class="cell c-done">457</div><div class="cell c-done">657</div><div class="cell c-done">720</div></div></div>
+
+    <div class="sort-viz-wrap linear-viz-wrap" data-modes='["radix"]' data-default="radix">
+      <div class="viz-controls">
+        <label class="viz-algo-label">Algorithm: <select class="viz-algo"></select></label>
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <button class="viz-btn viz-shuffle">Shuffle</button>
+        <label>Speed: <input type="range" class="viz-speed" min="60" max="1600" value="1100" step="20"></label>
+      </div>
+      <div class="viz-algo-info"></div>
+      <div class="legend">
+        <span><span class="sw" style="background:#4a5aa8;border:1px solid #6b78c8"></span> current array</span>
+        <span><span class="sw c-cmp"></span> reading digit</span>
+        <span><span class="sw c-active"></span> placing in pass</span>
+        <span><span class="sw c-done"></span> written / sorted</span>
+        <span><span class="viz-digit-sw">5</span> highlighted digit in this pass</span>
+      </div>
+      <div class="viz-main">
+        <div class="viz-bars"></div>
+        <div class="viz-aux" hidden></div>
+        <div class="viz-code"></div>
+      </div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-stats">
+        <span>Step <b class="viz-step">0</b> / <b class="viz-total">0</b></span>
+        <span>Digit reads: <b class="viz-comps">0</b></span>
+        <span>Writes: <b class="viz-swaps">0</b></span>
+      </div>
+    </div>
+
+    <h4 id="radix-complexity">How \(\Theta(d(n+b))\) is calculated</h4>
+    <table>
+      <tr><th>Symbol</th><th>Meaning</th><th>Example (decimal)</th></tr>
+      <tr>
+        <td>\(n\)</td>
+        <td>number of keys (array length)</td>
+        <td>sort 1000 numbers → \(n=1000\)</td>
+      </tr>
+      <tr>
+        <td>\(b\)</td>
+        <td><b>base / radix</b> = how many possible values one digit can take.<br>
+            Same as the counting-sort range \(k\) for that digit.</td>
+        <td>base 10 → digits \(0..9\) → \(b=10\)<br>
+            base 256 (bytes) → \(b=256\)<br>
+            base 2 (bits) → \(b=2\)</td>
+      </tr>
+      <tr>
+        <td>\(d\)</td>
+        <td>number of <b>digits</b> (passes).<br>
+            If keys are at most \(U\) and base is \(b\): \(d = \lceil\log_b(U+1)\rceil\).</td>
+        <td>numbers \(0..999\) in base 10 → \(d=3\) (ones, tens, hundreds)</td>
+      </tr>
+    </table>
+    <p><b>One pass</b> = stable counting sort on a single digit:</p>
+    <ul>
+      <li>scan all \(n\) keys to count digits → \(\Theta(n)\)</li>
+      <li>build / use the count array of size \(b\) → \(\Theta(b)\)</li>
+      <li>place \(n\) keys into the output → \(\Theta(n)\)</li>
+    </ul>
+    <p>So <b>one digit pass costs</b> \(\Theta(n+b)\).</p>
+    <p>Radix does this <b>\(d\) times</b> (once per digit, LSD → MSD):</p>
+    \[
+      T(n) = d \cdot \Theta(n+b) = \Theta\bigl(d(n+b)\bigr).
+    \]
+    <div class="note">
+      <b>\(k\) vs \(b\):</b> some notes write \(\Theta(d(n+k))\). Here \(k\) means the digit range = base \(b\)
+      (not the full key range). For decimal digits, \(k=b=10\). The animator uses \(b=10\).
+    </div>
+    <div class="warn">
+      <b>When is radix “linear”?</b> Only if \(d=O(1)\) and \(b=O(n)\), so \(d(n+b)=O(n)\).
+      If you use 1-bit passes (\(b=2\)) on \(\Theta(\log n)\)-bit keys, then \(d=\Theta(\log n)\) and cost is \(\Theta(n\log n)\) — same order as merge, not better.
+    </div>
   </div>
 
   <!-- ===== BUCKET ===== -->
@@ -350,6 +448,36 @@
     <span class="kw">for</span> i = 0 <span class="kw">to</span> n-1:
         insertionSort(B[i])
     <span class="kw">return</span> concat(B[0..n-1])</pre>
+
+    <div class="sort-viz-wrap linear-viz-wrap" data-modes='["bucket"]' data-default="bucket">
+      <div class="viz-controls">
+        <label class="viz-algo-label">Algorithm: <select class="viz-algo"></select></label>
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <button class="viz-btn viz-shuffle">Shuffle</button>
+        <label>Speed: <input type="range" class="viz-speed" min="60" max="1600" value="1100" step="20"></label>
+      </div>
+      <div class="viz-algo-info"></div>
+      <div class="legend">
+        <span><span class="sw" style="background:#4a5aa8;border:1px solid #6b78c8"></span> input in [0,1)</span>
+        <span><span class="sw c-active"></span> placing into a bucket</span>
+        <span><span class="sw c-done"></span> sorted result</span>
+        <span>Bottom panel = the n buckets filling &amp; sorting</span>
+      </div>
+      <div class="viz-main">
+        <div class="viz-bars"></div>
+        <div class="viz-aux" hidden></div>
+        <div class="viz-code"></div>
+      </div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-stats">
+        <span>Step <b class="viz-step">0</b> / <b class="viz-total">0</b></span>
+        <span>Comparisons: <b class="viz-comps">0</b></span>
+        <span>Writes: <b class="viz-swaps">0</b></span>
+      </div>
+    </div>
+
     <p>Average <span class="tag b-On">Θ(n)</span> (uniform input) · Worst <span class="tag b-On2">Θ(n²)</span> (all in one bucket).</p>
   </div>
 
@@ -413,6 +541,76 @@
       dynamic + Select/Rank, <b>expected</b> OK → <b>IndexableSkipList</b>.
     </div>
     <div class="pitfall"><b>Do not store absolute index</b> on each node (position in the sorted order). Updating it after insert/delete is non-local → not \(O(\log n)\). Use <b>local</b> fields only: subtree <code>size</code> (OST) or skip <code>width</code> (indexable skip list).</div>
+  </div>
+
+  <h2 class="section" id="sel-complexity">2.4.0 Complexity map — Partition family</h2>
+  <div class="card">
+    <p style="margin-top:0">One table for the algorithms built around Partition. “Uses” = what this algorithm calls (directly or as its main subroutine).</p>
+    <table>
+      <tr>
+        <th>Algorithm</th>
+        <th>Expected / average</th>
+        <th>Worst case</th>
+        <th>Uses</th>
+        <th>Notes</th>
+      </tr>
+      <tr>
+        <td><a href="#sel-partition"><b>Partition</b></a> (Lomuto)</td>
+        <td colspan="2" style="text-align:center"><span class="tag b-On">Θ(n)</span></td>
+        <td>—</td>
+        <td>One scan of the subarray. Always linear; quality of the split depends on the pivot.</td>
+      </tr>
+      <tr>
+        <td><a href="#sel-rand-partition"><b>RandomizedPartition</b></a></td>
+        <td colspan="2" style="text-align:center"><span class="tag b-On">Θ(n)</span></td>
+        <td><b>Partition</b></td>
+        <td>Swap a random index to the end, then Partition. Cost is still Θ(n); randomness only improves the <b>pivot</b>.</td>
+      </tr>
+      <tr>
+        <td><a href="#quick"><b>Quicksort</b></a></td>
+        <td><span class="tag b-Onlog">Θ(n log n)</span> avg</td>
+        <td><span class="tag b-On2">Θ(n²)</span></td>
+        <td><b>Partition</b> (+ recurse both sides)</td>
+        <td>Avg assumes “typical” / random-like splits. Fixed last-element pivot → Θ(n²) on sorted input.</td>
+      </tr>
+      <tr>
+        <td><b>Randomized-Quicksort</b></td>
+        <td><span class="tag b-Onlog">Θ(n log n)</span> expected</td>
+        <td><span class="tag b-On2">Θ(n²)</span></td>
+        <td><b>RandomizedPartition</b> → Partition</td>
+        <td>Same as Quicksort, but every pivot is random. For <b>any fixed</b> input, expected time is Θ(n log n). Still not a worst-case guarantee.</td>
+      </tr>
+      <tr>
+        <td><a href="#sel-rand-select"><b>Randomized-Select</b></a></td>
+        <td><span class="tag b-On">Θ(n)</span> expected</td>
+        <td><span class="tag b-On2">O(n²)</span></td>
+        <td><b>RandomizedPartition</b> → Partition<br>(+ recurse <b>one</b> side)</td>
+        <td>Finds the \(i\)-th smallest. Like Quicksort’s partition idea, but only one recursive call.</td>
+      </tr>
+      <tr>
+        <td><a href="#sel-deterministic"><b>Select (MoM)</b></a><br><span style="font-size:13px;color:var(--muted)">deterministic Select</span></td>
+        <td colspan="2" style="text-align:center"><span class="tag b-On">Θ(n)</span> worst-case</td>
+        <td><b>ChoosePivot (MoM)</b> + <b>Partition</b><br>(+ recurse one side)</td>
+        <td>Same skeleton as Rand-Select, but pivot is guaranteed “good enough”. Recurrence: \(T(n)=T(n/5)+T(7n/10)+O(n)\).</td>
+      </tr>
+      <tr>
+        <td><b>ChoosePivot</b> / MoM<br><span style="font-size:13px;color:var(--muted)">median of medians</span></td>
+        <td colspan="2" style="text-align:center"><span class="tag b-On">Θ(n)</span></td>
+        <td>group medians (size 5) + <b>Select</b> on ~\(n/5\) medians</td>
+        <td>Not a full sort. Returns a pivot with ≥ ~30% of elements on each side. Groups of 3 do <b>not</b> give linear Select.</td>
+      </tr>
+    </table>
+    <div class="note">
+      <b>Dependency chain (exam-friendly):</b><br>
+      RandomizedPartition <b>uses</b> Partition ·
+      Randomized-Quicksort / Randomized-Select <b>use</b> RandomizedPartition ·
+      Select (MoM) <b>uses</b> ChoosePivot + Partition ·
+      ChoosePivot <b>uses</b> Select on the ~\(n/5\) medians (recursive).
+    </div>
+    <div class="warn">
+      <b>Don’t confuse:</b> Partition / RandomizedPartition are always \(\Theta(n)\) <i>per call</i>.
+      The \(n\log n\) or \(n^2\) bounds belong to the <b>algorithms that call them repeatedly</b> (Quicksort / Select), depending on how good the pivots are.
+    </div>
   </div>
 
   <h2 class="section" id="sel-partition">2.4.1 Partition</h2>
@@ -487,7 +685,7 @@
     i = Random(l, r)             <span class="cm"># uniform in [l..r]</span>
     swap(A[i], A[r])
     <span class="kw">return</span> Partition(A, l, r)</pre>
-    <p>Used by both <b>Randomized-Quicksort</b> and <b>Randomized-Select</b>. For any fixed distinct input, expected Quicksort time becomes \(\Theta(n\log n)\) (randomness is in the algorithm, not the input).</p>
+    <p>Used by both <b>Randomized-Quicksort</b> and <b>Randomized-Select</b>. For any fixed distinct input, expected Quicksort time becomes \(\Theta(n\log n)\) (randomness is in the algorithm, not the input). Full comparison: <a href="#sel-complexity">§2.4.0 complexity map</a>.</p>
     <div class="note"><b>Randomized-Quicksort:</b> same as Quicksort, but line (2) calls <code>RandomizedPartition</code> instead of <code>Partition</code>.</div>
     <h4>Animator</h4>
     <div class="sort-viz-wrap sel-viz-wrap" data-modes='["randpartition"]' data-default="randpartition">
@@ -717,6 +915,6 @@
 </main>
 </div>
 <script src="assets/viz-code-helper.js"></script>
-<script src="assets/sorting.js?v=20260712cm" defer></script>
+<script src="assets/sorting.js?v=20260713linear" defer></script>
 </body>
 </html>

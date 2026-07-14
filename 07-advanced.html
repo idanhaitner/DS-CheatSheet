@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>7 · Amortized &amp; Union-Find</title>
-<link rel="stylesheet" href="assets/style.css?v=20260713sidebartoc2">
-<script src="assets/theme.js?v=20260713sidebartoc2"></script>
+<link rel="stylesheet" href="assets/style.css?v=20260714steps2">
+<script src="assets/theme.js?v=20260713uf"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
@@ -72,6 +72,52 @@
       <tr><td><b>Both optimizations</b></td><td><span class="tag b-O1">O(m·α(n))</span> ≈ O(m): α = inverse Ackermann, ≤ 4 in practice</td></tr>
     </table>
     <div class="note"><b>Application:</b> connected components: MakeSet each vertex, then for each edge (u,v) Union their sets. Two vertices are connected ⟺ same Find.</div>
+
+    <h4>Animator</h4>
+    <p style="margin-top:0">Watch <b>Find</b> climb to the root (and compress the path) and <b>Union</b> link trees by rank. Arrows point <em>child → parent</em> (up toward the root).</p>
+    <div class="uf-viz-wrap">
+      <div class="uf-toolbar">
+        <div class="uf-mode-toggle" role="group" aria-label="Operation">
+          <button type="button" class="uf-mode-btn is-on" data-mode="union">Union</button>
+          <button type="button" class="uf-mode-btn" data-mode="find">Find</button>
+        </div>
+        <label class="viz-arg-label">x
+          <select class="uf-x viz-select"></select>
+        </label>
+        <label class="viz-arg-label uf-y-wrap">y
+          <select class="uf-y viz-select"></select>
+        </label>
+        <label class="uf-opt"><input type="checkbox" class="uf-opt-rank" checked> Union by rank</label>
+        <label class="uf-opt"><input type="checkbox" class="uf-opt-compress" checked> Path compression</label>
+      </div>
+      <div class="viz-controls uf-controls">
+        <button type="button" class="viz-btn viz-primary uf-run">Run</button>
+        <button type="button" class="viz-btn uf-play">▶ Play</button>
+        <button type="button" class="viz-btn uf-prev">◀ Step</button>
+        <button type="button" class="viz-btn uf-next">Step ▶</button>
+        <button type="button" class="viz-btn uf-demo">Load demo</button>
+        <button type="button" class="viz-btn uf-reset">Reset</button>
+        <label>Speed: <input type="range" class="uf-speed" min="60" max="1600" value="1100" step="20"></label>
+      </div>
+      <div class="legend">
+        <span><span class="sw" style="background:#3f51b5;border:1px solid #5c6bc0"></span> node</span>
+        <span><span class="sw" style="background:#c0533f;border:1px solid #ff6b81"></span> current / start</span>
+        <span><span class="sw" style="background:#5c6bc0;border:1px solid #7c9cff"></span> on Find path</span>
+        <span><span class="sw" style="background:#2f8f5f;border:1px solid #57e0c0"></span> root</span>
+        <span><span class="sw" style="background:#b45309;border:1px solid #fbbf24"></span> attach / compress</span>
+      </div>
+      <div class="uf-main">
+        <div class="uf-stage" aria-label="Union-Find forest"></div>
+        <div class="uf-side">
+          <div class="uf-table"></div>
+          <div class="uf-code viz-code"></div>
+        </div>
+      </div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-stats">
+        <span>Step <b class="viz-step">0</b> / <b class="viz-total">0</b></span>
+      </div>
+    </div>
   </div>
 
   <h2 class="section" id="deamortization">7.3 Deamortization</h2>
@@ -92,42 +138,75 @@
     </ul>
     <p>Naive rehash costs \(\Theta(n)\) at once. Amortized analysis gives O(1) per insert, but one operation can still be \(\Theta(n)\). <b>Deamortization</b> fixes that.</p>
 
-    <h4>Naive rehash algorithm (2m steps total)</h4>
+    <h4>Rehashing algorithm (lecture) — \(2m\) steps</h4>
     <span class="code-label">pseudocode</span>
-<pre><span class="cm"># T = old table (size m), T' = new table (size 2m)</span>
-<span class="kw">for</span> i = 0 <span class="kw">to</span> m-1:
-    p = T[i]
-    <span class="kw">while</span> p != NULL:
-        Insert(T', p)       <span class="cm"># one element into new table</span>
-        p = p.next          <span class="cm"># advance chain</span>
-<span class="cm"># Total: m cell-scans + m element-inserts = 2m steps</span></pre>
-    <p>Each "step" = scan one cell <b>or</b> insert one element into \(T'\). Full rehash = <b>\(2m\) steps</b>.</p>
+<pre><span class="cm">(1)</span> Create a hash table T' of size 2m
+<span class="cm">(2)</span> <span class="kw">for</span> i = 0 <span class="kw">to</span> m−1
+<span class="cm">(3)</span>     p ← T[i]
+<span class="cm">(4)</span>     <span class="kw">while</span> p ≠ NULL
+<span class="cm">(5)</span>         Insert(T', p)
+<span class="cm">(6)</span>         p ← p.next</pre>
+    <p>Exactly <b>\(2m\) steps</b>: scanning the \(m\) cells of \(T\), plus Insert(T′,·) for each of the \(m\) list elements.</p>
 
-    <h4>Deamortized insert: two tables</h4>
-    <p>Always maintain two tables: <b>\(T\)</b> (size \(m\)) and <b>\(T'\)</b> (size \(2m\)). When \(T\) has exactly \(m/2\) elements, \(T'\) is empty. Over the next <b>\(m/2\) insertions</b>, gradually rebuild into \(T'\):</p>
-    <span class="code-label">pseudocode: insert with deamortized rehash</span>
-<pre><span class="cm"># Invariant: |T| starts at m/2, grows to m over m/2 inserts</span>
-<span class="kw">Insert</span>(x):
-    insert x into T (normal chaining insert)
+    <h4>Insertion (deamortized) — lecture</h4>
+    <p>Always keep two tables: <b>\(T\)</b> (size \(m\)) and <b>\(T'\)</b> (size \(2m\)). When \(T\) contains exactly \(m/2\) elements, \(T'\) is empty. In each of the next \(m/2\) Insert operations:</p>
+    <span class="code-label">pseudocode</span>
+<pre><span class="kw">Insert</span>(x):
+    insert x into T
 
-    <span class="kw">if</span> x was inserted <span class="kw">after</span> current rehash scan position:
-        perform <b>4 steps</b> of the rehash algorithm
-    <span class="kw">else</span>:
-        insert x into T' as well
-        perform <b>3 steps</b> of the rehash algorithm
+    <span class="kw">if</span> the new element x was inserted <span class="kw">after</span> the current scan location:
+        perform <b>4 steps</b> of the previous algorithm
+    <span class="kw">otherwise</span>:
+        insert x into T'
+        perform <b>3 steps</b> of the previous algorithm
 
-    <span class="kw">when</span> |T| = m:
+    <span class="kw">when</span> T has m elements:
         T ← T'
-        create new empty T' of size 4m   <span class="cm"># smart array: Θ(1) alloc</span></pre>
+        create a new empty table T' of size 4m   <span class="cm">(smart array)</span></pre>
 
     <table>
-      <tr><th>Component</th><th>Cost per insert</th></tr>
-      <tr><td>Normal insert into \(T\)</td><td>\(\Theta(1)\)</td></tr>
-      <tr><td>Rehash work (3 or 4 steps)</td><td>\(\Theta(1)\): constant steps only</td></tr>
-      <tr><td>Swap \(T \leftarrow T'\) when full</td><td>\(\Theta(1)\) pointer swap</td></tr>
+      <tr><th>Component</th><th>Cost per Insert</th></tr>
+      <tr><td>Insert into \(T\)</td><td>\(\Theta(1)\)</td></tr>
+      <tr><td>3 or 4 rehashing steps</td><td>\(\Theta(1)\)</td></tr>
+      <tr><td>\(T \leftarrow T'\) + smart-array alloc</td><td>\(\Theta(1)\)</td></tr>
     </table>
-    <div class="note"><b>Key idea:</b> \(2m\) rehash steps spread over \(m/2\) inserts \(\Rightarrow\) at most 4 steps/insert. Each insert does only <b>constant</b> rehash work, so worst-case insert = <span class="tag b-O1">O(1)</span>. Total for \(n\) inserts remains <span class="tag b-On">O(n)</span>.</div>
-    <div class="warn"><b>Requires a smart array:</b> allocating a table of size \(4m\) without initializing every cell costs \(\Theta(1)\) (same assumption as in assignments). Standard RAM model would charge \(\Theta(m)\) for initialization.</div>
+    <div class="note"><b>What is one “step” of the rehashing algorithm?</b>
+      Full rehashing is the for-loop over T that copies into T′. The lecture counts <b>exactly \(2m\) tiny steps</b>:
+      <ul style="margin:6px 0 0">
+        <li><b>Scan one cell</b> of T: read \(T[i]\) and set \(p \leftarrow T[i]\) (even if the list is empty) — costs 1 step.</li>
+        <li><b>Insert(T′, p)</b> for <em>one</em> list element, then \(p \leftarrow p.next\) — costs 1 step.</li>
+      </ul>
+      So “perform 4 steps” means: run the next 4 of those tiny actions (some mix of cell-scans and Insert(T′,·)), then stop and return from this Insert. Over \(m/2\) Inserts you finish all \(2m\) steps without ever paying \(\Theta(n)\) in one operation.
+    </div>
+    <div class="note"><b>Why 4?</b> Full rehashing = \(2m\) steps, spread over \(m/2\) Inserts \(\Rightarrow\) at most 4 steps per Insert. Worst-case Insert = <span class="tag b-O1">O(1)</span> (not only amortized).</div>
+    <div class="warn"><b>Smart array:</b> allocating T′ of size \(4m\) without initializing every cell is \(\Theta(1)\) (course model). Ordinary RAM would charge \(\Theta(m)\).</div>
+
+    <h4>Animator</h4>
+    <p style="margin-top:0">Same scenario as the slides: <code>m = 4</code>, start with keys <b>1, 8</b> in T, then <b>Insert(4)</b> and <b>Insert(3)</b>. Watch T′ fill cell-by-cell, then the <b>switch</b> \(T \leftarrow T'\) and the new empty T′ of size \(4m\).</p>
+    <div id="deam-viz" class="deam-viz-wrap">
+      <div class="viz-controls">
+        <button type="button" id="deam-play" class="viz-btn viz-primary">▶ Play</button>
+        <button type="button" id="deam-prev" class="viz-btn">◀ Step</button>
+        <button type="button" id="deam-next" class="viz-btn">Step ▶</button>
+        <button type="button" id="deam-reset" class="viz-btn">Reset</button>
+        <label>Speed: <input type="range" id="deam-speed" min="100" max="1600" value="1100" step="20"></label>
+      </div>
+      <div class="legend">
+        <span><span class="sw" style="background:#3f51b5"></span> element in list</span>
+        <span><span class="sw" style="background:#c0533f"></span> current x / step</span>
+        <span><span class="sw" style="background:#0f766e;border:1px dashed #57e0c0"></span> already scanned cell</span>
+        <span style="font-size:13px;color:#57e0c0">▲ location</span> current scan location
+      </div>
+      <div class="deam-main">
+        <div id="deam-stage" class="deam-stage">Loading…</div>
+        <div id="deam-code" class="viz-code"></div>
+      </div>
+      <div id="deam-desc" class="viz-desc">Loading…</div>
+      <div id="deam-panel" class="viz-panel"></div>
+      <div class="viz-stats">
+        <span>Step <b id="deam-step">0</b> / <b id="deam-total">0</b></span>
+      </div>
+    </div>
   </div>
 
   <h2 class="section" id="btree-amortized">7.4 B-Tree Amortized Analysis</h2>
@@ -153,5 +232,8 @@
   </div>
 </main>
 </div>
+<script src="assets/union-find.js?v=20260713uf" defer></script>
+<script src="assets/viz-code-helper.js" defer></script>
+<script src="assets/deamort.js?v=20260714steps2" defer></script>
 </body>
 </html>

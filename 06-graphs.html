@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>6 · Graphs + Animator</title>
-<link rel="stylesheet" href="assets/style.css?v=20260713sidebartoc2">
-<script src="assets/theme.js?v=20260713sidebartoc2"></script>
+<link rel="stylesheet" href="assets/style.css?v=20260713bfsdfs">
+<script src="assets/theme.js?v=20260713bfsdfs"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
@@ -304,7 +304,7 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
     </div>
 
     <div class="note"><b>Exam mnemonic:</b> “cycles, topo sort, finish times, components” → <b>DFS</b>. Same <span class="tag b-On">O(V + E)</span> time as BFS with adjacency list.</div>
-    <div class="graph-viz-wrap" data-modes='["dfs"]' data-default="dfs">
+    <div class="graph-viz-wrap" data-modes='["dfs"]' data-default="dfs" data-scenario="dfs-dir">
       <div class="viz-controls">
         <label class="viz-algo-label" style="display:none">Algorithm: <select class="viz-algo"></select></label>
         <button class="viz-btn viz-primary viz-play">▶ Play</button>
@@ -326,6 +326,39 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
       <div class="viz-panel"></div>
       <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
     </div>
+
+    <h4 id="dfs-practice">Practice graph (all four edge types)</h4>
+    <p>Same DFS from <b>S</b>. Pause before the end and classify each non-tree edge yourself, then check:</p>
+    <table>
+      <tr><th>Edge</th><th>Type</th><th>Why</th></tr>
+      <tr><td>S→P, P→R, P→T, T→U, S→Q</td><td><b>tree</b></td><td>first discovery (white)</td></tr>
+      <tr><td>U→P</td><td><b>back</b></td><td>P still gray (ancestor) → cycle</td></tr>
+      <tr><td>S→R</td><td><b>forward</b></td><td>R already finished descendant (\(d[S] &lt; d[R]\))</td></tr>
+      <tr><td>Q→R</td><td><b>cross</b></td><td>R finished in another branch (\(d[Q] &gt; d[R]\))</td></tr>
+    </table>
+    <div class="graph-viz-wrap" data-modes='["dfs"]' data-default="dfs" data-scenario="dfs-dir2">
+      <div class="viz-controls">
+        <label class="viz-algo-label" style="display:none">Algorithm: <select class="viz-algo"></select></label>
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1450" step="20"></label>
+      </div>
+      <div class="gviz-legend-compact">
+        <span class="leg-wgb"><span class="sw" style="background:#ffffff;border:1px solid #94a3b8"></span><span class="sw" style="background:#9ca3af;border:1px solid #6b7280"></span><span class="sw" style="background:#1a1a1a;border:1px solid #000"></span> white → gray → black</span>
+        <span class="leg-tree"><span class="sw" style="background:#57e0c0"></span> tree edge</span>
+        <span class="leg-back" style="display:none"><span class="sw" style="background:#ff6b81"></span> back edge</span>
+        <span class="leg-forward" style="display:none"><span class="sw" style="background:#f59e0b"></span> forward edge</span>
+        <span class="leg-cross" style="display:none"><span class="sw" style="background:#a78bfa"></span> cross edge</span>
+        <span class="leg-reject" style="display:none"><span class="sw" style="background:#ff6b81"></span> rejected</span>
+      </div>
+      <p class="gviz-legend-note"></p>
+      <div class="graph-stage"></div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-panel"></div>
+      <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+    </div>
+
     <span class="code-label">pseudocode</span>
 <pre><span class="kw">DFS-Visit</span>(u):
     color[u] = gray
@@ -342,16 +375,102 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
     <p>Time <span class="tag b-On">O(V + E)</span> · Space <span class="tag b-On">O(V)</span> (recursion/stack depth up to \(O(V)\)).</p>
     <div class="warn"><b>Pitfall:</b> forward/cross ≠ “no cycle.” Only a <b>back</b> edge (to gray) proves a directed cycle. A DAG can still have forward and cross edges—just never back.</div>
     <div class="note"><b>White-path theorem:</b> \(v\) is a descendant of \(u\) in the DFS forest ⟺ at time \(d[u]\) there is an all-<b>white</b> path \(u\rightsquigarrow v\).</div>
+  </div>
 
-    <h4>BFS vs DFS: exam quick compare</h4>
+  <h2 class="section" id="bfs-vs-dfs">6.3.1 BFS vs DFS — differences &amp; when to use which</h2>
+  <div class="card">
+    <p style="margin-top:0">Both traverse the graph in <span class="tag b-On">O(V+E)</span> (adjacency list) and can build a search tree / forest. They differ in <b>order</b>, <b>data structure</b>, and <b>what questions they answer well</b>.</p>
+
+    <h4>In general</h4>
     <table>
       <tr><th></th><th>BFS</th><th>DFS</th></tr>
-      <tr><td>Structure</td><td><b>Queue</b> (FIFO)</td><td><b>Stack</b> / recursion (LIFO)</td></tr>
-      <tr><td>Exploration order</td><td>By <b>distance layers</b></td><td>Deep path, then backtrack</td></tr>
-      <tr><td>Shortest path (unweighted)</td><td><b>Yes</b></td><td>No: finds <em>a</em> path, not necessarily shortest</td></tr>
-      <tr><td>Typical exam uses</td><td>Shortest hops, bipartite, connectivity</td><td>Cycles, topo sort, \(d/f\) times, components</td></tr>
-      <tr><td>Time</td><td colspan="2"><span class="tag b-On">O(V + E)</span> both (adjacency list)</td></tr>
+      <tr>
+        <td><b>Idea</b></td>
+        <td>Explore by <b>layers</b>: all neighbors of \(s\), then their neighbors, …</td>
+        <td>Go as <b>deep</b> as possible on one path, then <b>backtrack</b></td>
+      </tr>
+      <tr>
+        <td><b>Data structure</b></td>
+        <td><b>Queue</b> (FIFO)</td>
+        <td><b>Stack</b> or recursion (LIFO)</td>
+      </tr>
+      <tr>
+        <td><b>Order from source \(s\)</b></td>
+        <td>Nondecreasing <b>hop distance</b></td>
+        <td>Discovery / finish times \(d[v], f[v]\) (parenthesis structure)</td>
+      </tr>
+      <tr>
+        <td><b>Shortest path (unweighted)</b></td>
+        <td><b>Yes</b> — first time you reach \(v\) uses fewest edges</td>
+        <td><b>No</b> — finds <em>a</em> path, not necessarily shortest</td>
+      </tr>
+      <tr>
+        <td><b>Search tree shape</b></td>
+        <td>Wide / shallow: reflects distance layers</td>
+        <td>Often deep / skinny: long root-to-leaf paths</td>
+      </tr>
+      <tr>
+        <td><b>Extra bookkeeping</b></td>
+        <td>\(dist[v]\), \(parent[v]\), colors</td>
+        <td>\(d[v]\), \(f[v]\), \(parent[v]\), colors; edge types (tree/back/forward/cross)</td>
+      </tr>
+      <tr>
+        <td><b>Forest on undirected graph</b></td>
+        <td colspan="2">One run from each unvisited vertex = one tree per component. If \(G\) is <b>connected</b>, the forest has <b>exactly one tree</b> (a spanning tree) — but <b>which</b> tree depends on start vertex and neighbor order.</td>
+      </tr>
+      <tr>
+        <td><b>Time / space</b></td>
+        <td colspan="2"><span class="tag b-On">O(V+E)</span> time · <span class="tag b-On">O(V)</span> space (queue or recursion stack)</td>
+      </tr>
     </table>
+
+    <h4>Uses — pick by problem type</h4>
+    <table>
+      <tr><th>You need…</th><th>Prefer</th><th>Why</th></tr>
+      <tr>
+        <td>Shortest path in <b>hops</b> (unweighted / all weights = 1)</td>
+        <td><b>BFS</b></td>
+        <td>Layer order = distance</td>
+      </tr>
+      <tr>
+        <td>Is the graph <b>bipartite</b>? (2-coloring)</td>
+        <td><b>BFS</b></td>
+        <td>Color by level; same-color edge ⇒ odd cycle</td>
+      </tr>
+      <tr>
+        <td><b>Cycle</b> in a digraph? Is it a <b>DAG</b>?</td>
+        <td><b>DFS</b></td>
+        <td>Back edge to gray ⟺ cycle; no back edges ⟺ DAG</td>
+      </tr>
+      <tr>
+        <td><b>Topological order</b> (prerequisites, build order)</td>
+        <td><b>DFS</b></td>
+        <td>Decreasing finish times (this course)</td>
+      </tr>
+      <tr>
+        <td>Reachability / <b>connected components</b></td>
+        <td><b>Either</b></td>
+        <td>Same asymptotic cost; both visit each reachable vertex once</td>
+      </tr>
+      <tr>
+        <td>Ancestor / descendant structure, edge classification</td>
+        <td><b>DFS</b></td>
+        <td>Timestamps + tree/back/forward/cross</td>
+      </tr>
+      <tr>
+        <td>Weighted shortest path</td>
+        <td><b>Neither</b></td>
+        <td>Use Dijkstra / Bellman-Ford — not plain BFS/DFS</td>
+      </tr>
+    </table>
+
+    <div class="note">
+      <b>Exam one-liners:</b>
+      “fewest edges from \(s\)” → <b>BFS</b> ·
+      “cycle / topo / finish times” → <b>DFS</b> ·
+      “just connectivity” → <b>BFS or DFS</b> ·
+      connected undirected ⇒ DFS/BFS forest has <b>one</b> tree (not a unique tree across runs).
+    </div>
   </div>
 
   <h2 class="section" id="toposort">6.4 Topological Sort</h2>
@@ -795,6 +914,6 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
 </main>
 </div>
 <script src="assets/viz-code-helper.js"></script>
-<script src="assets/graph.js?v=20260712dfs-fwd" defer></script>
+<script src="assets/graph.js?v=20260713dfs2" defer></script>
 </body>
 </html>

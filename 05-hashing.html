@@ -274,7 +274,7 @@
       <tr><td><b>Search</b></td><td>Ordinary skip-list search.</td><td>expected <span class="tag b-Olog">O(log n)</span></td></tr>
       <tr><td><b>Insert</b></td><td>Ordinary insert, then fix <code>width</code> along the search path: reverse from the new node up to height of the tower (local arithmetic), then for levels above the new height add \(+1\) to the relevant widths on the path.</td><td>expected <span class="tag b-Olog">O(log n)</span></td></tr>
       <tr><td><b>Delete</b></td><td>Ordinary unlink + <code>width</code> updates symmetric to Insert (must touch the whole search path, not only the deleted tower).</td><td>expected <span class="tag b-Olog">O(log n)</span></td></tr>
-      <tr><td><b>Select(i)</b></td><td>Like search, but compare against ranks: start <code>pos = 0</code>; at level \(ℓ\), if <code>pos + width[ℓ] &lt; i</code> step right and add width; else drop down. Return the successor at the bottom.</td><td>expected <span class="tag b-Olog">O(log n)</span></td></tr>
+      <tr><td><b>Select(i)</b></td><td>Like search, but compare against ranks: start <code>pos = 0</code>; at level \(ℓ\), if <code>pos + width[ℓ] &lt; i</code> step right; if <code>== i</code> take that jump and return (exact hit); if greater, drop down.</td><td>expected <span class="tag b-Olog">O(log n)</span></td></tr>
       <tr><td><b>Rank(x)</b></td><td>Like search by key: jump right while <code>next.key &lt; x</code>, adding <code>width</code> each jump. Then Rank = <code>pos + 1</code> if x is present (1-based).</td><td>expected <span class="tag b-Olog">O(log n)</span></td></tr>
     </table>
 
@@ -399,6 +399,6 @@
 <script src="assets/viz-code-helper.js"></script>
 <script src="assets/hash.js" defer></script>
 <script src="assets/skip-list.js?v=20260712sl-circles" defer></script>
-<script src="assets/indexable-skip-list.js?v=20260712rank" defer></script>
+<script src="assets/indexable-skip-list.js?v=20260713exact" defer></script>
 </body>
 </html>

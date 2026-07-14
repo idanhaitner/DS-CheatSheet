@@ -17,7 +17,9 @@
         '    ' + K('while') + ' pos + width[lv] < i:',
         '      pos += width[lv]',
         '      curr = next[lv]  ' + C('# right'),
-        '    ' + C('# else: drop down'),
+        '    ' + K('if') + ' pos + width[lv] == i:',
+        '      ' + K('return') + ' next[lv]  ' + C('# exact hit — no need to drop'),
+        '    ' + C('# else pos + width > i: drop down'),
         '  ' + K('return') + ' curr.next[0]'
       ],
       rank: [
@@ -42,7 +44,7 @@
     };
 
     var INFO = {
-      select: 'Select(i) walks like Search, but compares <b>ranks</b> using widths: if <code>pos + width &lt; i</code> go right and add width; else drop down. Returns the <b>i-th</b> smallest key (1-based).',
+      select: 'Select(i) walks like Search, but compares <b>ranks</b> using widths: if <code>pos + width &lt; i</code> go right; if <code>pos + width == i</code> take that jump and <b>return</b> (exact hit — no need to drop to L0); if greater, drop down.',
       rank: 'Rank(x) is the inverse of Select: walk by <b>keys</b> like Search, but add <code>width</code> each time you jump right. When you stop, <code>pos</code> = # of keys &lt; x; if x is present, Rank = <b>pos + 1</b>.',
       insert: 'After splicing the new tower, update widths on the search path: levels at/below the new height split the old skip; levels above just <b>+1</b> (one more element under that long jump).'
     };
@@ -185,11 +187,12 @@
         push(out, {
           nodes: nodes, maxLevel: ml, showAllWidths: true, cur: { ni: ni, lv: lv },
           target: iTarget, pos: pos,
-          desc: 'At L' + lv + ': try to jump right while pos + width < ' + iTarget + '.',
+          desc: 'At L' + lv + ': jump while pos + width &lt; ' + iTarget + '; if equal, take jump and return.',
           panel: 'pos = ' + pos,
           line: 2
         });
 
+        var exactHit = false;
         while (true) {
           var w = skipWidth(nodes, ni, lv);
           var nx = nextOn(nodes, ni, lv);
@@ -213,18 +216,41 @@
               panel: 'pos = ' + pos,
               line: 4
             });
+          } else if (pos + w === iTarget) {
+            push(out, {
+              nodes: nodes, maxLevel: ml, showAllWidths: true,
+              cur: { ni: ni, lv: lv }, hotEdge: { ni: ni, lv: lv },
+              target: iTarget, pos: pos,
+              desc: 'pos + width = ' + pos + ' + ' + w + ' = ' + iTarget + ' → exact hit. Take this jump and return (no drop needed).',
+              panel: 'exact width match',
+              line: 6
+            });
+            pos += w;
+            ni = nx;
+            push(out, {
+              nodes: nodes, maxLevel: ml, showAllWidths: true,
+              cur: { ni: ni, lv: lv }, found: ni,
+              target: iTarget, pos: pos,
+              desc: 'Landed on the ' + iTarget + '-th key at L' + lv + ': Select(' + iTarget + ') = <b>' + keyLabel(nodes[ni]) + '</b>.',
+              panel: 'answer = ' + keyLabel(nodes[ni]),
+              line: 7
+            });
+            exactHit = true;
+            break;
           } else {
             push(out, {
               nodes: nodes, maxLevel: ml, showAllWidths: true,
               cur: { ni: ni, lv: lv }, hotEdge: { ni: ni, lv: lv },
               target: iTarget, pos: pos,
-              desc: 'pos + width = ' + pos + ' + ' + w + ' = ' + (pos + w) + ' ≥ ' + iTarget + ' → do not jump; drop down.',
+              desc: 'pos + width = ' + pos + ' + ' + w + ' = ' + (pos + w) + ' &gt; ' + iTarget + ' → skip too far; drop down.',
               panel: 'skip too far',
-              line: 5
+              line: 8
             });
             break;
           }
         }
+
+        if (exactHit) return out;
 
         if (lv === 0) {
           var ans = nextOn(nodes, ni, 0);
@@ -234,7 +260,7 @@
             target: iTarget, pos: pos,
             desc: 'Bottom: successor of curr is Select(' + iTarget + ') = <b>' + keyLabel(nodes[ans]) + '</b>.',
             panel: 'answer = ' + keyLabel(nodes[ans]),
-            line: 6
+            line: 9
           });
           return out;
         }
@@ -245,7 +271,7 @@
           target: iTarget, pos: pos,
           desc: 'Drop to L' + lv + ' (same node).',
           panel: 'pos = ' + pos,
-          line: 5
+          line: 8
         });
       }
       return out;

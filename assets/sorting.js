@@ -4,6 +4,12 @@
   /* Last element = pivot for Partition: keep it mid-range so ≤ / > both grow. */
   var SEL_INIT = [4, 9, 1, 8, 3, 7, 2, 10, 5, 6];
   var PART_INIT = [4, 9, 1, 8, 3, 7, 2, 10, 5, 6];
+  var LINEAR_INIT = {
+    counting: [3, 1, 4, 1, 5, 0, 2, 3],
+    radix: [170, 45, 75, 90, 802, 24, 2, 66],
+    bucket: [0.78, 0.17, 0.39, 0.26, 0.72, 0.94, 0.21, 0.12, 0.23, 0.68]
+  };
+  var LINEAR_MODES = { counting: 1, radix: 1, bucket: 1 };
 
   var K = function (s) { return '<span class="kw">' + s + '</span>'; };
   var C = function (s) { return '<span class="cm">' + s + '</span>'; };
@@ -91,6 +97,27 @@
       '  i = Random(l, r)',
       '  swap(A[i], A[r])',
       '  ' + K('return') + ' Partition(A, l, r)'
+    ],
+    counting: [
+      'C[0..k] = 0',
+      K('for') + ' a ' + K('in') + ' A:  C[a]++',
+      K('for') + ' i = 1 … k:  C[i] += C[i-1]',
+      K('for') + ' j = n-1 ' + K('downto') + ' 0:',
+      '  C[A[j]]--;  B[C[A[j]]] = A[j]',
+      K('return') + ' B  ' + C('# stable')
+    ],
+    radix: [
+      K('RadixSort') + '(A, d):',
+      '  ' + K('for') + ' place = 0 … d-1:  ' + C('# LSD first'),
+      '    CountingSort A by digit(place)',
+      '  ' + K('return') + ' A'
+    ],
+    bucket: [
+      K('BucketSort') + '(A):  ' + C('# A[i] ∈ [0,1)'),
+      '  create n empty lists B[0..n-1]',
+      '  ' + K('for') + ' x ' + K('in') + ' A: append to B[⌊n·x⌋]',
+      '  ' + K('for') + ' i = 0 … n-1: insertionSort(B[i])',
+      '  ' + K('return') + ' concat(B)'
     ]
   };
 
@@ -98,7 +125,8 @@
     bubble: 'Bubble Sort', selection: 'Selection Sort', insertion: 'Insertion Sort',
     merge: 'Merge Sort', quick: 'Quick Sort', heap: 'Heap Sort',
     quickselect: 'Randomized-Select', mom: 'Select (MoM)',
-    partition: 'Partition', randpartition: 'Randomized Partition'
+    partition: 'Partition', randpartition: 'Randomized Partition',
+    counting: 'Counting Sort', radix: 'Radix Sort', bucket: 'Bucket Sort'
   };
 
   var INFO = {
@@ -141,6 +169,18 @@
     randpartition: {
       text: 'Pick a uniform random index, swap it to the end, then run ordinary <b>Partition</b>. Avoids always-bad pivots.',
       meta: 'Expected good splits · Used by Randomized-Quicksort / Select'
+    },
+    counting: {
+      text: 'Non-comparison sort for integers in <b>[0..k]</b>: count frequencies, prefix-sum to positions, place <b>right→left</b> for stability.',
+      meta: 'Time / space: Θ(n+k) · Stable · Needs integer keys'
+    },
+    radix: {
+      text: 'Sort <b>digit by digit</b> (least significant first) with a stable sort. Each pass is counting sort on one digit.',
+      meta: 'Time: Θ(d(n+b)) · Base b=10 here · Stable · Needs fixed-width digits'
+    },
+    bucket: {
+      text: 'Scatter uniform values in <b>[0,1)</b> into n equal buckets, sort each (insertion), then concatenate.',
+      meta: 'Avg: Θ(n) if uniform · Worst: Θ(n²) · Stable · Extra space O(n)'
     }
   };
 
@@ -153,14 +193,16 @@
     var codeBox = $('.viz-code');
     if (!barsBox || !codeBox) return;
 
-    var data = (wrap.classList.contains('sel-viz-wrap') ? SEL_INIT : INIT).slice();
+    var data = LINEAR_INIT[mode]
+      ? LINEAR_INIT[mode].slice()
+      : (wrap.classList.contains('sel-viz-wrap') ? SEL_INIT : INIT).slice();
     if (mode === 'partition') data = PART_INIT.slice();
     var frames = [], idx = 0, timer = null, playing = false, maxv = 9;
     var codeLineEls = [];
     var a, comps, swaps, sortedSet, out;
 
     function reset(arr) { a = arr.slice(); comps = 0; swaps = 0; sortedSet = {}; out = []; }
-    function rec(colors, desc, line, range, ptrs) {
+    function rec(colors, desc, line, range, ptrs, aux) {
       var c = {};
       for (var k in sortedSet) c[k] = 'done';
       if (range) {
@@ -176,10 +218,33 @@
         comps: comps,
         swaps: swaps,
         line: (line == null ? -1 : line),
-        ptrs: ptrs || null
+        ptrs: ptrs || null,
+        aux: aux || null
       });
     }
     function markSorted(i) { sortedSet[i] = 1; }
+
+    function rowCells(arr, highlight, keys) {
+      var cells = [];
+      for (var i = 0; i < arr.length; i++) {
+        var v = arr[i];
+        var empty = v == null || v === '';
+        cells.push({
+          v: empty ? '·' : v,
+          key: keys ? i : undefined,
+          cls: highlight === i ? 'active' : (empty ? 'empty' : (keys ? '' : 'done'))
+        });
+      }
+      return cells;
+    }
+    function auxRow(title, label, arr, highlight, keys) {
+      return { kind: 'row', title: title, label: label, cells: rowCells(arr, highlight, keys) };
+    }
+    function auxStack(rows, extra) {
+      var o = { kind: 'stack', rows: rows };
+      if (extra) for (var k in extra) o[k] = extra[k];
+      return o;
+    }
 
     function lomutoPartition(lo, hi, lineCmp, lineSwap, linePlace, linePivot) {
       var pivot = a[hi];
@@ -519,11 +584,206 @@
       return out;
     }
 
+    function genCounting(arr) {
+      reset(arr);
+      var n = a.length;
+      var kMax = 0;
+      var i, j, key, cols, pos;
+      for (i = 0; i < n; i++) if (a[i] > kMax) kMax = a[i];
+      var C = [];
+      for (i = 0; i <= kMax; i++) C.push(0);
+      var B = [];
+      for (i = 0; i < n; i++) B.push(null);
+
+      rec({}, 'Integer keys in [0..' + kMax + ']. Start with C[0..' + kMax + '] = 0.', 0, null, null,
+        auxRow('Count array C[0..k]', 'C', C, -1, true));
+
+      for (j = 0; j < n; j++) {
+        key = a[j];
+        C[key]++;
+        comps++;
+        swaps++;
+        cols = {}; cols[j] = 'cmp';
+        rec(cols, 'See A[' + j + ']=' + key + ' → increment C[' + key + '] to ' + C[key] + '.', 1, null, { j: j },
+          auxRow('Count array C[0..k]', 'C', C, key, true));
+      }
+
+      rec({}, 'Counts done. Prefix sums: C[i] = number of elements ≤ i.', 2, null, null,
+        auxRow('Count array C[0..k]', 'C', C, -1, true));
+
+      for (i = 1; i <= kMax; i++) {
+        C[i] = C[i] + C[i - 1];
+        swaps++;
+        rec({}, 'C[' + i + '] += C[' + (i - 1) + '] → ' + C[i] + ' (slots for keys ≤ ' + i + ').', 2, null, null,
+          auxRow('Prefix sums C', 'C', C, i, true));
+      }
+
+      rec({}, 'Place from right to left into B (keeps equal keys in original order).', 3, null, null,
+        auxStack([
+          auxRow('Prefix / remaining slots C', 'C', C, -1, true),
+          auxRow('Output B', 'B', B, -1, false)
+        ]));
+
+      for (j = n - 1; j >= 0; j--) {
+        key = a[j];
+        C[key]--;
+        pos = C[key];
+        B[pos] = key;
+        swaps += 2;
+        cols = {}; cols[j] = 'active';
+        rec(cols, 'Place A[' + j + ']=' + key + ' into B[' + pos + ']; C[' + key + '] is now ' + C[key] + '.', 4, null, { j: j },
+          auxStack([
+            auxRow('Remaining slots C', 'C', C, key, true),
+            auxRow('Output B', 'B', B, pos, false)
+          ]));
+      }
+
+      for (i = 0; i < n; i++) { a[i] = B[i]; markSorted(i); }
+      rec({}, 'Done. Stable Θ(n+k) sort — B is fully sorted.', 5, null, null,
+        auxStack([
+          auxRow('Final C', 'C', C, -1, true),
+          auxRow('Sorted output B', 'B', B, -1, false)
+        ]));
+      return out;
+    }
+
+    function genRadix(arr) {
+      reset(arr);
+      var n = a.length;
+      var max = 0;
+      var i, j, dig, cols, pos, place;
+      for (i = 0; i < n; i++) if (a[i] > max) max = a[i];
+      var d = String(max).length;
+
+      function digitOf(x, p) { return Math.floor(x / Math.pow(10, p)) % 10; }
+      function placeName(p) {
+        return p === 0 ? 'ones' : p === 1 ? 'tens' : p === 2 ? 'hundreds' : ('10^' + p);
+      }
+
+      rec({}, 'Radix sort over ' + d + ' digits (LSD). Each pass = stable counting sort on one digit.', 0, null, null,
+        { kind: 'note', text: 'Base b = 10 · passes = ' + d });
+
+      for (place = 0; place < d; place++) {
+        var pname = placeName(place);
+        rec({}, 'Pass ' + (place + 1) + '/' + d + ': stable-sort by the ' + pname + ' digit.', 1, null, null,
+          { kind: 'note', text: 'Current digit: ' + pname, digitPlace: place });
+
+        var C = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        for (j = 0; j < n; j++) {
+          dig = digitOf(a[j], place);
+          C[dig]++;
+          comps++;
+          swaps++;
+          cols = {}; cols[j] = 'cmp';
+          rec(cols, a[j] + ' → ' + pname + ' digit ' + dig + ' · C[' + dig + '] = ' + C[dig], 2, null, { j: j },
+            auxStack([auxRow('Digit counts C[0..9]', 'C', C, dig, true)], { digitPlace: place }));
+        }
+
+        for (i = 1; i < 10; i++) { C[i] += C[i - 1]; swaps++; }
+        rec({}, 'Prefix sums on digit counts (slots per digit 0..9).', 2, null, null,
+          auxStack([auxRow('Prefix C', 'C', C, -1, true)], { digitPlace: place }));
+
+        var B = [];
+        for (i = 0; i < n; i++) B.push(null);
+        for (j = n - 1; j >= 0; j--) {
+          dig = digitOf(a[j], place);
+          C[dig]--;
+          pos = C[dig];
+          B[pos] = a[j];
+          swaps += 2;
+          cols = {}; cols[j] = 'active';
+          rec(cols, 'Place ' + a[j] + ' (digit ' + dig + ') at output[' + pos + '].', 2, null, { j: j },
+            auxStack([
+              auxRow('Remaining digit slots C', 'C', C, dig, true),
+              auxRow('Pass output', 'B', B, pos, false)
+            ], { digitPlace: place }));
+        }
+
+        for (i = 0; i < n; i++) a[i] = B[i];
+        rec({}, 'After ' + pname + ' pass: [' + a.join(', ') + '].', 2, null, null,
+          { kind: 'note', text: 'Order by ' + pname + ' (and earlier digits) is fixed.', digitPlace: place });
+      }
+
+      for (i = 0; i < n; i++) markSorted(i);
+      rec({}, 'Done. All digit passes finished — array is sorted. Θ(d(n+b)).', 3);
+      return out;
+    }
+
+    function genBucket(arr) {
+      reset(arr.map(function (x) { return Math.round(Number(x) * 100) / 100; }));
+      var n = a.length;
+      var buckets = [];
+      var i, j, p, q, x, bi, key, cols;
+      for (i = 0; i < n; i++) buckets.push([]);
+
+      function fmt(v) { return (Math.round(v * 100) / 100).toFixed(2); }
+      function auxBuckets(hi) {
+        return {
+          kind: 'buckets',
+          title: 'Buckets B[0..n−1]',
+          buckets: buckets.map(function (b, idx) {
+            return {
+              i: idx,
+              items: b.map(fmt),
+              cls: hi === idx ? 'active' : (b.length ? '' : 'empty')
+            };
+          })
+        };
+      }
+
+      rec({}, 'Uniform values in [0,1). Create n=' + n + ' buckets; put x in B[⌊n·x⌋].', 0, null, null, auxBuckets(-1));
+
+      for (j = 0; j < n; j++) {
+        x = a[j];
+        bi = Math.min(n - 1, Math.floor(n * x));
+        buckets[bi].push(x);
+        swaps++;
+        cols = {}; cols[j] = 'active';
+        rec(cols, 'A[' + j + ']=' + fmt(x) + ' → bucket ' + bi + '  (⌊' + n + '·' + fmt(x) + '⌋ = ' + bi + ').', 2, null, { j: j },
+          auxBuckets(bi));
+      }
+
+      rec({}, 'Sort each non-empty bucket (insertion sort), then concatenate.', 3, null, null, auxBuckets(-1));
+
+      for (i = 0; i < n; i++) {
+        var b = buckets[i];
+        if (b.length === 0) continue;
+        if (b.length === 1) {
+          rec({}, 'Bucket ' + i + ' has one element — already sorted.', 3, null, null, auxBuckets(i));
+          continue;
+        }
+        for (p = 1; p < b.length; p++) {
+          key = b[p];
+          q = p - 1;
+          while (q >= 0 && b[q] > key) {
+            comps++;
+            b[q + 1] = b[q];
+            swaps++;
+            q--;
+            rec({}, 'Bucket ' + i + ': shift larger values right for key ' + fmt(key) + '.', 3, null, null, auxBuckets(i));
+          }
+          if (q >= 0) comps++;
+          b[q + 1] = key;
+          swaps++;
+          rec({}, 'Bucket ' + i + ': insert ' + fmt(key) + '.', 3, null, null, auxBuckets(i));
+        }
+      }
+
+      var outArr = [];
+      for (i = 0; i < n; i++) {
+        for (j = 0; j < buckets[i].length; j++) outArr.push(buckets[i][j]);
+      }
+      for (i = 0; i < n; i++) { a[i] = outArr[i]; markSorted(i); }
+      rec({}, 'Concatenate buckets → [' + a.map(fmt).join(', ') + ']. Avg Θ(n) if uniform.', 4, null, null, auxBuckets(-1));
+      return out;
+    }
+
     var GENS = {
       bubble: genBubble, selection: genSelection, insertion: genInsertion,
       merge: genMerge, quick: genQuick, heap: genHeap,
       quickselect: genQuickselect, mom: genMom,
-      partition: genPartition, randpartition: genRandPartition
+      partition: genPartition, randpartition: genRandPartition,
+      counting: genCounting, radix: genRadix, bucket: genBucket
     };
 
     function updateAlgoInfo() {
@@ -550,14 +810,81 @@
           })();
     }
 
+    function renderAux(f) {
+      var auxBox = $('.viz-aux');
+      if (!auxBox) return;
+      var aux = f.aux;
+      if (!aux) {
+        auxBox.innerHTML = '';
+        auxBox.hidden = true;
+        return;
+      }
+      auxBox.hidden = false;
+
+      function renderRow(row) {
+        var html = '<div class="viz-aux-row">';
+        if (row.title) html += '<div class="viz-aux-title">' + row.title + '</div>';
+        html += '<div class="viz-aux-cells">';
+        if (row.label) html += '<span class="viz-aux-label">' + row.label + '</span>';
+        (row.cells || []).forEach(function (cell) {
+          var key = cell.key != null ? '<span class="viz-aux-key">' + cell.key + '</span>' : '';
+          html += '<span class="viz-aux-cell' + (cell.cls ? ' ' + cell.cls : '') + '">' +
+            key + '<span class="viz-aux-val">' + cell.v + '</span></span>';
+        });
+        html += '</div></div>';
+        return html;
+      }
+
+      if (aux.kind === 'note') {
+        auxBox.innerHTML = '<div class="viz-aux-note">' + aux.text + '</div>';
+        return;
+      }
+      if (aux.kind === 'row') {
+        auxBox.innerHTML = renderRow(aux);
+        return;
+      }
+      if (aux.kind === 'stack') {
+        auxBox.innerHTML = (aux.rows || []).map(renderRow).join('');
+        return;
+      }
+      if (aux.kind === 'buckets') {
+        var html = '<div class="viz-aux-title">' + (aux.title || 'Buckets') + '</div><div class="viz-buckets">';
+        (aux.buckets || []).forEach(function (b) {
+          html += '<div class="viz-bucket' + (b.cls ? ' ' + b.cls : '') + '">' +
+            '<div class="viz-bucket-idx">B[' + b.i + ']</div>' +
+            '<div class="viz-bucket-items">' +
+            (b.items.length
+              ? b.items.map(function (it) { return '<span class="viz-bucket-item">' + it + '</span>'; }).join('')
+              : '<span class="viz-bucket-empty">∅</span>') +
+            '</div></div>';
+        });
+        html += '</div>';
+        auxBox.innerHTML = html;
+      }
+    }
+
+    function formatBarVal(v, digitPlace) {
+      if (typeof v === 'number' && !Number.isInteger(v)) {
+        return (Math.round(v * 100) / 100).toFixed(2);
+      }
+      if (digitPlace == null || digitPlace < 0) return String(v);
+      var s = String(Math.floor(Number(v)));
+      while (s.length <= digitPlace) s = '0' + s;
+      var idx = s.length - 1 - digitPlace;
+      return s.slice(0, idx) + '<span class="viz-digit">' + s.charAt(idx) + '</span>' + s.slice(idx + 1);
+    }
+
     function render() {
       var f = frames[idx];
       barsBox.innerHTML = '';
+      var isLinear = !!LINEAR_MODES[mode];
+      barsBox.classList.toggle('viz-chips', isLinear);
+      var digitPlace = f.aux && f.aux.digitPlace != null ? f.aux.digitPlace : null;
       var ptrs = f.ptrs || {};
       var hasPtrs = false;
       for (var pk in ptrs) { if (Object.prototype.hasOwnProperty.call(ptrs, pk) && ptrs[pk] != null) { hasPtrs = true; break; } }
       barsBox.classList.toggle('has-ptrs', hasPtrs);
-      if ((ptrs.i != null && ptrs.i < 0) || (ptrs.j != null && ptrs.j < 0)) {
+      if (!isLinear && ((ptrs.i != null && ptrs.i < 0) || (ptrs.j != null && ptrs.j < 0))) {
         var ghost = document.createElement('div');
         ghost.className = 'viz-bar-ghost';
         var gwrap = document.createElement('span');
@@ -580,33 +907,45 @@
       var PTR_ORDER = ['i', 'j', 'min', 'key', 'k', 'mid', 'med', 'p', 'pivot', 'e', 'lo', 'hi'];
       for (var bi = 0; bi < f.arr.length; bi++) {
         var b = document.createElement('div');
-        b.className = 'viz-bar' + (f.colors[bi] ? (' ' + f.colors[bi]) : '');
-        b.style.height = (f.arr[bi] / maxv * 190 + 20) + 'px';
+        b.className = 'viz-bar' + (isLinear ? ' viz-chip' : '') + (f.colors[bi] ? (' ' + f.colors[bi]) : '');
+        if (!isLinear) b.style.height = (f.arr[bi] / maxv * 190 + 20) + 'px';
         var val = document.createElement('span');
         val.className = 'viz-bar-val';
-        val.textContent = f.arr[bi];
+        if (digitPlace != null) val.innerHTML = formatBarVal(f.arr[bi], digitPlace);
+        else val.textContent = formatBarVal(f.arr[bi], null);
         b.appendChild(val);
-        var tags = [];
-        for (var ti = 0; ti < PTR_ORDER.length; ti++) {
-          var name = PTR_ORDER[ti];
-          if (ptrs[name] === bi) {
-            if (name === 'pivot' && ptrs.p === bi) continue;
-            tags.push([name, PTR_STYLE[name]]);
+        if (!isLinear) {
+          var tags = [];
+          for (var ti = 0; ti < PTR_ORDER.length; ti++) {
+            var name = PTR_ORDER[ti];
+            if (ptrs[name] === bi) {
+              if (name === 'pivot' && ptrs.p === bi) continue;
+              tags.push([name, PTR_STYLE[name]]);
+            }
           }
-        }
-        if (tags.length) {
-          var wrap = document.createElement('span');
-          wrap.className = 'viz-ptrs';
-          for (var t = 0; t < tags.length; t++) {
-            var lab = document.createElement('span');
-            lab.className = 'viz-ptr ' + tags[t][1];
-            lab.textContent = tags[t][0];
-            wrap.appendChild(lab);
+          if (tags.length) {
+            var wrapPtrs = document.createElement('span');
+            wrapPtrs.className = 'viz-ptrs';
+            for (var t = 0; t < tags.length; t++) {
+              var lab = document.createElement('span');
+              lab.className = 'viz-ptr ' + tags[t][1];
+              lab.textContent = tags[t][0];
+              wrapPtrs.appendChild(lab);
+            }
+            b.appendChild(wrapPtrs);
           }
-          b.appendChild(wrap);
+        } else if (ptrs.j === bi) {
+          var jlab = document.createElement('span');
+          jlab.className = 'viz-ptrs';
+          var jspan = document.createElement('span');
+          jspan.className = 'viz-ptr viz-ptr-j';
+          jspan.textContent = 'j';
+          jlab.appendChild(jspan);
+          b.appendChild(jlab);
         }
         barsBox.appendChild(b);
       }
+      renderAux(f);
       for (var ck = 0; ck < codeLineEls.length; ck++) codeLineEls[ck].classList.toggle('active', ck === f.line);
       var descEl = $('.viz-desc');
       var stepEl = $('.viz-step');
@@ -626,7 +965,8 @@
       if (algoSel && modes.length > 1 && algoSel.value) mode = algoSel.value;
       if (!mode || !GENS[mode]) mode = modes[0];
       if (algoSel && !algoSel.value) algoSel.value = mode;
-      maxv = Math.max.apply(null, data);
+      maxv = mode === 'bucket' ? 1 : Math.max.apply(null, data.map(Number));
+      if (!(maxv > 0)) maxv = 1;
       updateAlgoInfo();
       renderCode();
       frames = GENS[mode](data);
@@ -679,20 +1019,32 @@
     if (nextBtn) nextBtn.onclick = function () { step(1); };
     if (prevBtn) prevBtn.onclick = function () { step(-1); };
     if (shuffleBtn) shuffleBtn.onclick = function () {
-      var pool = wrap.classList.contains('sel-viz-wrap')
-        ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-        : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-      for (var i = pool.length - 1; i > 0; i--) {
-        var k = Math.floor(Math.random() * (i + 1));
-        var t = pool[i]; pool[i] = pool[k]; pool[k] = t;
-      }
-      data = pool.slice(0, 10);
-      /* Partition demo: avoid min/max as pivot so both zones appear. */
-      if (mode === 'partition') {
-        var mid = data.slice().sort(function (x, y) { return x - y; })[4];
-        var mi = data.indexOf(mid);
-        if (mi >= 0 && mi !== data.length - 1) {
-          t = data[mi]; data[mi] = data[data.length - 1]; data[data.length - 1] = t;
+      var i, k, t;
+      if (mode === 'counting') {
+        data = [];
+        for (i = 0; i < 8; i++) data.push(Math.floor(Math.random() * 6));
+      } else if (mode === 'radix') {
+        data = [];
+        for (i = 0; i < 8; i++) data.push(Math.floor(Math.random() * 900) + 10);
+      } else if (mode === 'bucket') {
+        data = [];
+        for (i = 0; i < 8; i++) data.push(Math.round(Math.random() * 99) / 100);
+      } else {
+        var pool = wrap.classList.contains('sel-viz-wrap')
+          ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+          : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+        for (i = pool.length - 1; i > 0; i--) {
+          k = Math.floor(Math.random() * (i + 1));
+          t = pool[i]; pool[i] = pool[k]; pool[k] = t;
+        }
+        data = pool.slice(0, 10);
+        /* Partition demo: avoid min/max as pivot so both zones appear. */
+        if (mode === 'partition') {
+          var mid = data.slice().sort(function (x, y) { return x - y; })[4];
+          var mi = data.indexOf(mid);
+          if (mi >= 0 && mi !== data.length - 1) {
+            t = data[mi]; data[mi] = data[data.length - 1]; data[data.length - 1] = t;
+          }
         }
       }
       build();

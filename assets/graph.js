@@ -54,9 +54,29 @@
     ],
     edges: [[0, 1], [0, 2], [0, 3], [1, 3], [2, 3], [3, 4], [4, 1]]
   };
+  // Second practice digraph (start S). Expected classification:
+  // Tree: S→P→R, P→T→U, S→Q. Back: U→P. Forward: S→R. Cross: Q→R.
+  var DFS_DIR2 = {
+    id: 'dfs-dir2', directed: true, weighted: false,
+    nodes: [
+      { id: 0, label: 'S', x: 70, y: 150 },
+      { id: 1, label: 'P', x: 200, y: 70 },
+      { id: 2, label: 'Q', x: 200, y: 230 },
+      { id: 3, label: 'R', x: 340, y: 70 },
+      { id: 4, label: 'T', x: 340, y: 180 },
+      { id: 5, label: 'U', x: 490, y: 180 }
+    ],
+    edges: [
+      [0, 1], [0, 2], [0, 3],
+      [1, 3], [1, 4],
+      [2, 3],
+      [4, 5],
+      [5, 1]
+    ]
+  };
   var SCENARIOS = {
     traverse: TRAVERSE, weighted: WEIGHTED, 'dijkstra-w': DIJKSTRA_W,
-    dag: DAG, 'dfs-dir': DFS_DIR
+    dag: DAG, 'dfs-dir': DFS_DIR, 'dfs-dir2': DFS_DIR2
   };
   var ALGO_SCENARIO = {
     bfs: 'traverse', dfs: 'dfs-dir', topo: 'dag',
@@ -866,7 +886,8 @@
       if (algoSel && modes.length > 1 && algoSel.value) mode = algoSel.value;
       if (!mode || !GENS[mode]) mode = modes[0];
       renderCode();
-      var scId = ALGO_SCENARIO[mode];
+      var scId = wrap.getAttribute('data-scenario') || ALGO_SCENARIO[mode];
+      if (!SCENARIOS[scId]) scId = ALGO_SCENARIO[mode];
       if (!scenario || scenario.id !== scId) rebuildSvg(SCENARIOS[scId]);
       frames = GENS[mode]();
       idx = 0;

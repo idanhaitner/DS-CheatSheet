@@ -285,18 +285,60 @@
 
   <h2 class="section" id="btree">3.7 B-Tree (minimum degree t)</h2>
   <div class="card">
-    <p>Balanced search tree optimized for <b>disk</b> (minimize block reads). Each node holds many keys, so the tree is very <b>shallow</b>. Every node except root has between <b>t−1</b> and <b>2t−1</b> keys; an internal node with k keys has k+1 children.</p>
+    <p>Balanced search tree optimized for <b>disk</b> (minimize block reads). Each node holds many keys, so the tree is very <b>shallow</b>. Every node except root has between <b>t−1</b> and <b>2t−1</b> keys; an internal node with k keys has k+1 children. All leaves have the same depth.</p>
     <table>
       <tr><th>Property / Op</th><th>Value</th></tr>
-      <tr><td>Height</td><td><span class="tag b-Olog">\(O(\log_t n)\)</span></td></tr>
-      <tr><td>Search / Insert / Delete</td><td><span class="tag b-Olog">\(O(\log_t n)\)</span></td></tr>
+      <tr><td>Height (theorem)</td><td>\(h \le \log_t\frac{n+1}{2}\) &nbsp;→&nbsp; <span class="tag b-Olog">\(O(\log_t n)\)</span></td></tr>
+      <tr><td>Search / Insert / Delete</td><td><span class="tag b-Olog">\(O(\log_t n)\)</span> disk accesses (one per level)</td></tr>
       <tr><td>Split child</td><td><span class="tag b-O1">O(t)</span></td></tr>
     </table>
+
+    <h4 id="btree-height">Height bound (lecture theorem)</h4>
+    <p>For \(n \ge 1\), a B-tree with minimum degree \(t\) and \(n\) keys has height</p>
+    \[
+      h \le \log_t \frac{n+1}{2}.
+    \]
+    <p><b>Why:</b> a minimal-height tree still has the fewest keys when the root has 1 key and every other node has exactly \(t-1\) keys. Counting keys by depth:</p>
+    \[
+      n \ge 1 + \sum_{i=1}^{h} 2\,t^{i-1}(t-1) = 2t^{h} - 1
+      \quad\Rightarrow\quad
+      h \le \log_t\frac{n+1}{2}.
+    \]
+    <div class="note"><b>Exam:</b> write the exact bound \(h \le \log_t\frac{n+1}{2}\), not only \(O(\log_t n)\). That is why B-trees need so few disk accesses vs a BST (\(h \ge \lfloor\log_2 n\rfloor\)).</div>
+
+    <h4 id="btree-split">Node splitting (how a split is made)</h4>
+    <p>Needed when a node \(v\) is <b>full</b>: it has \(2t-1\) keys (cannot accept another key). <b>Node splitting</b> on \(v\):</p>
+    <ol>
+      <li>Split \(v\) into <b>two</b> nodes: the left keeps the \(t-1\) <em>smallest</em> keys; the right gets the \(t-1\) <em>largest</em> keys.</li>
+      <li>The <b>median</b> key of \(v\) moves <b>up into the parent</b> (it becomes the separator between the two new children).</li>
+      <li>If \(v\) was the root, create a <b>new root</b> containing only that median (tree height grows by 1).</li>
+    </ol>
+    <p>Example with \(t=2\) (full node has 3 keys): keys \([a,b,c]\) → left \([a]\), median \(b\) goes to parent, right \([c]\).</p>
+    <div class="note"><b>Parent must have room</b> for the median. That is why insert has 1-pass / 2-pass strategies: split parents <em>before</em> (or as needed) so the median always has somewhere to go.</div>
+
+    <h4 id="btree-merge">Shifting &amp; merging (how delete fixes a thin node)</h4>
+    <p>On the way down (1-pass), if a non-root node \(v\) has only \(t-1\) keys (minimum), we must <b>grow</b> it before entering — otherwise a delete could go illegal. Two tools:</p>
+
+    <p><b>Shifting (borrow from a sibling)</b> — prefer this when a sibling has ≥ \(t\) keys:</p>
+    <ul>
+      <li><b>Left sibling \(u\) rich:</b> move the parent’s separator key down into \(v\); move \(u\)’s <em>maximum</em> key up into the parent.</li>
+      <li><b>Right sibling \(w\) rich:</b> move the parent’s separator down into \(v\); move \(w\)’s <em>minimum</em> key up into the parent.</li>
+    </ul>
+    <p>(Children pointers move with the borrowed key when nodes are internal.)</p>
+
+    <p><b>Merging</b> — when <em>no</em> immediate sibling has ≥ \(t\) keys:</p>
+    <ol>
+      <li>Merge \(v\) with an immediate sibling (left if it exists, else right).</li>
+      <li>Pull the parent’s <b>separating key</b> down into the new merged node (it sits between the two old key-lists).</li>
+    </ol>
+    <p>Merged node then has \((t-1)+(t-1)+1 = 2t-1\) keys (full). If the parent was the root and loses its last key, the merged node becomes the new root (height drops by 1).</p>
+
+    <h4>Insert / Delete overview</h4>
     <ul>
       <li><b>Insert (easy):</b> put the key in a leaf that is not full (\(&lt; 2t-1\) keys).</li>
-      <li><b>Insert (hard):</b> leaf is full → must <b>split</b> (median goes to the parent). Parent may also be full → need a strategy so the median has somewhere to go.</li>
-      <li><b>Delete (easy):</b> remove from a leaf with more than \(t-1\) keys.</li>
-      <li><b>Delete (hard):</b> node is minimal (\(t-1\) keys) → <b>borrow</b> (shift) from a sibling or <b>merge</b> with a sibling before deleting.</li>
+      <li><b>Insert (hard):</b> leaf is full → must <b>split</b> (median goes to the parent). Parent may also be full → use 1-pass or 2-pass so the median has room.</li>
+      <li><b>Delete (easy):</b> remove from a leaf that has more than \(t-1\) keys.</li>
+      <li><b>Delete (hard):</b> node is minimal (\(t-1\) keys) → <b>shift</b> from a sibling or <b>merge</b> with a sibling before deleting. If the key is in an internal node: delete its <b>successor</b> from a leaf (with shifts/merges on the way), then replace the key by that successor.</li>
     </ul>
 
     <h4 id="btree-passes">1-pass vs 2-pass</h4>
@@ -305,13 +347,13 @@
       <tr><th></th><th><b>1-pass</b></th><th><b>2-pass</b></th></tr>
       <tr>
         <td><b>Insert</b></td>
-        <td>Going down: if a node is full, <b>split it right away</b>. Then the leaf always has space.</td>
-        <td>First find the leaf. If it is full, go back and <b>split only the nodes that need it</b>, then insert.</td>
+        <td>Going down: before entering a full node (\(2t-1\) keys), <b>split it right away</b>. Then the leaf always has space.</td>
+        <td>First find the leaf. If it is full, go back and <b>split only the nodes that need it</b> (from the lowest non-full ancestor), then insert.</td>
       </tr>
       <tr>
         <td><b>Delete</b></td>
-        <td>Going down: if a node has too few keys, <b>borrow or merge now</b>. Then delete is safe.</td>
-        <td>First find the key. Then <b>borrow or merge only where needed</b>, then delete.</td>
+        <td>Going down: before entering a minimal non-root (\(t-1\) keys), <b>shift or merge now</b>. Then delete is safe.</td>
+        <td>First find the key. Then <b>shift or merge only where needed</b>, then delete.</td>
       </tr>
       <tr>
         <td><b>Simple idea</b></td>
@@ -323,7 +365,7 @@
     <div class="note">A "2-3-4 tree" is a B-tree with \(t = 2\). Best answer when the exam says "data on disk" or "minimize block accesses."</div>
 
     <h4>Interactive animator</h4>
-    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">B-tree with <b>t = 2</b> (max 3 keys/node). Insert or delete: watch <b>splits</b>, <b>borrows</b>, and <b>merges</b>. Use <b>Fit</b> / <b>+/−</b> when the tree grows wide.</p>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">B-tree with <b>t = 2</b> (max 3 keys/node). Insert or delete: watch <b>splits</b>, <b>borrows (shifts)</b>, and <b>merges</b>. Use <b>Fit</b> / <b>+/−</b> when the tree grows wide.</p>
     <div class="tree-viz-wrap btree-viz-wrap">
       <div class="viz-controls">
         <label>Key: <input type="number" class="viz-key" min="1" max="99" value="25" style="width:56px"></label>
