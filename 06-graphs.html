@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>6 · Graphs + Animator</title>
-<link rel="stylesheet" href="assets/style.css?v=20260713bfsdfs">
-<script src="assets/theme.js?v=20260713bfsdfs"></script>
+<link rel="stylesheet" href="assets/style.css?v=20260716ux">
+<script src="assets/theme.js?v=20260716ux"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
@@ -24,7 +24,6 @@
     <a href="06-graphs.html" class="active">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
-    <a href="09-assignments.html">9 · Homework</a>
   </nav>
 </aside>
 <main class="content">
@@ -508,74 +507,28 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
 
   <h2 class="section" id="mst">6.5 Minimum Spanning Tree (MST)</h2>
   <div class="card">
-    <h4>What problem does MST solve?</h4>
-    <p>You have a connected, weighted, undirected graph. You want to connect <b>all vertices</b> using exactly \(|V|-1\) edges (a tree) such that the <b>total weight is minimized</b>. Real-world: lay fiber-optic cables between cities at minimum cost; connect computers in a network; design a pipeline system.</p>
+    <p>Connected, weighted, undirected graph → spanning tree of <b>minimum total weight</b> (exactly \(|V|-1\) edges, no cycles).</p>
 
-    <h4>Spanning tree vs MST: know the difference</h4>
+    <h4>Edge membership (exam tests)</h4>
     <table>
-      <tr><th>Concept</th><th>Definition</th><th>Check</th></tr>
+      <tr><th>Question</th><th>Test</th></tr>
       <tr>
-        <td><b>Spanning tree</b></td>
-        <td>Subgraph that connects all \(V\) vertices, has exactly \(|V|-1\) edges, and has <b>no cycles</b></td>
-        <td>Connected + acyclic + \(|E_T|=|V|-1\)</td>
-      </tr>
-      <tr>
-        <td><b>NOT a spanning tree</b></td>
-        <td>Has a cycle, or is disconnected, or has wrong edge count</td>
-        <td>Any cycle ⟹ not a tree; missing vertex ⟹ not spanning</td>
-      </tr>
-      <tr>
-        <td><b>MST</b></td>
-        <td>A spanning tree whose <b>sum of edge weights</b> is minimum among all spanning trees</td>
-        <td>Compare total weight \(w(T)\) across all spanning trees</td>
-      </tr>
-    </table>
-
-    <h4>The two key properties (memorize for proofs)</h4>
-    <div class="grid2">
-      <div class="note" style="margin:0">
-        <b>Cut property:</b> for any partition of \(V\) into \(S\) and \(V\setminus S\), the <b>lightest edge crossing the cut</b> belongs to some MST.<br>
-        <em>Intuition:</em> to connect the two sides, you must use a crossing edge: pick the cheapest one.
-      </div>
-      <div class="note" style="margin:0">
-        <b>Cycle property:</b> in any cycle, the <b>heaviest edge</b> (strictly heaviest if weights are distinct) is <b>never</b> in an MST.<br>
-        <em>Intuition:</em> you can always swap it for a lighter edge on the cycle and get a cheaper tree.
-      </div>
-    </div>
-
-    <h4>Edge membership: exam favorites</h4>
-    <table>
-      <tr><th>Question</th><th>Answer / test</th></tr>
-      <tr>
-        <td>Is \(e_{\min}\) (unique lightest edge) in every MST?</td>
-        <td><b>Yes.</b> Proof by contradiction: if some MST \(T\) lacks \(e_{\min}\), then \(T \cup \{e_{\min}\}\) has a cycle; remove the cycle's max edge (heavier than \(e_{\min}\)) → cheaper spanning tree. Contradiction.</td>
+        <td>Unique lightest \(e_{\min}\) in every MST?</td>
+        <td><b>Yes</b> (swap/contradiction).</td>
       </tr>
       <tr>
         <td>Can \(e_{\max}\) be in an MST?</td>
-        <td><b>Yes</b>: e.g. if \(e_{\max}\) is the only edge to a leaf vertex (bridge to an isolated part), every spanning tree must include it.</td>
+        <td><b>Yes</b> if it is a bridge to a leaf / cut-vertex side.</td>
       </tr>
       <tr>
-        <td>Can there be multiple MSTs?</td>
-        <td><b>Yes</b> when weights tie. If all weights are <b>distinct</b>, the MST is <b>unique</b> (proof: swap argument on two different MSTs gives contradiction).</td>
+        <td>\(e\) in <b>some</b> MST?</td>
+        <td>BFS in \(G'=\{e':w(e')&lt;w(e)\}\). Reachable ⇒ no; else yes. <span class="tag b-On">O(V+E)</span></td>
       </tr>
       <tr>
-        <td>Is edge \(e=(u,v)\) in <b>some</b> MST?</td>
-        <td>
-          <b>Test:</b> let \(G'\) = all edges with weight \(< w(e)\). BFS/DFS from \(u\) in \(G'\).<br>
-          • <b>\(v\) reachable</b> in \(G'\) → path + edge \(e\) forms a cycle where \(e\) is the <b>unique heaviest</b> → \(e\) is in <b>no</b> MST.<br>
-          • <b>\(v\) not reachable</b> → no such cycle → \(e\) <b>can</b> appear in some MST.
-        </td>
-      </tr>
-      <tr>
-        <td>Is edge \(e=(u,v)\) in <b>every</b> MST?</td>
-        <td>
-          <b>Test:</b> let \(G'\) = all edges with weight \(\le w(e)\), <b>excluding \(e\)</b>. BFS/DFS from \(u\).<br>
-          • <b>\(v\) reachable</b> in \(G'\) → alternate \(u\)–\(v\) path without \(e\) → \(e\) is <b>not</b> in every MST.<br>
-          • <b>\(v\) not reachable</b> → must use \(e\) to connect \(u\) and \(v\) → \(e\) is in <b>every</b> MST.
-        </td>
+        <td>\(e\) in <b>every</b> MST?</td>
+        <td>BFS in \(G'=\{e':w(e')\le w(e)\}\setminus\{e\}\). Reachable ⇒ no; else yes.</td>
       </tr>
     </table>
-    <p class="case-hint">Both edge-membership tests run in <span class="tag b-On">O(V + E)</span>: build \(G'\) + one BFS/DFS.</p>
 
     <div class="graph-viz-wrap" data-modes='["kruskal","prim"]' data-default="kruskal">
       <div class="viz-controls">
@@ -653,67 +606,22 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
       </div>
     </div>
 
-    <h4>Kruskal vs Prim: decision guide</h4>
+    <h4>Kruskal vs Prim (when weights are special)</h4>
     <table>
-      <tr><th>When you see…</th><th>What to use</th><th>Total time</th></tr>
-      <tr>
-        <td><b>Default exam case</b> — no special tricks mentioned</td>
-        <td>Either Kruskal or Prim (same answer, same asymptotic cost)</td>
-        <td><span class="tag b-Onlog">O(E log V)</span> for both<br><span style="font-size:13px;color:var(--muted)">Kruskal sort is O(E log E) = O(E log V) since E ≤ V²</span></td>
-      </tr>
-      <tr>
-        <td>Integer edge weights in <b>[1, V]</b></td>
-        <td><b>Kruskal</b> + <b>counting sort</b> on edges (skip comparison sort)</td>
-        <td><span class="tag b-On">O(E · α(V))</span><br><span style="font-size:13px;color:var(--muted)">Sort becomes O(E + V); Union-Find dominates</span></td>
-      </tr>
-      <tr>
-        <td>Integer edge weights in <b>\([0, E^{3/2}-1]\)</b></td>
-        <td><b>Kruskal</b> + <b>radix sort</b> (base \(E\), \(d = O(1)\) digit passes)</td>
-        <td><span class="tag b-On">O(E · α(E))</span><br><span style="font-size:13px;color:var(--muted)">Sorting is O(E); counting alone would be O(E^{3/2})</span></td>
-      </tr>
-      <tr>
-        <td>All edge weights are small integers in <b>[1, W]</b>, and <b>W is fixed</b> (e.g. only weights 1–10, no matter how big the graph is)</td>
-        <td><b>Prim</b>, but swap the binary heap for a <b>bucket queue</b>: keep <b>W + 1 linked lists</b>; list <b>i</b> stores every fringe vertex whose current <code>key</code> is <b>i</b>. To extract-min, scan lists 0, 1, 2, … until you find a non-empty one.</td>
-        <td><span class="tag b-On">O(E)</span><br><span style="font-size:13px;color:var(--muted)">Only W+1 buckets exist, so find-min and move a vertex to a new bucket are O(1); W is constant</span></td>
-      </tr>
-      <tr>
-        <td>Some connections already exist for <b>free</b> (cost 0)</td>
-        <td>Either algorithm on the full graph: set existing edges to weight <b>0</b>, new edges to positive cost</td>
-        <td>Same as standard MST<br><span style="font-size:13px;color:var(--muted)">Zero-weight edges are taken first; pay only for new edges in the MST</span></td>
-      </tr>
+      <tr><th>Weights</th><th>Use</th><th>Time</th></tr>
+      <tr><td>Default</td><td>Either (binary heap / sort)</td><td><span class="tag b-Onlog">O(E log V)</span></td></tr>
+      <tr><td>Integers in \([1,V]\)</td><td>Kruskal + counting sort</td><td><span class="tag b-On">O(E · α(V))</span></td></tr>
+      <tr><td>Integers in \([0, E^{3/2}-1]\)</td><td>Kruskal + radix (base \(E\))</td><td><span class="tag b-On">O(E · α(E))</span></td></tr>
+      <tr><td>Small fixed \(W\) (weights in \([1,W]\))</td><td>Prim + <b>bucket queue</b> (\(W{+}1\) lists)</td><td><span class="tag b-On">O(E)</span></td></tr>
     </table>
-
-    <div class="note">
-      <b>Bucket queue for Prim (plain English):</b> Prim repeatedly asks “which outside vertex has the smallest <code>key</code>?” A heap answers in O(log V). If every possible <code>key</code> is only 0, 1, …, W (W fixed), keep <b>W + 1 buckets</b> instead:<br>
-      • <b>Insert / decrease-key:</b> move vertex v to bucket[<code>key[v]</code>] — O(1).<br>
-      • <b>Extract-min:</b> take any vertex from the lowest-numbered non-empty bucket — O(W) = O(1) because W is constant.<br>
-      <b>Example (W = 3):</b> buckets are <code>0: {A}</code>, <code>1: {D}</code>, <code>2: {B, C}</code>, <code>3: ∅</code>. Extract-min returns A from bucket 0. After relaxing edges from A, maybe C moves from bucket 2 to bucket 1. Next extract-min skips empty bucket 0, returns D from bucket 1.<br>
-      <b>Why O(E)?</b> You still do O(E) relax steps like normal Prim; each heap operation became O(1), so no log factor.
-    </div>
-
-    <h4>Modeling real problems as MST</h4>
-    <div class="note">
-      <b>Example: connect cities with existing cables:</b> build complete graph on cities; existing connections get weight <b>0</b>, new connections get cost \(c(u,v) &gt; 0\). Run MST. The result uses all zero-weight (existing) edges that don't form a cycle, plus minimum-cost new edges to connect everything. Total cost = sum of weights of new edges in the MST.
-    </div>
-    <p><b>Exam tip:</b> once you recognize “connect all nodes, minimize total cost,” write “reduce to MST” and cite Kruskal or Prim as a black box: then analyze the reduction + MST runtime.</p>
+    <div class="note"><b>Bucket queue:</b> list \(i\) holds fringe vertices with \(\mathrm{key}=i\). Extract-min = first nonempty list (O(W)=O(1)). Decrease-key = move between lists in O(1).</div>
+    <p><b>Exam tip:</b> “connect all, minimize cost” → reduce to MST; cite Kruskal/Prim as a black box and analyze the reduction.</p>
   </div>
 
   <h2 class="section" id="dijkstra">6.6 Dijkstra: Single-Source Shortest Paths</h2>
   <div class="card">
-    <p><b>Problem it solves:</b> find shortest paths from source \(s\) to all vertices when edge weights are <b>non-negative</b>. Generalizes BFS to weighted graphs.</p>
-    <p><b>Input:</b> graph \(G=(V,E)\), source \(s\), and a weight function <b>\(w(u,v)\)</b> giving the cost of edge \((u,v)\). In the visualizer, the number on each edge <em>is</em> \(w(u,v)\) (e.g. A–C has \(w=2\)).</p>
-    <p><b>Strategy:</b> greedy: maintain <code>dist[v]</code> = best known distance from \(s\) to \(v\). Repeatedly extract the unvisited vertex with minimum <code>dist</code> from a <b>priority queue (PQ)</b>, finalize it, then <b>relax</b> each outgoing edge.</p>
-    <div class="note">
-      <b>What does “relax edge \((u,v)\)” mean?</b> After finalizing \(u\), check whether the path \(s \leadsto u \to v\) is shorter than the current best to \(v\).<br>
-      • <b>Test:</b> is <code>dist[u] + w(u,v) &lt; dist[v]</code>?<br>
-      • <b>Yes:</b> update <code>dist[v]</code> and <code>parent[v]=u</code>; edge \((u,v)\) joins the <b>shortest-path tree</b> (teal). Update PQ (insert or decrease-key).<br>
-      • <b>No:</b> keep <code>dist[v]</code>; edge is not part of the shortest-path tree.<br>
-      <b>Example:</b> <code>dist[A]=0</code>, edge A→B with \(w=4\), <code>dist[B]=∞</code> → set <code>dist[B]=4</code>.
-    </div>
-    <div class="note">
-      <b>Teal edges = shortest-path tree (SPT), not MST.</b> Each teal edge is the last edge on a <em>best known path from \(s\)</em> to some vertex. At the end they form a tree rooted at \(s\). An edge can be in the SPT but <b>not</b> in an MST (and vice versa): SPT minimizes path cost from one source; MST minimizes total weight connecting all nodes.<br>
-      <b>Example graph (7 vertices):</b> Same layout as the MST visualizer. A is the source. The direct edge A→B (8) is a trap — B first gets 8, then improves to <b>6</b> via A→C→D→B (the only decrease-key). Teal edges = current shortest-path tree from A.
-    </div>
+    <p>Non-negative weights: shortest paths from source \(s\). Greedy with a PQ on \(\mathrm{dist}[v]\); repeatedly extract-min and <b>relax</b> outgoing edges. Teal edges = shortest-path tree (not an MST).</p>
+    <div class="note"><b>Relax \((u,v)\):</b> if \(\mathrm{dist}[u]+w(u,v)&lt;\mathrm{dist}[v]\), update \(\mathrm{dist}[v]\) and parent. Demo trap: A→B weight 8 improves to 6 via A→C→D→B.</div>
     <div class="graph-viz-wrap" data-modes='["dijkstra"]' data-default="dijkstra">
       <div class="viz-controls">
         <label class="viz-algo-label" style="display:none">Algorithm: <select class="viz-algo"></select></label>
@@ -747,6 +655,22 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
       <tr><td>Binary heap</td><td><span class="tag b-Onlog">O((V+E) log V)</span></td></tr>
       <tr><td>Fibonacci heap</td><td>O(E + V log V)</td></tr>
     </table>
+
+    <h4 id="dijkstra-complexity">Why binary-heap Dijkstra is \(O((V+E)\log V)\)</h4>
+    <p>Dijkstra’s work is dominated by the priority queue. With a <b>binary heap</b>, each heap op (insert / extract-min / decrease-key) costs \(O(\log V)\) because the heap holds at most \(V\) vertices.</p>
+    <table>
+      <tr><th>Operation</th><th>How many times</th><th>Cost each</th><th>Total</th></tr>
+      <tr><td><b>extract-min</b></td><td>\(\le V\) (finalize each vertex once)</td><td>\(O(\log V)\)</td><td>\(O(V\log V)\)</td></tr>
+      <tr><td><b>decrease-key</b> / insert into PQ</td><td>\(\le E\) (at most once per edge, when relaxing)</td><td>\(O(\log V)\)</td><td>\(O(E\log V)\)</td></tr>
+      <tr><td>Init / other \(O(V)\) bookkeeping</td><td>—</td><td>—</td><td>\(O(V)\)</td></tr>
+    </table>
+    <p>Add them up:</p>
+    \[
+      O(V\log V) + O(E\log V) = O\big((V+E)\log V\big).
+    \]
+    <div class="note">
+      <b>Exam wording:</b> same heap accounting as Prim. Sparse graphs (\(E=\Theta(V)\)): \(O(V\log V)\). Dense (\(E=\Theta(V^2)\)): \(O(V^2\log V)\). With a Fibonacci heap, decrease-key is amortized \(O(1)\) → \(O(E + V\log V)\), but the course default answer is the binary-heap bound.
+    </div>
 
     <h4>Is Dijkstra BFS? DFS? Neither?</h4>
     <table>
@@ -892,7 +816,7 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
       <tr><th>Claim type</th><th>Technique</th></tr>
       <tr><td>“Lightest edge is in every MST”</td><td>Contradiction: add edge → cycle → swap heavier edge → cheaper tree</td></tr>
       <tr><td>“MST is unique” (distinct weights)</td><td>Contradiction: two MSTs differ on edge \(e\) → cycle with lighter swap</td></tr>
-      <tr><td>“Edge \(e\) safe to add”</td><td>Cut property: \(e\) is lightest crossing some cut</td></tr>
+      <tr><td>“\(e\) in some / every MST?”</td><td>BFS reachability tests on lighter (or ≤) edges — see edge-membership table above</td></tr>
       <tr><td>“Edge \(e\) never in MST”</td><td>Cycle property: \(e\) is heaviest in some cycle</td></tr>
       <tr><td>“BFS finds shortest path”</td><td>Induction on distance layers: first visit at layer \(d\) means shortest path has length \(d\)</td></tr>
     </table>

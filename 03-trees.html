@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>3 · Structures &amp; Trees</title>
-<link rel="stylesheet" href="assets/style.css?v=20260713sidebartoc2">
-<script src="assets/theme.js?v=20260713sidebartoc2"></script>
+<link rel="stylesheet" href="assets/style.css?v=20260716avlcolor">
+<script src="assets/theme.js?v=20260716ux"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
@@ -24,7 +24,6 @@
     <a href="06-graphs.html">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
-    <a href="09-assignments.html">9 · Homework</a>
   </nav>
 </aside>
 <main class="content">
@@ -142,52 +141,249 @@
       <tr><td>Insert</td><td><span class="tag b-Olog">O(log n)</span>: at most <b>1</b> (single/double) rotation</td></tr>
       <tr><td>Delete</td><td><span class="tag b-Olog">O(log n)</span>: up to <b>O(log n)</b> rotations to the root</td></tr>
     </table>
-    <h4>The 4 rotation cases</h4>
-    <table>
-      <tr><th>Case</th><th>Shape</th><th>Fix</th></tr>
-      <tr><td><b>LL</b></td><td>left subtree of left child</td><td>single <b>Right</b>-Rotate</td></tr>
-      <tr><td><b>RR</b></td><td>right subtree of right child</td><td>single <b>Left</b>-Rotate</td></tr>
-      <tr><td><b>LR</b></td><td>right subtree of left child</td><td>Left-Rotate(child) then Right-Rotate</td></tr>
-      <tr><td><b>RL</b></td><td>left subtree of right child</td><td>Right-Rotate(child) then Left-Rotate</td></tr>
-    </table>
-    <h4>Left-Rotation (fixes RR)</h4>
-    <div class="grid2">
-      <div>
-        <svg viewBox="0 0 300 200" width="100%" height="180">
-          <line x1="90" y1="35" x2="60" y2="80" stroke="#5c6bc0" stroke-width="2"/>
-          <line x1="105" y1="35" x2="180" y2="80" stroke="#5c6bc0" stroke-width="2"/>
-          <line x1="185" y1="90" x2="150" y2="140" stroke="#5c6bc0" stroke-width="2"/>
-          <line x1="195" y1="90" x2="240" y2="140" stroke="#5c6bc0" stroke-width="2"/>
+    <h4 id="avl-rotations">All rotations</h4>
+    <p style="font-size:15px;color:var(--muted);margin:0 0 10px"><code>bf = h(L) − h(R)</code>. Same colors in every diagram — tags on the figure show the <code>bf</code> test and which rotate to run.</p>
+    <div class="avl-rot-legend" aria-label="Color legend">
+      <span class="avl-leg"><i class="avl-dot" style="background:#e25555"></i><b>Red = z</b> unbalanced node</span>
+      <span class="avl-leg"><i class="avl-dot" style="background:#4f7cff"></i><b>Blue = y</b> child of z</span>
+      <span class="avl-leg"><i class="avl-dot" style="background:#8b5cf6"></i><b>Violet = x</b> grandchild (double cases)</span>
+      <span class="avl-leg"><i class="avl-dot" style="background:#2bb673"></i><b>Green = new root</b> after the rotate(s)</span>
+      <span class="avl-leg"><i class="avl-dot" style="background:#5a6490"></i><b>Gray = T*</b> subtrees</span>
+    </div>
+
+    <div class="avl-rot-block">
+      <h5 class="avl-rot-title">Right-Rotation <span>(fixes LL)</span></h5>
+      <div class="avl-rot-stage">
+        <svg viewBox="0 0 640 210" class="avl-rot-sheet" role="img" aria-label="Right rotation LL">
+          <!-- before -->
+          <line x1="150" y1="55" x2="85" y2="100" stroke="#6b7cc4" stroke-width="2.2"/>
+          <line x1="165" y1="55" x2="210" y2="100" stroke="#6b7cc4" stroke-width="2.2"/>
+          <line x1="75" y1="110" x2="45" y2="155" stroke="#6b7cc4" stroke-width="2.2"/>
+          <line x1="90" y1="110" x2="120" y2="155" stroke="#6b7cc4" stroke-width="2.2"/>
           <g font-size="14" font-weight="700" text-anchor="middle">
-            <circle cx="95" cy="30" r="17" fill="#c0533f"/><text x="95" y="35" fill="#fff">z</text>
-            <circle cx="55" cy="85" r="15" fill="#455a9e"/><text x="55" y="90" fill="#fff">T1</text>
-            <circle cx="190" cy="85" r="17" fill="#3f51b5"/><text x="190" y="90" fill="#fff">y</text>
-            <circle cx="145" cy="145" r="15" fill="#455a9e"/><text x="145" y="150" fill="#fff">T2</text>
-            <circle cx="245" cy="145" r="17" fill="#6366f1"/><text x="245" y="150" fill="#fff">x</text>
+            <circle cx="160" cy="50.0" r="17" fill="#e25555"/><text x="160" y="55" fill="#fff">z</text>
+            <circle cx="80" cy="105.0" r="17" fill="#4f7cff"/><text x="80" y="110" fill="#fff">y</text>
+            <circle cx="215" cy="105.0" r="14" fill="#5a6490"/><text x="215" y="110" fill="#fff">T3</text>
+            <circle cx="40" cy="160.0" r="17" fill="#8b5cf6"/><text x="40" y="165" fill="#fff">x</text>
+            <circle cx="125" cy="160.0" r="14" fill="#5a6490"/><text x="125" y="165" fill="#fff">T2</text>
           </g>
-        </svg>
-        <div class="caption">Before: right-heavy (RR)</div>
-      </div>
-      <div>
-        <svg viewBox="0 0 300 200" width="100%" height="180">
-          <line x1="140" y1="35" x2="90" y2="90" stroke="#57e0c0" stroke-width="2"/>
-          <line x1="160" y1="35" x2="215" y2="90" stroke="#57e0c0" stroke-width="2"/>
-          <line x1="85" y1="95" x2="55" y2="145" stroke="#57e0c0" stroke-width="2"/>
-          <line x1="95" y1="95" x2="130" y2="145" stroke="#57e0c0" stroke-width="2"/>
+          <rect x="175" y="8" width="72" height="40" rx="5" fill="#2a1830" stroke="#e07a6a" stroke-width="1.2"/>
+              <text x="211.0" y="24" fill="#ffc4ba" font-size="10.5" font-weight="700" text-anchor="middle" font-family="ui-monospace,monospace">bf(z)=+2</text>
+              <text x="211.0" y="37" fill="#ffc4ba" font-size="10.5" font-weight="700" text-anchor="middle" font-family="ui-monospace,monospace">bf(y)≥0</text>
+          <text x="120" y="198" fill="#9aa3c8" font-size="12" font-weight="700" text-anchor="middle">LL imbalance</text>
+
+          <!-- connector -->
+          <text x="290" y="95" fill="#7dffa8" font-size="12" font-weight="700" text-anchor="middle" font-family="ui-monospace,monospace">RightRotate(z)</text>
+          <text x="290" y="118" fill="#8ba4ff" font-size="22" font-weight="800" text-anchor="middle">→</text>
+
+          <!-- after -->
+          <line x1="450" y1="55" x2="395" y2="105" stroke="#3cb89a" stroke-width="2.2"/>
+          <line x1="470" y1="55" x2="525" y2="105" stroke="#3cb89a" stroke-width="2.2"/>
+          <line x1="520" y1="115" x2="485" y2="160" stroke="#3cb89a" stroke-width="2.2"/>
+          <line x1="535" y1="115" x2="565" y2="160" stroke="#3cb89a" stroke-width="2.2"/>
           <g font-size="14" font-weight="700" text-anchor="middle">
-            <circle cx="150" cy="30" r="17" fill="#2f8f5f"/><text x="150" y="35" fill="#fff">y</text>
-            <circle cx="85" cy="90" r="17" fill="#3f51b5"/><text x="85" y="95" fill="#fff">z</text>
-            <circle cx="220" cy="90" r="17" fill="#6366f1"/><text x="220" y="95" fill="#fff">x</text>
-            <circle cx="55" cy="150" r="15" fill="#455a9e"/><text x="55" y="155" fill="#fff">T1</text>
-            <circle cx="130" cy="150" r="15" fill="#455a9e"/><text x="130" y="155" fill="#fff">T2</text>
+            <circle cx="460" cy="50.0" r="17" fill="#2bb673"/><text x="460" y="55" fill="#fff">y</text>
+            <circle cx="390" cy="110.0" r="17" fill="#8b5cf6"/><text x="390" y="115" fill="#fff">x</text>
+            <circle cx="530" cy="110.0" r="17" fill="#e25555"/><text x="530" y="115" fill="#fff">z</text>
+            <circle cx="480" cy="165.0" r="14" fill="#5a6490"/><text x="480" y="170" fill="#fff">T2</text>
+            <circle cx="570" cy="165.0" r="14" fill="#5a6490"/><text x="570" y="170" fill="#fff">T3</text>
           </g>
+          <text x="480" y="198" fill="#9aa3c8" font-size="12" font-weight="700" text-anchor="middle">balanced</text>
         </svg>
-        <div class="caption">After Left-Rotate(z): balanced</div>
       </div>
     </div>
-    <div class="note"><b>Mnemonic:</b> the rotation is the <b>opposite</b> of the heavy side. Right-heavy → rotate left; left-heavy → rotate right. Double cases first rotate the child to reduce to a single case.</div>
 
-    <h4>Interactive animator</h4>
+    <div class="avl-rot-block">
+      <h5 class="avl-rot-title">Left-Rotation <span>(fixes RR)</span></h5>
+      <div class="avl-rot-stage">
+        <svg viewBox="0 0 640 210" class="avl-rot-sheet" role="img" aria-label="Left rotation RR">
+          <line x1="85" y1="55" x2="50" y2="100" stroke="#6b7cc4" stroke-width="2.2"/>
+          <line x1="100" y1="55" x2="170" y2="100" stroke="#6b7cc4" stroke-width="2.2"/>
+          <line x1="175" y1="110" x2="140" y2="155" stroke="#6b7cc4" stroke-width="2.2"/>
+          <line x1="190" y1="110" x2="225" y2="155" stroke="#6b7cc4" stroke-width="2.2"/>
+          <g font-size="14" font-weight="700" text-anchor="middle">
+            <circle cx="90" cy="50.0" r="17" fill="#e25555"/><text x="90" y="55" fill="#fff">z</text>
+            <circle cx="45" cy="105.0" r="14" fill="#5a6490"/><text x="45" y="110" fill="#fff">T1</text>
+            <circle cx="180" cy="105.0" r="17" fill="#4f7cff"/><text x="180" y="110" fill="#fff">y</text>
+            <circle cx="135" cy="160.0" r="14" fill="#5a6490"/><text x="135" y="165" fill="#fff">T2</text>
+            <circle cx="230" cy="160.0" r="17" fill="#8b5cf6"/><text x="230" y="165" fill="#fff">x</text>
+          </g>
+          <rect x="8" y="8" width="72" height="40" rx="5" fill="#2a1830" stroke="#e07a6a" stroke-width="1.2"/>
+              <text x="44.0" y="24" fill="#ffc4ba" font-size="10.5" font-weight="700" text-anchor="middle" font-family="ui-monospace,monospace">bf(z)=−2</text>
+              <text x="44.0" y="37" fill="#ffc4ba" font-size="10.5" font-weight="700" text-anchor="middle" font-family="ui-monospace,monospace">bf(y)≤0</text>
+          <text x="120" y="198" fill="#9aa3c8" font-size="12" font-weight="700" text-anchor="middle">RR imbalance</text>
+
+          <text x="300" y="95" fill="#7dffa8" font-size="12" font-weight="700" text-anchor="middle" font-family="ui-monospace,monospace">LeftRotate(z)</text>
+          <text x="300" y="118" fill="#8ba4ff" font-size="22" font-weight="800" text-anchor="middle">→</text>
+
+          <line x1="450" y1="55" x2="395" y2="105" stroke="#3cb89a" stroke-width="2.2"/>
+          <line x1="470" y1="55" x2="525" y2="105" stroke="#3cb89a" stroke-width="2.2"/>
+          <line x1="390" y1="115" x2="360" y2="160" stroke="#3cb89a" stroke-width="2.2"/>
+          <line x1="405" y1="115" x2="440" y2="160" stroke="#3cb89a" stroke-width="2.2"/>
+          <g font-size="14" font-weight="700" text-anchor="middle">
+            <circle cx="460" cy="50.0" r="17" fill="#2bb673"/><text x="460" y="55" fill="#fff">y</text>
+            <circle cx="395" cy="110.0" r="17" fill="#e25555"/><text x="395" y="115" fill="#fff">z</text>
+            <circle cx="530" cy="110.0" r="17" fill="#8b5cf6"/><text x="530" y="115" fill="#fff">x</text>
+            <circle cx="355" cy="165.0" r="14" fill="#5a6490"/><text x="355" y="170" fill="#fff">T1</text>
+            <circle cx="445" cy="165.0" r="14" fill="#5a6490"/><text x="445" y="170" fill="#fff">T2</text>
+          </g>
+          <text x="460" y="198" fill="#9aa3c8" font-size="12" font-weight="700" text-anchor="middle">balanced</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="avl-rot-block">
+      <h5 class="avl-rot-title">Left-Right Rotation <span>(fixes LR)</span></h5>
+      <div class="avl-rot-stage">
+        <svg viewBox="0 0 900 230" class="avl-rot-sheet" role="img" aria-label="Left-Right rotation">
+          <!-- 1 -->
+          <line x1="130" y1="50" x2="70" y2="90" stroke="#6b7cc4" stroke-width="2"/>
+          <line x1="145" y1="50" x2="185" y2="90" stroke="#6b7cc4" stroke-width="2"/>
+          <line x1="60" y1="100" x2="30" y2="140" stroke="#6b7cc4" stroke-width="2"/>
+          <line x1="75" y1="100" x2="110" y2="140" stroke="#6b7cc4" stroke-width="2"/>
+          <line x1="105" y1="150" x2="80" y2="185" stroke="#6b7cc4" stroke-width="2"/>
+          <line x1="120" y1="150" x2="145" y2="185" stroke="#6b7cc4" stroke-width="2"/>
+          <g font-size="13" font-weight="700" text-anchor="middle">
+            <circle cx="140" cy="45.0" r="15" fill="#e25555"/><text x="140" y="50" fill="#fff">z</text>
+            <circle cx="65" cy="95.0" r="15" fill="#4f7cff"/><text x="65" y="100" fill="#fff">y</text>
+            <circle cx="190" cy="95.0" r="13" fill="#5a6490"/><text x="190" y="100" fill="#fff">T4</text>
+            <circle cx="25" cy="145.0" r="13" fill="#5a6490"/><text x="25" y="150" fill="#fff">T1</text>
+            <circle cx="115" cy="145.0" r="15" fill="#8b5cf6"/><text x="115" y="150" fill="#fff">x</text>
+            <circle cx="75" cy="190.0" r="12" fill="#5a6490"/><text x="75" y="194" fill="#fff">T2</text>
+            <circle cx="150" cy="190.0" r="12" fill="#5a6490"/><text x="150" y="194" fill="#fff">T3</text>
+          </g>
+          <rect x="155" y="4" width="70" height="40" rx="5" fill="#2a1830" stroke="#e07a6a" stroke-width="1.2"/>
+              <text x="190.0" y="20" fill="#ffc4ba" font-size="10.5" font-weight="700" text-anchor="middle" font-family="ui-monospace,monospace">bf(z)=+2</text>
+              <text x="190.0" y="33" fill="#ffc4ba" font-size="10.5" font-weight="700" text-anchor="middle" font-family="ui-monospace,monospace">bf(y)&lt;0</text>
+          <text x="100" y="218" fill="#9aa3c8" font-size="11" font-weight="700" text-anchor="middle">LR imbalance</text>
+
+          <text x="250" y="100" fill="#7dffa8" font-size="11" font-weight="700" text-anchor="middle" font-family="ui-monospace,monospace">LeftRotate(y)</text>
+          <text x="250" y="120" fill="#8ba4ff" font-size="20" font-weight="800" text-anchor="middle">→</text>
+
+          <!-- 2 -->
+          <line x1="400" y1="50" x2="345" y2="90" stroke="#8b7cf0" stroke-width="2"/>
+          <line x1="415" y1="50" x2="455" y2="90" stroke="#8b7cf0" stroke-width="2"/>
+          <line x1="335" y1="100" x2="305" y2="145" stroke="#8b7cf0" stroke-width="2"/>
+          <line x1="350" y1="100" x2="385" y2="145" stroke="#8b7cf0" stroke-width="2"/>
+          <line x1="300" y1="155" x2="280" y2="185" stroke="#8b7cf0" stroke-width="2"/>
+          <line x1="315" y1="155" x2="340" y2="185" stroke="#8b7cf0" stroke-width="2"/>
+          <g font-size="13" font-weight="700" text-anchor="middle">
+            <circle cx="410" cy="45.0" r="15" fill="#e25555"/><text x="410" y="50" fill="#fff">z</text>
+            <circle cx="340" cy="95.0" r="15" fill="#8b5cf6"/><text x="340" y="100" fill="#fff">x</text>
+            <circle cx="460" cy="95.0" r="13" fill="#5a6490"/><text x="460" y="100" fill="#fff">T4</text>
+            <circle cx="305" cy="150.0" r="15" fill="#4f7cff"/><text x="305" y="155" fill="#fff">y</text>
+            <circle cx="390" cy="150.0" r="13" fill="#5a6490"/><text x="390" y="155" fill="#fff">T3</text>
+            <circle cx="275" cy="190.0" r="12" fill="#5a6490"/><text x="275" y="194" fill="#fff">T1</text>
+            <circle cx="345" cy="190.0" r="12" fill="#5a6490"/><text x="345" y="194" fill="#fff">T2</text>
+          </g>
+          <text x="380" y="218" fill="#9aa3c8" font-size="11" font-weight="700" text-anchor="middle">now LL</text>
+
+          <text x="530" y="92" fill="#9aa3c8" font-size="11" font-weight="700" text-anchor="middle">then</text>
+          <text x="530" y="108" fill="#7dffa8" font-size="11" font-weight="700" text-anchor="middle" font-family="ui-monospace,monospace">RightRotate(z)</text>
+          <text x="530" y="128" fill="#8ba4ff" font-size="20" font-weight="800" text-anchor="middle">→</text>
+
+          <!-- 3 -->
+          <line x1="700" y1="50" x2="640" y2="100" stroke="#3cb89a" stroke-width="2"/>
+          <line x1="715" y1="50" x2="775" y2="100" stroke="#3cb89a" stroke-width="2"/>
+          <line x1="635" y1="110" x2="605" y2="155" stroke="#3cb89a" stroke-width="2"/>
+          <line x1="650" y1="110" x2="675" y2="155" stroke="#3cb89a" stroke-width="2"/>
+          <line x1="770" y1="110" x2="745" y2="155" stroke="#3cb89a" stroke-width="2"/>
+          <line x1="785" y1="110" x2="810" y2="155" stroke="#3cb89a" stroke-width="2"/>
+          <g font-size="13" font-weight="700" text-anchor="middle">
+            <circle cx="705" cy="45.0" r="15" fill="#2bb673"/><text x="705" y="50" fill="#fff">x</text>
+            <circle cx="640" cy="105.0" r="15" fill="#4f7cff"/><text x="640" y="110" fill="#fff">y</text>
+            <circle cx="780" cy="105.0" r="15" fill="#e25555"/><text x="780" y="110" fill="#fff">z</text>
+            <circle cx="600" cy="160.0" r="12" fill="#5a6490"/><text x="600" y="164" fill="#fff">T1</text>
+            <circle cx="680" cy="160.0" r="12" fill="#5a6490"/><text x="680" y="164" fill="#fff">T2</text>
+            <circle cx="740" cy="160.0" r="12" fill="#5a6490"/><text x="740" y="164" fill="#fff">T3</text>
+            <circle cx="815" cy="160.0" r="12" fill="#5a6490"/><text x="815" y="164" fill="#fff">T4</text>
+          </g>
+          <text x="710" y="218" fill="#9aa3c8" font-size="11" font-weight="700" text-anchor="middle">balanced</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="avl-rot-block">
+      <h5 class="avl-rot-title">Right-Left Rotation <span>(fixes RL)</span></h5>
+      <div class="avl-rot-stage">
+        <svg viewBox="0 0 900 230" class="avl-rot-sheet" role="img" aria-label="Right-Left rotation">
+          <!-- 1 -->
+          <line x1="70" y1="50" x2="35" y2="90" stroke="#6b7cc4" stroke-width="2"/>
+          <line x1="85" y1="50" x2="145" y2="90" stroke="#6b7cc4" stroke-width="2"/>
+          <line x1="140" y1="100" x2="110" y2="140" stroke="#6b7cc4" stroke-width="2"/>
+          <line x1="155" y1="100" x2="185" y2="140" stroke="#6b7cc4" stroke-width="2"/>
+          <line x1="105" y1="150" x2="80" y2="185" stroke="#6b7cc4" stroke-width="2"/>
+          <line x1="120" y1="150" x2="145" y2="185" stroke="#6b7cc4" stroke-width="2"/>
+          <g font-size="13" font-weight="700" text-anchor="middle">
+            <circle cx="75" cy="45.0" r="15" fill="#e25555"/><text x="75" y="50" fill="#fff">z</text>
+            <circle cx="30" cy="95.0" r="13" fill="#5a6490"/><text x="30" y="100" fill="#fff">T1</text>
+            <circle cx="150" cy="95.0" r="15" fill="#4f7cff"/><text x="150" y="100" fill="#fff">y</text>
+            <circle cx="110" cy="145.0" r="15" fill="#8b5cf6"/><text x="110" y="150" fill="#fff">x</text>
+            <circle cx="190" cy="145.0" r="13" fill="#5a6490"/><text x="190" y="150" fill="#fff">T4</text>
+            <circle cx="75" cy="190.0" r="12" fill="#5a6490"/><text x="75" y="194" fill="#fff">T2</text>
+            <circle cx="150" cy="190.0" r="12" fill="#5a6490"/><text x="150" y="194" fill="#fff">T3</text>
+          </g>
+          <rect x="95" y="4" width="70" height="40" rx="5" fill="#2a1830" stroke="#e07a6a" stroke-width="1.2"/>
+              <text x="130.0" y="20" fill="#ffc4ba" font-size="10.5" font-weight="700" text-anchor="middle" font-family="ui-monospace,monospace">bf(z)=−2</text>
+              <text x="130.0" y="33" fill="#ffc4ba" font-size="10.5" font-weight="700" text-anchor="middle" font-family="ui-monospace,monospace">bf(y)&gt;0</text>
+          <text x="100" y="218" fill="#9aa3c8" font-size="11" font-weight="700" text-anchor="middle">RL imbalance</text>
+
+          <text x="250" y="100" fill="#7dffa8" font-size="11" font-weight="700" text-anchor="middle" font-family="ui-monospace,monospace">RightRotate(y)</text>
+          <text x="250" y="120" fill="#8ba4ff" font-size="20" font-weight="800" text-anchor="middle">→</text>
+
+          <!-- 2 -->
+          <line x1="340" y1="50" x2="305" y2="90" stroke="#8b7cf0" stroke-width="2"/>
+          <line x1="355" y1="50" x2="410" y2="90" stroke="#8b7cf0" stroke-width="2"/>
+          <line x1="405" y1="100" x2="370" y2="145" stroke="#8b7cf0" stroke-width="2"/>
+          <line x1="420" y1="100" x2="455" y2="145" stroke="#8b7cf0" stroke-width="2"/>
+          <line x1="450" y1="155" x2="425" y2="185" stroke="#8b7cf0" stroke-width="2"/>
+          <line x1="465" y1="155" x2="485" y2="185" stroke="#8b7cf0" stroke-width="2"/>
+          <g font-size="13" font-weight="700" text-anchor="middle">
+            <circle cx="345" cy="45.0" r="15" fill="#e25555"/><text x="345" y="50" fill="#fff">z</text>
+            <circle cx="300" cy="95.0" r="13" fill="#5a6490"/><text x="300" y="100" fill="#fff">T1</text>
+            <circle cx="415" cy="95.0" r="15" fill="#8b5cf6"/><text x="415" y="100" fill="#fff">x</text>
+            <circle cx="365" cy="150.0" r="13" fill="#5a6490"/><text x="365" y="155" fill="#fff">T2</text>
+            <circle cx="460" cy="150.0" r="15" fill="#4f7cff"/><text x="460" y="155" fill="#fff">y</text>
+            <circle cx="420" cy="190.0" r="12" fill="#5a6490"/><text x="420" y="194" fill="#fff">T3</text>
+            <circle cx="490" cy="190.0" r="12" fill="#5a6490"/><text x="490" y="194" fill="#fff">T4</text>
+          </g>
+          <text x="390" y="218" fill="#9aa3c8" font-size="11" font-weight="700" text-anchor="middle">now RR</text>
+
+          <text x="545" y="92" fill="#9aa3c8" font-size="11" font-weight="700" text-anchor="middle">then</text>
+          <text x="545" y="108" fill="#7dffa8" font-size="11" font-weight="700" text-anchor="middle" font-family="ui-monospace,monospace">LeftRotate(z)</text>
+          <text x="545" y="128" fill="#8ba4ff" font-size="20" font-weight="800" text-anchor="middle">→</text>
+
+          <!-- 3 -->
+          <line x1="700" y1="50" x2="640" y2="100" stroke="#3cb89a" stroke-width="2"/>
+          <line x1="715" y1="50" x2="775" y2="100" stroke="#3cb89a" stroke-width="2"/>
+          <line x1="635" y1="110" x2="605" y2="155" stroke="#3cb89a" stroke-width="2"/>
+          <line x1="650" y1="110" x2="675" y2="155" stroke="#3cb89a" stroke-width="2"/>
+          <line x1="770" y1="110" x2="745" y2="155" stroke="#3cb89a" stroke-width="2"/>
+          <line x1="785" y1="110" x2="810" y2="155" stroke="#3cb89a" stroke-width="2"/>
+          <g font-size="13" font-weight="700" text-anchor="middle">
+            <circle cx="705" cy="45.0" r="15" fill="#2bb673"/><text x="705" y="50" fill="#fff">x</text>
+            <circle cx="640" cy="105.0" r="15" fill="#e25555"/><text x="640" y="110" fill="#fff">z</text>
+            <circle cx="780" cy="105.0" r="15" fill="#4f7cff"/><text x="780" y="110" fill="#fff">y</text>
+            <circle cx="600" cy="160.0" r="12" fill="#5a6490"/><text x="600" y="164" fill="#fff">T1</text>
+            <circle cx="680" cy="160.0" r="12" fill="#5a6490"/><text x="680" y="164" fill="#fff">T2</text>
+            <circle cx="740" cy="160.0" r="12" fill="#5a6490"/><text x="740" y="164" fill="#fff">T3</text>
+            <circle cx="815" cy="160.0" r="12" fill="#5a6490"/><text x="815" y="164" fill="#fff">T4</text>
+          </g>
+          <text x="710" y="218" fill="#9aa3c8" font-size="11" font-weight="700" text-anchor="middle">balanced</text>
+        </svg>
+      </div>
+    </div>
+
+    <table style="margin-top:14px">
+      <tr><th>Case</th><th>When (at first unbalanced z)</th><th>Fix</th></tr>
+      <tr><td><b>LL</b></td><td>\(\mathrm{bf}(z)=+2\) and \(\mathrm{bf}(z.\mathrm{left})\ge 0\)</td><td>single <b>Right</b>-Rotate(z)</td></tr>
+      <tr><td><b>RR</b></td><td>\(\mathrm{bf}(z)=-2\) and \(\mathrm{bf}(z.\mathrm{right})\le 0\)</td><td>single <b>Left</b>-Rotate(z)</td></tr>
+      <tr><td><b>LR</b></td><td>\(\mathrm{bf}(z)=+2\) and \(\mathrm{bf}(z.\mathrm{left})&lt;0\)</td><td>Left-Rotate(z.left) then Right-Rotate(z)</td></tr>
+      <tr><td><b>RL</b></td><td>\(\mathrm{bf}(z)=-2\) and \(\mathrm{bf}(z.\mathrm{right})&gt;0\)</td><td>Right-Rotate(z.right) then Left-Rotate(z)</td></tr>
+    </table>
+    <div class="note"><b>Mnemonic:</b> rotate <b>opposite</b> the heavy side (left-heavy → right rotate). Double cases first rotate the child so they collapse to a single case. Insert needs ≤1 rotation; delete may need rotations all the way to the root.</div>
+
+    <h4>Insert / delete animator</h4>
     <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Insert or delete a key: the node is added/removed <b>without</b> auto-rebalancing. Press <b>Balance Tree</b> when <b>|h(L)−h(R)| &gt; 1</b>. Use <b>Fit</b> / <b>+/−</b> or Ctrl+scroll to zoom. <span style="color:#ff6b81"><b>Red</b></span> = pivot · <span style="color:#a78bfa"><b>Purple</b></span> = rotating subtree · <span style="color:#57e0c0"><b>Teal</b></span> = promoted root · <span style="color:#7c4dff"><b>Violet</b></span> = inserted / deleted.</p>
     <div class="tree-viz-wrap avl-viz-wrap">
       <div class="viz-controls">
@@ -293,81 +489,42 @@
       <tr><td>Split child</td><td><span class="tag b-O1">O(t)</span></td></tr>
     </table>
 
-    <h4 id="btree-height">Height bound (lecture theorem)</h4>
-    <p>For \(n \ge 1\), a B-tree with minimum degree \(t\) and \(n\) keys has height</p>
-    \[
-      h \le \log_t \frac{n+1}{2}.
-    \]
-    <p><b>Why:</b> a minimal-height tree still has the fewest keys when the root has 1 key and every other node has exactly \(t-1\) keys. Counting keys by depth:</p>
-    \[
-      n \ge 1 + \sum_{i=1}^{h} 2\,t^{i-1}(t-1) = 2t^{h} - 1
-      \quad\Rightarrow\quad
-      h \le \log_t\frac{n+1}{2}.
-    \]
-    <div class="note"><b>Exam:</b> write the exact bound \(h \le \log_t\frac{n+1}{2}\), not only \(O(\log_t n)\). That is why B-trees need so few disk accesses vs a BST (\(h \ge \lfloor\log_2 n\rfloor\)).</div>
+    <h4 id="btree-height">Height bound</h4>
+    <p>For \(n \ge 1\): \(h \le \log_t\frac{n+1}{2}\). Root has ≥1 key; every other node ≥ \(t-1\) keys ⇒ \(n \ge 2t^{h}-1\). Write the exact bound on exams, not only \(O(\log_t n)\).</p>
 
-    <h4 id="btree-split">Node splitting (how a split is made)</h4>
-    <p>Needed when a node \(v\) is <b>full</b>: it has \(2t-1\) keys (cannot accept another key). <b>Node splitting</b> on \(v\):</p>
-    <ol>
-      <li>Split \(v\) into <b>two</b> nodes: the left keeps the \(t-1\) <em>smallest</em> keys; the right gets the \(t-1\) <em>largest</em> keys.</li>
-      <li>The <b>median</b> key of \(v\) moves <b>up into the parent</b> (it becomes the separator between the two new children).</li>
-      <li>If \(v\) was the root, create a <b>new root</b> containing only that median (tree height grows by 1).</li>
-    </ol>
-    <p>Example with \(t=2\) (full node has 3 keys): keys \([a,b,c]\) → left \([a]\), median \(b\) goes to parent, right \([c]\).</p>
-    <div class="note"><b>Parent must have room</b> for the median. That is why insert has 1-pass / 2-pass strategies: split parents <em>before</em> (or as needed) so the median always has somewhere to go.</div>
+    <h4 id="btree-split">Node splitting</h4>
+    <p>Full node = \(2t-1\) keys. Split into two nodes of \(t-1\) keys; <b>median moves up</b> into the parent. If the root was full, create a new root (height +1). Example \(t=2\): \([a,b,c]\) → left \([a]\), median \(b\), right \([c]\).</p>
 
-    <h4 id="btree-merge">Shifting &amp; merging (how delete fixes a thin node)</h4>
-    <p>On the way down (1-pass), if a non-root node \(v\) has only \(t-1\) keys (minimum), we must <b>grow</b> it before entering — otherwise a delete could go illegal. Two tools:</p>
-
-    <p><b>Shifting (borrow from a sibling)</b> — prefer this when a sibling has ≥ \(t\) keys:</p>
+    <h4 id="btree-merge">Shift &amp; merge (delete)</h4>
     <ul>
-      <li><b>Left sibling \(u\) rich:</b> move the parent’s separator key down into \(v\); move \(u\)’s <em>maximum</em> key up into the parent.</li>
-      <li><b>Right sibling \(w\) rich:</b> move the parent’s separator down into \(v\); move \(w\)’s <em>minimum</em> key up into the parent.</li>
-    </ul>
-    <p>(Children pointers move with the borrowed key when nodes are internal.)</p>
-
-    <p><b>Merging</b> — when <em>no</em> immediate sibling has ≥ \(t\) keys:</p>
-    <ol>
-      <li>Merge \(v\) with an immediate sibling (left if it exists, else right).</li>
-      <li>Pull the parent’s <b>separating key</b> down into the new merged node (it sits between the two old key-lists).</li>
-    </ol>
-    <p>Merged node then has \((t-1)+(t-1)+1 = 2t-1\) keys (full). If the parent was the root and loses its last key, the merged node becomes the new root (height drops by 1).</p>
-
-    <h4>Insert / Delete overview</h4>
-    <ul>
-      <li><b>Insert (easy):</b> put the key in a leaf that is not full (\(&lt; 2t-1\) keys).</li>
-      <li><b>Insert (hard):</b> leaf is full → must <b>split</b> (median goes to the parent). Parent may also be full → use 1-pass or 2-pass so the median has room.</li>
-      <li><b>Delete (easy):</b> remove from a leaf that has more than \(t-1\) keys.</li>
-      <li><b>Delete (hard):</b> node is minimal (\(t-1\) keys) → <b>shift</b> from a sibling or <b>merge</b> with a sibling before deleting. If the key is in an internal node: delete its <b>successor</b> from a leaf (with shifts/merges on the way), then replace the key by that successor.</li>
+      <li><b>Shift (borrow):</b> sibling has ≥ \(t\) keys → pull separator down, push sibling’s extreme key up.</li>
+      <li><b>Merge:</b> no rich sibling → merge with sibling + separator → \(2t-1\) keys. Empty root ⇒ height −1.</li>
     </ul>
 
-    <h4 id="btree-passes">1-pass vs 2-pass</h4>
-    <p>Both keep the B-tree legal. The only difference is <b>when</b> you fix full or almost-empty nodes.</p>
+    <h4 id="btree-passes">1-pass vs 2-pass (lecture)</h4>
     <table>
       <tr><th></th><th><b>1-pass</b></th><th><b>2-pass</b></th></tr>
       <tr>
         <td><b>Insert</b></td>
-        <td>Going down: before entering a full node (\(2t-1\) keys), <b>split it right away</b>. Then the leaf always has space.</td>
-        <td>First find the leaf. If it is full, go back and <b>split only the nodes that need it</b> (from the lowest non-full ancestor), then insert.</td>
+        <td>Before entering a full node (\(2t-1\) keys), <b>split it</b>. Leaf always has room.</td>
+        <td>Find the leaf first. Track lowest \(w\) with ≤ \(2t-2\) keys. If leaf is full, split every node from child \(w'\) of \(w\) down to the leaf, then insert.</td>
       </tr>
       <tr>
         <td><b>Delete</b></td>
-        <td>Going down: before entering a minimal non-root (\(t-1\) keys), <b>shift or merge now</b>. Then delete is safe.</td>
-        <td>First find the key. Then <b>shift or merge only where needed</b>, then delete.</td>
-      </tr>
-      <tr>
-        <td><b>Simple idea</b></td>
-        <td>Fix problems on the way down.</td>
-        <td>Find first, fix only what you must.</td>
+        <td>Before entering a minimal non-root (\(t-1\) keys), <b>shift or merge</b>.</td>
+        <td>Find &amp; delete first; shift/merge underfull nodes on the way <em>up</em>.</td>
       </tr>
     </table>
-    <div class="note"><b>Remember:</b> 1-pass = fix while going down. 2-pass = look first, then fix. Same big-O time.</div>
-    <div class="note">A "2-3-4 tree" is a B-tree with \(t = 2\). Best answer when the exam says "data on disk" or "minimize block accesses."</div>
+    <div class="note"><b>Remember:</b> 1-pass = fix while going down. 2-pass = find first, fix only the full/thin path. Same \(O(\log_t n)\) disk accesses. A 2-3-4 tree is a B-tree with \(t=2\).</div>
 
     <h4>Interactive animator</h4>
-    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">B-tree with <b>t = 2</b> (max 3 keys/node). Insert or delete: watch <b>splits</b>, <b>borrows (shifts)</b>, and <b>merges</b>. Use <b>Fit</b> / <b>+/−</b> when the tree grows wide.</p>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">\(t = 2\) (max 3 keys/node). Toggle <b>1-pass / 2-pass</b>, then insert or delete. Use <b>Fit</b> / <b>+/−</b> when the tree grows.</p>
     <div class="tree-viz-wrap btree-viz-wrap">
-      <div class="viz-controls">
+      <div class="viz-controls bt-pass-bar">
+        <div class="bt-pass-toggle" role="group" aria-label="B-tree pass mode">
+          <button type="button" class="bt-pass-btn is-on" data-pass="1">1-pass</button>
+          <button type="button" class="bt-pass-btn" data-pass="2">2-pass</button>
+        </div>
         <label>Key: <input type="number" class="viz-key" min="1" max="99" value="25" style="width:56px"></label>
         <button type="button" class="viz-btn viz-primary viz-insert">Insert</button>
         <button type="button" class="viz-btn viz-delete">Delete</button>
@@ -377,6 +534,7 @@
         <button type="button" class="viz-btn viz-next">Step ▶</button>
         <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1600" step="20"></label>
       </div>
+      <p class="bt-pass-hint"><b>1-pass:</b> before entering a full node, split it on the way down so the leaf always has room.</p>
       <div class="tree-stage"></div>
       <div class="viz-desc">Loading…</div>
       <div class="viz-panel"></div>
@@ -388,7 +546,7 @@
 </main>
 </div>
 <script src="assets/viz-code-helper.js?v=20260712ost" defer></script>
-<script src="assets/trees.js?v=20260711h" defer></script>
+<script src="assets/trees.js?v=20260716avlfix" defer></script>
 <script src="assets/ost.js?v=20260712smaller2" defer></script>
 </body>
 </html>

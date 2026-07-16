@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>8 · Exam Reference</title>
-<link rel="stylesheet" href="assets/style.css?v=20260713checklist">
-<script src="assets/theme.js?v=20260713checklist"></script>
+<link rel="stylesheet" href="assets/style.css?v=20260716lines">
+<script src="assets/theme.js?v=20260716ux"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
@@ -24,7 +24,6 @@
     <a href="06-graphs.html">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html" class="active">8 · Exam Reference</a>
-    <a href="09-assignments.html">9 · Homework</a>
   </nav>
 </aside>
 <main class="content">
@@ -38,11 +37,11 @@
   <div class="card quiz-launch" id="quiz">
     <div class="quiz-launch-inner">
       <h2>Practice Quiz</h2>
-      <p>Algorithms, data structures, concepts &amp; complexity: not just Big-O. Animated visuals, instant feedback, and explanations.</p>
+      <p>Multiple choice, True/False, and Always / Sometimes / Never — closed-form DS questions with short explanations.</p>
       <div class="quiz-launch-stats">
-        <span class="quiz-launch-stat"><b>100</b>questions</span>
-        <span class="quiz-launch-stat"><b>5</b>per round</span>
-        <span class="quiz-launch-stat"><b>4</b>topics</span>
+        <span class="quiz-launch-stat"><b id="quiz-stat-count">62</b>questions</span>
+        <span class="quiz-launch-stat"><b id="quiz-stat-asn">16</b>A / S / N</span>
+        <span class="quiz-launch-stat"><b>6</b>per round</span>
       </div>
       <button type="button" class="viz-btn viz-primary quiz-start-btn" id="quiz-start">▶ Start Quiz</button>
     </div>
@@ -50,121 +49,269 @@
 
   <h2 class="section" id="exam-checklist">8.0 Exam checklist</h2>
   <div class="card exam-checklist-card">
-    <p style="margin-top:0">Mark each moed as you finish it. Progress is saved in this browser (localStorage).</p>
+    <p style="margin-top:0">Check off moeds as you finish — progress saves in this browser. <a href="https://drive.google.com/drive/folders/1vcNQ3LqB2Vu7QhnbHhqKOjnIwyyej1PM" target="_blank" rel="noopener">Drive exams</a>.</p>
     <div class="exam-checklist-toolbar">
       <span class="exam-checklist-progress">Done: <b id="exam-check-done">0</b> / <b id="exam-check-total">0</b></span>
       <button type="button" class="viz-btn" id="exam-check-reset">Clear all</button>
+      <button type="button" class="viz-btn" id="exam-check-expand">Expand all</button>
+      <button type="button" class="viz-btn" id="exam-check-collapse">Collapse all</button>
     </div>
 
-    <div class="exam-check-year">
-      <h4>2020</h4>
+    <details class="exam-check-year" data-year="2015">
+      <summary class="exam-check-year-sum">
+        <span class="exam-check-year-title">2015</span>
+        <span class="exam-check-year-prog" aria-hidden="true"></span>
+      </summary>
+      <div class="exam-check-year-body">
+      <label class="exam-check-item" data-exam="2015-a">
+        <input type="checkbox">
+        <span class="exam-check-label"><b>Moed A</b></span>
+        <a class="exam-check-link" href="../Exams/2015/2015A-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2015/2015A-solution.pdf" target="_blank" rel="noopener">solution</a>
+      </label>
+      <label class="exam-check-item" data-exam="2015-b">
+        <input type="checkbox">
+        <span class="exam-check-label"><b>Moed B</b></span>
+        <a class="exam-check-link" href="../Exams/2015/2015B-solution.pdf" target="_blank" rel="noopener">solution</a>
+      </label>
+      </div>
+    </details>
+    <details class="exam-check-year" data-year="2016">
+      <summary class="exam-check-year-sum">
+        <span class="exam-check-year-title">2016</span>
+        <span class="exam-check-year-prog" aria-hidden="true"></span>
+      </summary>
+      <div class="exam-check-year-body">
+      <label class="exam-check-item" data-exam="2016-a">
+        <input type="checkbox">
+        <span class="exam-check-label"><b>Moed A</b></span>
+        <a class="exam-check-link" href="../Exams/2016/2016A-solution.pdf" target="_blank" rel="noopener">solution</a>
+      </label>
+      <label class="exam-check-item" data-exam="2016-b">
+        <input type="checkbox">
+        <span class="exam-check-label"><b>Moed B</b></span>
+        <a class="exam-check-link" href="../Exams/2016/2016B-solution.pdf" target="_blank" rel="noopener">solution</a>
+      </label>
+      </div>
+    </details>
+    <details class="exam-check-year" data-year="2017">
+      <summary class="exam-check-year-sum">
+        <span class="exam-check-year-title">2017</span>
+        <span class="exam-check-year-prog" aria-hidden="true"></span>
+      </summary>
+      <div class="exam-check-year-body">
+      <label class="exam-check-item" data-exam="2017-a">
+        <input type="checkbox">
+        <span class="exam-check-label"><b>Moed A</b></span>
+        <a class="exam-check-link" href="../Exams/2017/2017A-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2017/2017A-solution.pdf" target="_blank" rel="noopener">solution</a>
+      </label>
+      <label class="exam-check-item" data-exam="2017-b">
+        <input type="checkbox">
+        <span class="exam-check-label"><b>Moed B</b></span>
+        <a class="exam-check-link" href="../Exams/2017/2017B-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2017/2017B-solution.pdf" target="_blank" rel="noopener">solution</a>
+      </label>
+      </div>
+    </details>
+    <details class="exam-check-year" data-year="2018">
+      <summary class="exam-check-year-sum">
+        <span class="exam-check-year-title">2018</span>
+        <span class="exam-check-year-prog" aria-hidden="true"></span>
+      </summary>
+      <div class="exam-check-year-body">
+      <label class="exam-check-item" data-exam="2018-a">
+        <input type="checkbox">
+        <span class="exam-check-label"><b>Moed A</b></span>
+        <a class="exam-check-link" href="../Exams/2018/2018A-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2018/2018A-solution.pdf" target="_blank" rel="noopener">solution</a>
+      </label>
+      <label class="exam-check-item" data-exam="2018-b">
+        <input type="checkbox">
+        <span class="exam-check-label"><b>Moed B</b></span>
+        <a class="exam-check-link" href="../Exams/2018/2018B-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2018/2018B-solution.pdf" target="_blank" rel="noopener">solution</a>
+      </label>
+      </div>
+    </details>
+    <details class="exam-check-year" data-year="2019">
+      <summary class="exam-check-year-sum">
+        <span class="exam-check-year-title">2019</span>
+        <span class="exam-check-year-prog" aria-hidden="true"></span>
+      </summary>
+      <div class="exam-check-year-body">
+      <label class="exam-check-item" data-exam="2019-a">
+        <input type="checkbox">
+        <span class="exam-check-label"><b>Moed A</b></span>
+        <a class="exam-check-link" href="../Exams/2019/2019A-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2019/2019A-solution.pdf" target="_blank" rel="noopener">solution</a>
+      </label>
+      <label class="exam-check-item" data-exam="2019-b">
+        <input type="checkbox">
+        <span class="exam-check-label"><b>Moed B</b></span>
+        <a class="exam-check-link" href="../Exams/2019/2019B-solution.pdf" target="_blank" rel="noopener">solution</a>
+      </label>
+      </div>
+    </details>
+    <details class="exam-check-year" data-year="2020">
+      <summary class="exam-check-year-sum">
+        <span class="exam-check-year-title">2020</span>
+        <span class="exam-check-year-prog" aria-hidden="true"></span>
+      </summary>
+      <div class="exam-check-year-body">
       <label class="exam-check-item" data-exam="2020-a">
         <input type="checkbox">
         <span class="exam-check-label"><b>Moed A</b></span>
-        <a class="exam-check-link" href="../Exams/2020-20260703/2020-מועדא.pdf" target="_blank" rel="noopener">exam</a>
-        <a class="exam-check-link" href="../Exams/2020-20260703/2020-מועדא-שאלותנוספות.pdf" target="_blank" rel="noopener">extra Qs</a>
+        <a class="exam-check-link" href="../Exams/2020/2020A-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2020/2020A-solution.pdf" target="_blank" rel="noopener">solution</a>
       </label>
-    </div>
-
-    <div class="exam-check-year">
-      <h4>2021</h4>
+      <label class="exam-check-item" data-exam="2020-e">
+        <input type="checkbox">
+        <span class="exam-check-label"><b>Moed E</b></span>
+        <a class="exam-check-link" href="../Exams/2020/2020E-exam.pdf" target="_blank" rel="noopener">exam</a>
+      </label>
+      </div>
+    </details>
+    <details class="exam-check-year" data-year="2021">
+      <summary class="exam-check-year-sum">
+        <span class="exam-check-year-title">2021</span>
+        <span class="exam-check-year-prog" aria-hidden="true"></span>
+      </summary>
+      <div class="exam-check-year-body">
       <label class="exam-check-item" data-exam="2021-a">
         <input type="checkbox">
         <span class="exam-check-label"><b>Moed A</b></span>
-        <a class="exam-check-link" href="../Exams/2021-20260703/2021-a-final.pdf" target="_blank" rel="noopener">exam</a>
-        <a class="exam-check-link" href="../Exams/2021-20260703/2021-a-solution.pdf" target="_blank" rel="noopener">solution</a>
+        <a class="exam-check-link" href="../Exams/2021/2021A-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2021/2021A-solution.pdf" target="_blank" rel="noopener">solution</a>
       </label>
       <label class="exam-check-item" data-exam="2021-b">
         <input type="checkbox">
         <span class="exam-check-label"><b>Moed B</b></span>
-        <a class="exam-check-link" href="../Exams/2021-20260703/2021-b-final.pdf" target="_blank" rel="noopener">exam</a>
-        <a class="exam-check-link" href="../Exams/2021-20260703/2021-b-solution.pdf" target="_blank" rel="noopener">solution</a>
+        <a class="exam-check-link" href="../Exams/2021/2021B-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2021/2021B-solution.pdf" target="_blank" rel="noopener">solution</a>
       </label>
-    </div>
-
-    <div class="exam-check-year">
-      <h4>2022</h4>
+      </div>
+    </details>
+    <details class="exam-check-year" data-year="2022">
+      <summary class="exam-check-year-sum">
+        <span class="exam-check-year-title">2022</span>
+        <span class="exam-check-year-prog" aria-hidden="true"></span>
+      </summary>
+      <div class="exam-check-year-body">
       <label class="exam-check-item" data-exam="2022-a">
         <input type="checkbox">
         <span class="exam-check-label"><b>Moed A</b></span>
-        <a class="exam-check-link" href="../Exams/2022-20260703/2022a.pdf" target="_blank" rel="noopener">exam</a>
-        <a class="exam-check-link" href="../Exams/2022-20260703/2022a-Solution.pdf" target="_blank" rel="noopener">solution</a>
+        <a class="exam-check-link" href="../Exams/2022/2022A-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2022/2022A-solution.pdf" target="_blank" rel="noopener">solution</a>
       </label>
-      <label class="exam-check-item" data-exam="2022-b">
+      <label class="exam-check-item" data-exam="2022-b" title="AVL leaf-depth gap · ADT InsertMin + copy-2 deamortization">
         <input type="checkbox">
         <span class="exam-check-label"><b>Moed B</b></span>
-        <span class="exam-check-note">AVL leaf-depth gap · ADT InsertMin + copy-2 deamortization</span>
-        <a class="exam-check-link" href="../Exams/2022-20260703/2022b.pdf" target="_blank" rel="noopener">exam</a>
-        <a class="exam-check-link" href="../Exams/2022-20260703/2022b-Solution.pdf" target="_blank" rel="noopener">solution</a>
+        <a class="exam-check-link" href="../Exams/2022/2022B-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2022/2022B-solution.pdf" target="_blank" rel="noopener">solution</a>
       </label>
-    </div>
-
-    <div class="exam-check-year">
-      <h4>2023</h4>
+      </div>
+    </details>
+    <details class="exam-check-year" data-year="2023">
+      <summary class="exam-check-year-sum">
+        <span class="exam-check-year-title">2023</span>
+        <span class="exam-check-year-prog" aria-hidden="true"></span>
+      </summary>
+      <div class="exam-check-year-body">
       <label class="exam-check-item" data-exam="2023-a">
         <input type="checkbox">
         <span class="exam-check-label"><b>Moed A</b></span>
-        <a class="exam-check-link" href="../Exams/2023-20260703/MoedA_2023_DS_final.pdf" target="_blank" rel="noopener">exam</a>
-        <a class="exam-check-link" href="../Exams/2023-20260703/MoedA_2023_DS_Solution.pdf" target="_blank" rel="noopener">solution</a>
+        <a class="exam-check-link" href="../Exams/2023/2023A-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2023/2023A-solution.pdf" target="_blank" rel="noopener">solution</a>
       </label>
-      <label class="exam-check-item" data-exam="2023-b">
+      <label class="exam-check-item" data-exam="2023-b" title="deamortization rehash fill-ins · ADT PrevMin">
         <input type="checkbox">
         <span class="exam-check-label"><b>Moed B</b></span>
-        <span class="exam-check-note">deamortization rehash fill-ins · ADT PrevMin</span>
-        <a class="exam-check-link" href="../Exams/2023-20260703/MoedB_2023_DS_final_fixed.pdf" target="_blank" rel="noopener">exam</a>
-        <a class="exam-check-link" href="../Exams/2023-20260703/MoedB_2023_DS_Sol.pdf" target="_blank" rel="noopener">solution</a>
+        <a class="exam-check-link" href="../Exams/2023/2023B-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2023/2023B-solution.pdf" target="_blank" rel="noopener">solution</a>
       </label>
-    </div>
-
-    <div class="exam-check-year">
-      <h4>2024</h4>
+      <label class="exam-check-item" data-exam="2023-e">
+        <input type="checkbox">
+        <span class="exam-check-label"><b>Moed E</b></span>
+        <a class="exam-check-link" href="../Exams/2023/2023E-exam.pdf" target="_blank" rel="noopener">exam</a>
+      </label>
+      </div>
+    </details>
+    <details class="exam-check-year" data-year="2024" open>
+      <summary class="exam-check-year-sum">
+        <span class="exam-check-year-title">2024</span>
+        <span class="exam-check-year-prog" aria-hidden="true"></span>
+      </summary>
+      <div class="exam-check-year-body">
       <label class="exam-check-item" data-exam="2024-a">
         <input type="checkbox">
         <span class="exam-check-label"><b>Moed A</b></span>
-        <a class="exam-check-link" href="../Exams/2024-20260703/MoedA_2024_DS-final.pdf" target="_blank" rel="noopener">exam</a>
-        <a class="exam-check-link" href="../Exams/2024-20260703/MoedA_2024_DS-solution_Comments_commonMistakes.pdf" target="_blank" rel="noopener">solution</a>
+        <a class="exam-check-link" href="../Exams/2024/2024A-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2024/2024A-solution.pdf" target="_blank" rel="noopener">solution</a>
       </label>
       <label class="exam-check-item" data-exam="2024-b">
         <input type="checkbox">
         <span class="exam-check-label"><b>Moed B</b></span>
-        <a class="exam-check-link" href="../Exams/2024-20260703/MoedB_2024_DS-final.pdf" target="_blank" rel="noopener">exam</a>
-        <a class="exam-check-link" href="../Exams/2024-20260703/MoedB_2024_DS-Solution_Comments_4Students 2.pdf" target="_blank" rel="noopener">solution</a>
+        <a class="exam-check-link" href="../Exams/2024/2024B-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2024/2024B-solution.pdf" target="_blank" rel="noopener">solution</a>
       </label>
       <label class="exam-check-item" data-exam="2024-c">
         <input type="checkbox">
         <span class="exam-check-label"><b>Moed C</b></span>
-        <a class="exam-check-link" href="../Exams/2024-20260703/MoedC_2024_DS-final.pdf" target="_blank" rel="noopener">exam</a>
-        <a class="exam-check-link" href="../Exams/2024-20260703/MoedC_2024_DS-Corrected_Solution_Comments_4Students.pdf" target="_blank" rel="noopener">solution</a>
+        <a class="exam-check-link" href="../Exams/2024/2024C-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2024/2024C-solution.pdf" target="_blank" rel="noopener">solution</a>
       </label>
       <label class="exam-check-item" data-exam="2024-d">
         <input type="checkbox">
         <span class="exam-check-label"><b>Moed D</b></span>
-        <a class="exam-check-link" href="../Exams/2024-20260703/MoedD_2024_DS-final.pdf" target="_blank" rel="noopener">exam</a>
-        <a class="exam-check-link" href="../Exams/2024-20260703/MoedD_2024_DS-solution.pdf" target="_blank" rel="noopener">solution</a>
+        <a class="exam-check-link" href="../Exams/2024/2024D-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2024/2024D-solution.pdf" target="_blank" rel="noopener">solution</a>
       </label>
-    </div>
-
-    <div class="exam-check-year">
-      <h4>2025</h4>
+      </div>
+    </details>
+    <details class="exam-check-year" data-year="2025" open>
+      <summary class="exam-check-year-sum">
+        <span class="exam-check-year-title">2025</span>
+        <span class="exam-check-year-prog" aria-hidden="true"></span>
+      </summary>
+      <div class="exam-check-year-body">
       <label class="exam-check-item" data-exam="2025-a">
         <input type="checkbox">
         <span class="exam-check-label"><b>Moed A</b></span>
-        <a class="exam-check-link" href="../Exams/2025/MoedA_2025_DS-final3 - fixed.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2025/2025A-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2025/2025A-solution.pdf" target="_blank" rel="noopener">solution</a>
       </label>
       <label class="exam-check-item" data-exam="2025-b">
         <input type="checkbox">
         <span class="exam-check-label"><b>Moed B</b></span>
-        <a class="exam-check-link" href="../Exams/2025/MoedB_2025_DS-final - updated.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2025/2025B-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2025/2025B-solution.pdf" target="_blank" rel="noopener">solution</a>
       </label>
       <label class="exam-check-item" data-exam="2025-c">
         <input type="checkbox">
         <span class="exam-check-label"><b>Moed C</b></span>
-        <a class="exam-check-link" href="../Exams/2025/MoedC_2025_DS-v2.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2025/2025C-exam.pdf" target="_blank" rel="noopener">exam</a>
+        <a class="exam-check-link" href="../Exams/2025/2025C-solution.pdf" target="_blank" rel="noopener">solution</a>
       </label>
-    </div>
+      </div>
+    </details>
+    <details class="exam-check-year" data-year="2026" open>
+      <summary class="exam-check-year-sum">
+        <span class="exam-check-year-title">2026</span>
+        <span class="exam-check-year-prog" aria-hidden="true"></span>
+      </summary>
+      <div class="exam-check-year-body">
+      <label class="exam-check-item" data-exam="2026-a" title="illustrated solution (your writeup)">
+        <input type="checkbox">
+        <span class="exam-check-label"><b>Moed A</b></span>
+        <a class="exam-check-link" href="../Exams/2026/2026A-solution.pdf" target="_blank" rel="noopener">solution</a>
+      </label>
+      </div>
+    </details>
   </div>
 
-  <h2 class="section" id="master-table">8.1 Master Complexity Table: Data Structures</h2>
+  
+<h2 class="section" id="master-table">8.1 Master Complexity Table: Data Structures</h2>
   <div class="card">
     <div class="table-wrap">
     <table class="complex-table">
@@ -451,7 +598,11 @@
     <div class="exam-ask">
       <div class="exam-ask-item">
         <h5>Paper shape</h5>
-        <p>Warm-up asymptotics / Master Theorem → often a large <b>always / sometimes / never</b> block → one or two <b>design-a-structure</b> questions (full + cheaper partial-credit variant).</p>
+        <p>Warm-up asymptotics / recurrences → often a large <b>always / sometimes / never</b> block → one or two <b>design-a-structure</b> questions (full + cheaper partial-credit variant).</p>
+      </div>
+      <div class="exam-ask-item">
+        <h5>Recurrences</h5>
+        <p>Equal split \(aT(n/b)+f\) → Master (need polynomial \(\epsilon\)-gap). Unequal \(T(n/3)+T(2n/3)+n\) → recursion tree → \(\Theta(n\log n)\). Otherwise iteration / substitution. Full guide: <a href="01-foundations.html#recurrences">§1.2</a>.</p>
       </div>
       <div class="exam-ask-item">
         <h5>Always / sometimes / never</h5>
@@ -475,7 +626,7 @@
       </div>
       <div class="exam-ask-item">
         <h5>Design a structure</h5>
-        <p>Write <b>fields</b> first, then each op in 3–5 lines, then the bound. Combine: hash (membership) + AVL / skip / heap (order, DeleteMax); OST + <code>size</code> for Rank/Select; dual heaps or sorted halves when Median / SelectN must be \(O(1)\). Hard ops (Select for small \(i\), SumValues, GreaterPrice) carry the points. HW patterns: <a href="09-assignments.html">§9</a>.</p>
+        <p>Write <b>fields</b> first, then each op in 3–5 lines, then the bound. Combine: hash (membership) + AVL / skip / heap (order, DeleteMax); OST + <code>size</code> for Rank/Select; dual heaps or sorted halves when Median / SelectN must be \(O(1)\). Hard ops (Select for small \(i\), SumValues, GreaterPrice) carry the points.</p>
       </div>
       <div class="exam-ask-item">
         <h5>Order statistics (Select / Rank)</h5>
@@ -486,12 +637,16 @@
         <p>Full solution often needs a harder bound (e.g. Insert \(O(1)\) amortized, Init \(O(N)\), Select \(O(1)\) for \(i\le\log n\)). Weaker bound (e.g. Insert \(O(\log n)\)) still scores — state which variant you solve.</p>
       </div>
       <div class="exam-ask-item">
+        <h5>B-trees</h5>
+        <p>Height \(h\le\log_t\frac{n+1}{2}\). Know <b>1-pass</b> (split full child before descending) vs <b>2-pass</b> (find leaf; split from lowest non-full ancestor down). Animate: <a href="03-trees.html#btree-passes">§3.7</a>.</p>
+      </div>
+      <div class="exam-ask-item">
         <h5>Amortized &amp; deamortization</h5>
-        <p>Growing binary counter: \(f(k)=2k\) vs \(k+1\); token/accounting proofs; Insert amortized \(O(1)\) via periodic rebuilds. Deamortization: spread rehash so <em>every</em> step is \(O(1)\) worst-case. See <a href="07-advanced.html#amortized">§7</a>.</p>
+        <p>Growing binary counter: \(f(k)=2k\) vs \(k+1\); token/accounting proofs; Insert amortized \(O(1)\) via periodic rebuilds. Deamortization: spread rehash (\(2m\) micro-steps over \(m/2\) inserts → ≤4/insert) so <em>every</em> step is \(O(1)\) worst-case. See <a href="07-advanced.html#deamortization">§7.3</a>.</p>
       </div>
       <div class="exam-ask-item">
         <h5>Graphs</h5>
-        <p>Count distinct BFS trees (neighbor order matters); “is \(e_{\min}\) in every MST?” / “is \(e\) in some MST?”; BFS path vs Prim path when weights \(=1\); DFS tree/forward/back/cross on digraphs. Reductions: define \(G'\), then build + algo time. See <a href="06-graphs.html#graph-exam">§6.9</a>.</p>
+        <p>Edge membership tests (some / every MST); Kruskal and Prim; reductions. See <a href="06-graphs.html#mst">§6.5</a>.</p>
       </div>
       <div class="exam-ask-item">
         <h5>Union-Find</h5>
@@ -519,7 +674,7 @@
         <li><b>Hash:</b> insert \(O(1)\); search expected \(O(1+\alpha)\), worst \(O(n)\).</li>
         <li><b>AVL-per-bucket</b> ≠ global Successor in \(O(\log n)\).</li>
         <li><b>Huffman</b> is optimal for its algo; rarest need not be siblings in every optimal tree.</li>
-        <li><b>Master Theorem</b> fails when \(f\) is only a log-factor off.</li>
+        <li><b>Master Theorem</b> fails without a polynomial \(\epsilon\)-gap (e.g. \(f=n/\log n\)).</li>
         <li>Prefer <b>Θ</b> when tight; name the <b>theorem</b> you use.</li>
       </ul>
     </div>
@@ -547,7 +702,8 @@
     <div class="quiz-body">
       <div class="quiz-viz" id="quiz-viz"></div>
       <span class="quiz-cat" id="quiz-cat"></span>
-      <p class="quiz-meta" id="quiz-meta">Question 1 of 5</p>
+      <div class="quiz-source-row" id="quiz-source" hidden></div>
+      <p class="quiz-meta" id="quiz-meta">Question 1 of 6</p>
       <p class="quiz-q" id="quiz-q"></p>
       <div class="quiz-options" id="quiz-options"></div>
       <div class="quiz-feedback" id="quiz-feedback"></div>
@@ -559,7 +715,8 @@
   </div>
 </div>
 
-<script src="assets/exam-checklist.js?v=20260713checklist" defer></script>
-<script src="assets/quiz.js" defer></script>
+<script src="assets/exam-checklist.js?v=20260716fold" defer></script>
+<script src="assets/quiz-exam-pool.js?v=20260716lines"></script>
+<script src="assets/quiz.js?v=20260716lines" defer></script>
 </body>
 </html>

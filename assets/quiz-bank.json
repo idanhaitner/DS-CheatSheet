@@ -1,0 +1,586 @@
+[
+  {
+    "id": "2025a-q1",
+    "source": "2025 Moed A",
+    "cat": "Complexity",
+    "type": "mcq",
+    "q": "Given f(n) = 3n + log(n/2), which asymptotic class is correct?",
+    "choices": [
+      "A) f(n) ∈ Θ(1)",
+      "B) f(n) ∈ Θ(log n)",
+      "C) f(n) ∈ Θ(n)",
+      "D) f(n) ∈ Θ(n log n)"
+    ],
+    "answer": 2,
+    "explain": "The linear term 3n dominates log(n/2), so f(n) = Θ(n)."
+  },
+  {
+    "id": "2025b-q1",
+    "source": "2025 Moed B",
+    "cat": "Complexity",
+    "type": "mcq",
+    "q": "Solve T(n) = 2T(n/2) + n with T(1) = 1. Which is correct?",
+    "choices": [
+      "A) T(n) ∈ Θ(log n)",
+      "B) T(n) ∈ Θ(n)",
+      "C) T(n) ∈ Θ(n log n)",
+      "D) T(n) ∈ Θ(n²)"
+    ],
+    "answer": 2,
+    "explain": "Master theorem case 2 (or recursion tree): a = b = 2 and f(n) = Θ(n) ⇒ Θ(n log n)."
+  },
+  {
+    "id": "2025c-q1",
+    "source": "2025 Moed C",
+    "cat": "Complexity",
+    "type": "mcq",
+    "q": "Solve T(n) = T(n − 1) + 1 with T(1) = 1. Which is correct?",
+    "choices": [
+      "A) T(n) ∈ Θ(log n)",
+      "B) T(n) ∈ Θ(n)",
+      "C) T(n) ∈ Θ(n log n)",
+      "D) T(n) ∈ Θ(n²)"
+    ],
+    "answer": 1,
+    "explain": "Unrolling gives T(n) = n, so Θ(n)."
+  },
+  {
+    "id": "2026a-q1a",
+    "source": "2026 Moed A",
+    "cat": "Complexity",
+    "type": "mcq",
+    "q": "Given f(n) = n√n + n²/log n = n^{3/2} + n²/log n, which tight bound is correct?",
+    "choices": [
+      "A) f(n) = Θ(n^{3/2})",
+      "B) f(n) = Θ(n² / log n)",
+      "C) f(n) = Θ(n²)",
+      "D) f(n) = Θ(n log n)"
+    ],
+    "answer": 1,
+    "explain": "(n²/log n) / n^{3/2} = √n / log n → ∞, so n²/log n dominates."
+  },
+  {
+    "id": "2026a-q1b",
+    "source": "2026 Moed A",
+    "cat": "Complexity",
+    "type": "mcq",
+    "q": "Solve T(n) = T(n/3) + T(2n/3) + n with T(1) = Θ(1). What is T(n)?",
+    "choices": [
+      "A) Θ(n)",
+      "B) Θ(n log n)",
+      "C) Θ(n²)",
+      "D) Θ(n log log n)"
+    ],
+    "answer": 1,
+    "explain": "Each recursion level costs Θ(n) and every root-to-leaf path has length Θ(log n)."
+  },
+  {
+    "id": "2025a-q4b",
+    "source": "2025 Moed A",
+    "cat": "Compression",
+    "type": "asn",
+    "q": "In a string S over alphabet Σ, every character appears at least once and all frequencies are distinct. Let T be some optimal prefix-code tree for S (not necessarily Huffman’s). Claim: the two rarest characters are siblings in T.",
+    "choices": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "answer": 1,
+    "explain": "It holds for some frequency sets / trees and fails for others (e.g. frequencies 3,4,5,6)."
+  },
+  {
+    "id": "2025a-q5a",
+    "source": "2025 Moed A",
+    "cat": "Graphs",
+    "type": "asn",
+    "q": "Run DFS on a directed graph G. Edge (u,v) is classified as a back edge. Claim: v.d < u.d (discovery times).",
+    "choices": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "answer": 0,
+    "explain": "A back edge goes to an ancestor that is still gray, so v was discovered earlier than u."
+  },
+  {
+    "id": "2025a-q5b",
+    "source": "2025 Moed A",
+    "cat": "Heaps",
+    "type": "asn",
+    "q": "In a max-heap, every key in the root’s left subtree is smaller than every key in the root’s right subtree.",
+    "choices": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "answer": 1,
+    "explain": "Heaps do not order left vs right subtrees; the claim can hold for some heaps and fail for others."
+  },
+  {
+    "id": "2025a-q5c",
+    "source": "2025 Moed A",
+    "cat": "Heaps",
+    "type": "asn",
+    "q": "In a max-heap containing the distinct keys {1,2,…,10}, the key 2 is a leaf.",
+    "choices": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "answer": 1,
+    "explain": "2 can be a leaf, but it can also be an internal node with child 1 (e.g. at the last internal index)."
+  },
+  {
+    "id": "2025a-q5d",
+    "source": "2025 Moed A",
+    "cat": "Heaps",
+    "type": "asn",
+    "q": "In a max-heap containing the distinct keys {1,2,…,9}, the key 2 is a leaf.",
+    "choices": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "answer": 0,
+    "explain": "With n=9 there are only 4 internal nodes; 2 cannot have two children both ≤2 with distinct keys, so 2 must be a leaf."
+  },
+  {
+    "id": "2025a-q5e",
+    "source": "2025 Moed A",
+    "cat": "Graphs",
+    "type": "asn",
+    "q": "G is connected; run BFS(G,s) and Prim(G,w,s) with w(e)=1 for every edge. Claim: the s–t path in the BFS tree equals the s–t path in Prim’s MST.",
+    "choices": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "answer": 1,
+    "explain": "Unit weights make many MSTs possible; Prim’s tree need not match the BFS shortest-path tree."
+  },
+  {
+    "id": "2025b-q5a",
+    "source": "2025 Moed B",
+    "cat": "Graphs",
+    "type": "asn",
+    "q": "G is a DAG and s ∈ V. Two BFS(G,s) runs differ only in neighbor-scan order. Claim: they produce the same BFS tree (same vertices and edges).",
+    "choices": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "answer": 1,
+    "explain": "Different adjacency orders can choose different parents at the same distance, so trees may differ."
+  },
+  {
+    "id": "2025b-q5b",
+    "source": "2025 Moed B",
+    "cat": "Graphs",
+    "type": "asn",
+    "q": "G is undirected and connected. Run DFS(G). Claim: the DFS forest contains exactly one tree.",
+    "choices": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "answer": 0,
+    "explain": "Connectivity implies a single DFS tree spanning all vertices."
+  },
+  {
+    "id": "2025b-q5c",
+    "source": "2025 Moed B",
+    "cat": "Sorting",
+    "type": "asn",
+    "q": "A has n distinct keys and is sorted ascending. Claim: deterministic Quicksort runs in Θ(n²) time.",
+    "choices": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "answer": 0,
+    "explain": "With the usual fixed end/first pivot, a sorted array yields the worst-case partition every time."
+  },
+  {
+    "id": "2025b-q5d",
+    "source": "2025 Moed B",
+    "cat": "Sorting",
+    "type": "asn",
+    "q": "A has n distinct keys and is neither ascending-sorted nor descending-sorted. Claim: deterministic Quicksort runs in Θ(n²).",
+    "choices": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "answer": 1,
+    "explain": "Some non-monotone arrays still force unbalanced partitions; others give Θ(n log n)."
+  },
+  {
+    "id": "2025b-q5e",
+    "source": "2025 Moed B",
+    "cat": "Skip Lists",
+    "type": "asn",
+    "q": "In a skip list, consider a search path P from the top sentinel down to S₀. Claim: the number of down-steps on P is ≤ the number of right-steps on P.",
+    "choices": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "answer": 1,
+    "explain": "You can descend many levels with few (or zero) right moves, so the inequality need not always hold."
+  },
+  {
+    "id": "2025c-q5a",
+    "source": "2025 Moed C",
+    "cat": "Compression",
+    "type": "asn",
+    "q": "Huffman’s algorithm produces an optimal prefix code.",
+    "choices": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "answer": 0,
+    "explain": "Huffman’s greedy construction yields a minimum-cost prefix code for the given frequencies."
+  },
+  {
+    "id": "2025c-q5b",
+    "source": "2025 Moed C",
+    "cat": "Trees",
+    "type": "asn",
+    "q": "T is an AVL tree of height 2. Claim: there exists a leaf x such that deleting x causes a rotation, and re-inserting x restores exactly the original tree T.",
+    "choices": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "answer": 2,
+    "explain": "When a rotation occurs on delete, re-inserting the leaf does not undo that rotation; the shape is not restored."
+  },
+  {
+    "id": "2025c-q5c",
+    "source": "2025 Moed C",
+    "cat": "Trees",
+    "type": "asn",
+    "q": "T is an AVL tree of height 1. Claim: there exists a key x ∉ T such that inserting x causes a rotation, and then deleting x restores exactly T.",
+    "choices": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "answer": 1,
+    "explain": "For some height-1 shapes/keys the insert–delete cycle restores T; for others it does not."
+  },
+  {
+    "id": "2025c-q5e",
+    "source": "2025 Moed C",
+    "cat": "Trees",
+    "type": "asn",
+    "q": "Given an unsorted array A of n numbers, one can build some binary search tree (not necessarily balanced) on its keys in O(n) time.",
+    "choices": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "answer": 1,
+    "explain": "If A is already sorted, sequential inserts build a BST in Θ(n); for arbitrary A, building a BST needs sorting / Ω(n log n) comparison work."
+  },
+  {
+    "id": "2026a-q2a",
+    "source": "2026 Moed A",
+    "cat": "Heaps",
+    "type": "asn",
+    "q": "Array size n = 2^k − 1 with k distinct values a₁ < ··· < aₖ where aᵢ appears exactly 2^{i−1} times. Claim: after Build-Min-Heap the array is sorted.",
+    "choices": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "answer": 1,
+    "explain": "Heap order ≠ sorted order; e.g. [3,1,2,3,3,2,3] becomes [1,3,2,3,3,2,3], still unsorted."
+  },
+  {
+    "id": "2025a-q3-i",
+    "source": "2025 Moed A",
+    "cat": "Hashing",
+    "type": "tf",
+    "q": "Michal implements a dictionary with chaining via doubly linked lists; Paz uses an AVL tree in each bucket and claims worst-case search becomes Θ(log n). Michal claims Paz’s design worsens worst-case insert/delete versus her lists. Is Michal right?",
+    "choices": [
+      "True",
+      "False"
+    ],
+    "answer": 0,
+    "explain": "Per-bucket AVL insert/delete cost O(log n) worst-case vs O(1) at the head of a list."
+  },
+  {
+    "id": "2025a-q3-ii",
+    "source": "2025 Moed A",
+    "cat": "Hashing",
+    "type": "tf",
+    "q": "A chaining hash table stores an AVL tree in each bucket. Can this support successor (next larger key in the whole dictionary) in worst-case logarithmic time?",
+    "choices": [
+      "True",
+      "False"
+    ],
+    "answer": 1,
+    "explain": "Hashing destroys global key order; the successor may live in any other bucket."
+  },
+  {
+    "id": "2025b-q2a",
+    "source": "2025 Moed B",
+    "cat": "Amortized",
+    "type": "tf",
+    "q": "A binary counter stored in a bit array of width k reallocates to width f(k)=2k (cost Θ(f(k))) when all bits are 1. The amortized cost of increment is Θ(1).",
+    "choices": [
+      "True",
+      "False"
+    ],
+    "answer": 0,
+    "explain": "Doubling the width is rare (every Θ(2^k) increments) and bit-flip cost amortizes to O(1)."
+  },
+  {
+    "id": "2019a-q1a",
+    "source": "2019 Moed A",
+    "cat": "Heaps",
+    "type": "tf",
+    "q": "A min-heap is stored in an array; all keys are distinct and every node’s left child is smaller than its right child. Must the array be sorted?",
+    "choices": [
+      "True",
+      "False"
+    ],
+    "answer": 1,
+    "explain": "Counterexample: array [1,2,10,4,5] satisfies the local left<right condition but is not sorted."
+  },
+  {
+    "id": "2025b-q3a",
+    "source": "2025 Moed B",
+    "cat": "Hashing",
+    "type": "mcq",
+    "q": "Open addressing with linear probing uses tombstones D for deletes. Let α = n/m (real keys) and α′ = (n + #tombstones)/m. After a sequence of inserts and deletes with 0 < α < 1, what is the largest possible asymptotic value of α′/α?",
+    "choices": [
+      "A) Θ(1)",
+      "B) Θ(log m)",
+      "C) Θ(√m)",
+      "D) Θ(m)",
+      "E) Θ(α)",
+      "F) Cannot tell"
+    ],
+    "answer": 3,
+    "explain": "Almost all cells can be D while few real keys remain, so α′ ≈ 1 and α ≈ 1/m ⇒ ratio Θ(m)."
+  },
+  {
+    "id": "2023b-q1a",
+    "source": "2023 Moed B",
+    "cat": "Data Structures",
+    "type": "mcq",
+    "q": "Which structure is preferable for a Dynamic Set ADT when the intended usage pattern is unknown?",
+    "choices": [
+      "A) Unsorted array",
+      "B) AVL tree",
+      "C) B-tree",
+      "D) Cannot tell"
+    ],
+    "answer": 3,
+    "explain": "Without knowing operation mix / memory / persistence needs, no single structure is universally best."
+  },
+  {
+    "id": "2019a-q1d",
+    "source": "2019 Moed A",
+    "cat": "Data Structures",
+    "type": "mcq",
+    "q": "A company needs a structure supporting insert, search, and delete. Which choice is best for efficiency?",
+    "choices": [
+      "A) Unsorted linked list",
+      "B) Sorted linked list",
+      "C) AVL tree",
+      "D) Not enough information about the company’s needs"
+    ],
+    "answer": 3,
+    "explain": "Efficiency depends on operation frequencies, n, memory, and worst-case vs expected needs."
+  },
+  {
+    "id": "2021b-q1c",
+    "source": "2021 Moed B",
+    "cat": "Graphs",
+    "type": "mcq",
+    "q": "G is undirected, connected, and weighted. Edge e is a light edge across some cut C (w(e) ≤ w(e′) for every e′ crossing C). Which claim is always true?",
+    "choices": [
+      "A) Every MST of G contains e",
+      "B) Some MST of G contains e",
+      "C) Some MST of G does not contain e",
+      "D) No MST of G contains e"
+    ],
+    "answer": 1,
+    "explain": "Cut / safe-edge property: a light crossing edge belongs to some MST (ties may exclude it from others)."
+  },
+  {
+    "id": "2022b-q1a",
+    "source": "2022 Moed B",
+    "cat": "Trees",
+    "type": "mcq",
+    "q": "Let f(n) be the maximum, over all n-node AVL trees, of the absolute difference between depths of two leaves. Which is correct?",
+    "choices": [
+      "A) f(n) = 0 for all n ≥ 2",
+      "B) f(n) = 1 for all n ≥ 3",
+      "C) f(n) = 2 for all n ≥ 4",
+      "D) f(n) ∈ Θ(log log n)",
+      "E) f(n) ∈ Θ(log n)",
+      "F) f(n) ∈ Θ(n)"
+    ],
+    "answer": 4,
+    "explain": "AVL height is Θ(log n) and shallow vs deep leaves can differ by Θ(log n)."
+  },
+  {
+    "id": "2022a-q2a",
+    "source": "2022 Moed A",
+    "cat": "Sorting",
+    "type": "mcq",
+    "q": "Sort n integers, each with L = (log n)^{3/2} bits in base 2. Which learned algorithm is best in the worst case?",
+    "choices": [
+      "A) Merge sort",
+      "B) Heap sort",
+      "C) Radix sort",
+      "D) Insertion sort"
+    ],
+    "answer": 2,
+    "explain": "Radix sort is O((n + Σ)L) with small L relative to n; here it beats comparison Θ(n log n)."
+  },
+  {
+    "id": "2022a-q2b",
+    "source": "2022 Moed A",
+    "cat": "Sorting",
+    "type": "mcq",
+    "q": "Sort n integers, each with L = (log n)³ bits in base 2. Which learned algorithm is best in the worst case?",
+    "choices": [
+      "A) Radix sort",
+      "B) Merge sort",
+      "C) Counting sort",
+      "D) Bucket sort"
+    ],
+    "answer": 1,
+    "explain": "With L = (log n)³, radix sort costs Θ(n L) = Θ(n (log n)³), which is slower than comparison sorting; merge sort is Θ(n log n)."
+  },
+  {
+    "id": "2018a-q1-1",
+    "source": "2018 Moed A",
+    "cat": "Compression",
+    "type": "mcq",
+    "q": "Compress S = acacbacba with LZ78. How many pairs are in the encoding?",
+    "choices": [
+      "A) 3",
+      "B) 4",
+      "C) 5",
+      "D) 6",
+      "E) 7"
+    ],
+    "answer": 3,
+    "explain": "LZ78 emits six phrases for this string (dictionary grows a, c, ac, b, acb, …)."
+  },
+  {
+    "id": "2018a-q1-2",
+    "source": "2018 Moed A",
+    "cat": "Complexity",
+    "type": "mcq",
+    "q": "Minimum time to compute a·b for nonnegative integers without using multiplication (other ops allowed). Assume a ≤ b and b = 2^k for integer k > 0.",
+    "choices": [
+      "A) O(1)",
+      "B) O(log b)",
+      "C) O(√b)",
+      "D) O(b)",
+      "E) O(b²)"
+    ],
+    "answer": 1,
+    "explain": "Since b is a power of two, multiply by doubling / bit shifts in O(log b) additions."
+  },
+  {
+    "id": "2025c-q2",
+    "source": "2025 Moed C",
+    "cat": "Trees",
+    "type": "mcq",
+    "q": "In an AVL tree of height h, what is the minimum possible depth of a leaf (exact, not asymptotic)?",
+    "choices": [
+      "A) 0",
+      "B) 1",
+      "C) ⌊h/2⌋",
+      "D) ⌈h/2⌉",
+      "E) h − 1"
+    ],
+    "answer": 3,
+    "explain": "Balance forces the shallowest leaf depth to be ⌈h/2⌉ (e.g. h=2 → 1, h=3 → 2)."
+  },
+  {
+    "id": "2025c-q3",
+    "source": "2025 Moed C",
+    "cat": "Sorting",
+    "type": "mcq",
+    "q": "Bucket sort on an array of n keys; each bucket sorted by insertion sort. Keys are NOT assumed uniform on [0,1]. Which statements are always true?\n(I) whole sort is O(n²) worst-case\n(II) buckets can be sorted so the algorithm is stable\n(III) whole sort is Θ(n) worst-case",
+    "choices": [
+      "A) I only",
+      "B) II only",
+      "C) I and II only",
+      "D) I, II, and III",
+      "E) III only"
+    ],
+    "answer": 2,
+    "explain": "Without uniformity, one bucket can hold Θ(n) keys ⇒ O(n²); stability is achievable; Θ(n) worst-case is false."
+  },
+  {
+    "id": "2024a-q1a",
+    "source": "2024 Moed A",
+    "cat": "Hashing",
+    "type": "mcq",
+    "q": "Best worst-case time to implement DeleteLast (undo the previous insert; never two DeleteLast in a row) on a chaining hash table with singly linked lists (no rehashing), allowing O(1) extra fields and changing insert?",
+    "choices": [
+      "A) Θ(1)",
+      "B) Θ(α)",
+      "C) Θ(log n)",
+      "D) Θ(n)"
+    ],
+    "answer": 0,
+    "explain": "Keep a pointer to the list that received the last insert and delete from that list’s head in O(1)."
+  },
+  {
+    "id": "2023b-q1b",
+    "source": "2023 Moed B",
+    "cat": "Amortized",
+    "type": "mcq",
+    "q": "Chaining hash table, inserts only, rehash to size 2m when α=1. Rehash work S costs 2m ops with a “smart array” (no null init). In deamortization, how many ops of S must each insert perform so the new table is ready when needed?",
+    "choices": [
+      "A) 1",
+      "B) 2",
+      "C) 4",
+      "D) 8"
+    ],
+    "answer": 2,
+    "explain": "Exactly 4 operations from S per insert with the smart array (no null-init cost)."
+  },
+  {
+    "id": "2025b-q4e",
+    "source": "2025 Moed B",
+    "cat": "Sorting",
+    "type": "mcq",
+    "q": "Sort n integers where all but k keys lie in [0, n^{4.5}]; the other k keys are arbitrary. Best worst-case time of the split–sort–merge algorithm when k = n/3?",
+    "choices": [
+      "A) Θ(n)",
+      "B) Θ(n log log n)",
+      "C) Θ(n log n)",
+      "D) Θ(n²)"
+    ],
+    "answer": 2,
+    "explain": "The Θ(n) keys in range can be radix/counting-sorted in Θ(n), but sorting k=n/3 arbitrary keys needs Θ(n log n)."
+  },
+  {
+    "id": "2021b-q1a",
+    "source": "2021 Moed B",
+    "cat": "Compression",
+    "type": "mcq",
+    "q": "LZ78 encoding of T = aacbacaa. Which encoding is correct?",
+    "choices": [
+      "A) (0,a)(0,a)(0,c)(0,b)(0,a)(0,c)(0,a)(0,a)",
+      "B) (0,a)(1,c)(0,b)(2,a)(1,*)",
+      "C) (0,a)(1,a)(0,c)(0,b)(2,a)",
+      "D) (0,a)(0,c)(1,b)(2,a)(3,a)"
+    ],
+    "answer": 1,
+    "explain": "LZ78 emits (0,a)(1,c)(0,b)(2,a)(1,*)."
+  }
+]

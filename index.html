@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DS Cheat Sheet: Home</title>
-<link rel="stylesheet" href="assets/style.css?v=20260713sidebartoc2">
-<script src="assets/theme.js?v=20260713sidebartoc2"></script>
+<link rel="stylesheet" href="assets/style.css?v=20260716ux">
+<script src="assets/theme.js?v=20260716ux"></script>
 </head>
 <body>
 <div class="layout">
@@ -22,44 +22,41 @@
     <a href="06-graphs.html">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
-    <a href="09-assignments.html">9 · Homework</a>
   </nav>
 </aside>
 <main class="content">
   <div class="pagehead">
-    <h1>Data Structures: Master Exam Cheat Sheet</h1>
-    <p>A complete, visual study guide with interactive slow-motion animations.</p>
+    <h1>Data Structures Cheat Sheet</h1>
+    <p>Visual study guide with step-through animations — tuned for BGU exam definitions.</p>
   </div>
   <div class="inner">
     <div class="hero-banner card">
       <div class="hero-banner-inner">
-        <h2>Master Data Structures for Your Exam</h2>
-        <p>A complete visual study guide with interactive slow-motion animations, complexity tables, and practice quizzes.</p>
-        <div class="hero-stats">
-          <span class="hero-stat"><b>9</b>chapters</span>
-          <span class="hero-stat"><b>6+</b>animators</span>
-          <span class="hero-stat"><b>100</b>quiz questions</span>
-        </div>
+        <h2>Study by chapter</h2>
+        <p>Definitions from the lecture slides, interactive animators, and a practice quiz.</p>
         <div class="feature-pills">
-          <span class="feature-pill accent2">Interactive visualizers</span>
-          <span class="feature-pill">Complexity tables</span>
-          <span class="feature-pill accent2">Exam decision guide</span>
+          <span class="feature-pill accent2">B-tree 1-pass / 2-pass</span>
+          <span class="feature-pill">MST edge-membership tests</span>
+          <span class="feature-pill accent2">Deamortized rehash</span>
           <span class="feature-pill">Dark &amp; light mode</span>
         </div>
       </div>
     </div>
 
     <div class="note">
-      <b>How to use this site.</b> Use the left sidebar for chapters. On long pages, unfold the active chapter to jump between sections on that page (or use the Jump menu on mobile). A thin progress bar at the top shows how far you are.
-      Key pages with <b>interactive animations</b>:
-      <a href="02-sorting.html">Sorting</a>, <a href="03-trees.html">Trees</a>, <a href="04-heaps.html">Heaps &amp; Compression</a>,
-      <a href="05-hashing.html">Skip Lists &amp; Hashing</a>, and <a href="06-graphs.html">Graphs</a>.
-      Try the <a href="08-exam.html#quiz">Practice Quiz</a> and tick off past moeds on the <a href="08-exam.html#exam-checklist">Exam checklist</a>. Review <a href="09-assignments.html">Homework 2 &amp; 3</a> for design patterns that show up on exams.
+      <b>How to use.</b> Sidebar → chapter. Long pages unfold a section TOC.
+      Animations live in
+      <a href="02-sorting.html">Sorting</a>,
+      <a href="03-trees.html">Trees</a>,
+      <a href="04-heaps.html">Heaps</a>,
+      <a href="05-hashing.html">Hashing</a>,
+      <a href="06-graphs.html">Graphs</a>,
+      <a href="07-advanced.html">Amortized</a>.
+      Drill with the <a href="08-exam.html#quiz">quiz</a> and <a href="08-exam.html#exam-checklist">moed checklist</a>.
     </div>
 
-    <h2 class="section">Complexity color key</h2>
+    <h2 class="section">Complexity tags</h2>
     <div class="card">
-      <p>Throughout the site, running times use these color tags:</p>
       <p>
         <span class="tag b-O1">O(1)</span>
         <span class="tag b-Olog">O(log n)</span>
@@ -70,7 +67,7 @@
       </p>
     </div>
 
-    <h2 class="section">Full topic index</h2>
+    <h2 class="section">Chapters</h2>
     <div class="topic-grid">
       <div class="card topic-card">
         <div class="topic-card-head">
@@ -78,10 +75,8 @@
           <h4><a href="01-foundations.html">Foundations</a></h4>
         </div>
         <ul>
-          <li>Asymptotic notation (O, Ω, Θ, o, ω)</li>
-          <li>Recurrences &amp; the Master Theorem</li>
-          <li>Useful sums &amp; identities</li>
-          <li>Probability basics (expectation, indicators)</li>
+          <li>Asymptotics · <a href="01-foundations.html#recurrences">how to solve recurrences</a></li>
+          <li>Sums · expectation basics</li>
         </ul>
       </div>
       <div class="card topic-card">
@@ -90,13 +85,8 @@
           <h4><a href="02-sorting.html">Sorting</a></h4>
         </div>
         <ul>
-          <li>Interactive animated visualizer</li>
-          <li>Insertion, Selection, Bubble</li>
-          <li>Merge, Quick, Heap</li>
-          <li>Counting, Radix, Bucket + <a href="02-sorting.html#linear-sorting">linear-sort decision guide</a></li>
-          <li>Comparison lower bound</li>
-          <li><a href="02-sorting.html#selection-problem">Selection problem</a>: Partition, Randomized-Select, median of medians</li>
-          <li><a href="02-sorting.html#order-stat-toolkit">Order-stat toolkit</a>: static vs OST vs indexable skip list</li>
+          <li>Animated comparison &amp; linear sorts</li>
+          <li>Selection / order statistics</li>
         </ul>
       </div>
       <div class="card topic-card">
@@ -105,12 +95,8 @@
           <h4><a href="03-trees.html">Structures &amp; Trees</a></h4>
         </div>
         <ul>
-          <li>Stacks, queues, lists vs arrays</li>
-          <li>Tree definitions &amp; traversals</li>
-          <li>Binary Search Trees</li>
-          <li>AVL trees (rotations)</li>
-          <li>Order statistic trees (Select / Rank) · <a href="03-trees.html#ost">when vs skip list</a></li>
-          <li><a href="03-trees.html#btree">B-trees</a> · <a href="03-trees.html#btree-height">height</a> · <a href="03-trees.html#btree-split">split</a> / <a href="03-trees.html#btree-merge">merge</a></li>
+          <li>BST · AVL · OST</li>
+          <li><a href="03-trees.html#btree">B-trees</a> with <a href="03-trees.html#btree-passes">1-pass / 2-pass</a></li>
         </ul>
       </div>
       <div class="card topic-card">
@@ -119,9 +105,7 @@
           <h4><a href="04-heaps.html">Heaps &amp; Compression</a></h4>
         </div>
         <ul>
-          <li>Binary heap / priority queue</li>
-          <li>Huffman coding animator</li>
-          <li>Lempel-Ziv compression</li>
+          <li>Binary heap · Huffman · LZ</li>
         </ul>
       </div>
       <div class="card topic-card">
@@ -130,10 +114,7 @@
           <h4><a href="05-hashing.html">Skip Lists &amp; Hashing</a></h4>
         </div>
         <ul>
-          <li>Skip lists · <a href="05-hashing.html#indexable-skiplist">IndexableSkipList</a> (Select)</li>
-          <li>Hash tables &amp; chaining</li>
-          <li>Open addressing (probing)</li>
-          <li>Bloom filters</li>
+          <li>Skip lists · chaining · probing · Bloom</li>
         </ul>
       </div>
       <div class="card topic-card">
@@ -142,11 +123,8 @@
           <h4><a href="06-graphs.html">Graphs</a></h4>
         </div>
         <ul>
-          <li><a href="06-graphs.html#graph-map">Which algorithm when?</a> decision map</li>
-          <li><a href="06-graphs.html#bfs-vs-dfs">BFS vs DFS</a> comparison</li>
-          <li>Interactive BFS/DFS/MST/Dijkstra animators</li>
-          <li>MST deep dive (cut/cycle, edge membership)</li>
-          <li>Bellman-Ford, graph reductions, exam tips</li>
+          <li>BFS/DFS · <a href="06-graphs.html#mst">MST edge membership</a></li>
+          <li>Kruskal · Prim · Dijkstra · Bellman-Ford</li>
         </ul>
       </div>
       <div class="card topic-card">
@@ -155,39 +133,19 @@
           <h4><a href="07-advanced.html">Amortized &amp; Union-Find</a></h4>
         </div>
         <ul>
-          <li>Amortized analysis (aggregate &amp; accounting)</li>
-          <li><a href="07-advanced.html#deamortization">Deamortization</a> (rehashing)</li>
-          <li><a href="07-advanced.html#btree-amortized">B-tree amortized analysis</a></li>
-          <li>Disjoint sets / union-find <a href="07-advanced.html#unionfind">(animator)</a></li>
+          <li><a href="07-advanced.html#deamortization">Deamortized rehash</a> · B-tree accounting</li>
+          <li>Union-Find animator</li>
         </ul>
       </div>
       <div class="card topic-card">
         <div class="topic-card-head">
-          <span class="topic-num">8</span>
-          <h4><a href="08-exam.html">Exam Reference</a></h4>
+          <span class="topic-num">8–9</span>
+          <h4><a href="08-exam.html">Exam</a></h4>
         </div>
         <ul>
-          <li>Master complexity tables</li>
-          <li><a href="08-exam.html#exam-checklist">Exam checklist</a></li>
-          <li><a href="08-exam.html#decision">What to use when</a></li>
-          <li>Practice quiz &amp; common pitfalls</li>
+          <li>Tables · quiz · checklist · HW patterns</li>
         </ul>
       </div>
-      <div class="card topic-card">
-        <div class="topic-card-head">
-          <span class="topic-num">9</span>
-          <h4><a href="09-assignments.html">Homework</a></h4>
-        </div>
-        <ul>
-          <li><a href="09-assignments.html#hw2">Assignment 2</a>: AVL+list, product stats</li>
-          <li><a href="09-assignments.html#hw3">Assignment 3</a>: hashing, IndexableSkipList</li>
-          <li><a href="09-assignments.html#hw-exam">Exam map</a>: HW idea → structure</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="note" style="text-align:center">
-      Tip: use your browser's <b>Print → Save as PDF</b> on any page for an offline copy (styles are print-optimized).
     </div>
   </div>
 </main>

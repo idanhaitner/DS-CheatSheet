@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>1 · Foundations</title>
-<link rel="stylesheet" href="assets/style.css?v=20260713sidebartoc2">
-<script src="assets/theme.js?v=20260713sidebartoc2"></script>
+<link rel="stylesheet" href="assets/style.css?v=20260716masterpad">
+<script src="assets/theme.js?v=20260716ux"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
@@ -24,14 +24,13 @@
     <a href="06-graphs.html">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
-    <a href="09-assignments.html">9 · Homework</a>
   </nav>
 </aside>
 <main class="content">
   <div class="pagehead">
     <div class="crumbs"><a href="index.html">Home</a> › Foundations</div>
     <h1>1 · Foundations</h1>
-    <p>Asymptotics · recurrences · sums · probability</p>
+    <p>Asymptotics · how to solve recurrences · sums · probability</p>
   </div>
   <div class="inner">
 
@@ -53,11 +52,19 @@
         <p class="math-hierarchy">\(O(n^2) &lt; O(n^3) &lt; O(2^n) &lt; O(n!) &lt; O(n^n)\)</p>
       </div>
     </div>
+    <div class="note">
+      <b>Log bases are the same in asymptotics.</b>
+      Changing the base only multiplies by a constant:
+      \[
+        \log_b n = \frac{\log_a n}{\log_a b} = \Theta(\log_a n).
+      \]
+      So \(\log_2 n\), \(\ln n\), \(\log_{10} n\) are all \(\Theta(\log n)\). You can write \(O(\log n)\) without specifying the base.
+    </div>
     <h4>Key facts &amp; tricks</h4>
     <ul>
       <li><b>Transitivity:</b> if \(f=O(g)\) and \(g=O(h)\) then \(f=O(h)\).</li>
       <li><b>Sum rule:</b> \(O(f)+O(g)=O(\max(f,g))\): the dominant term wins.</li>
-      <li><b>Logs:</b> \(\log_a n = O(\log_b n)\): base doesn't matter in \(O\).</li>
+      <li><b>Logs:</b> any base is fine — see the note above.</li>
       <li><b>Polynomial vs log:</b> \(\log^k n = O(n^\epsilon)\) for any \(k,\epsilon&gt;0\).</li>
       <li><b>Polynomial vs exponential:</b> \(n^k = O(c^n)\) for \(c&gt;1\).</li>
       <li><b>Limit test:</b> \(\lim f/g = 0 \Rightarrow f=O(g)\); \(=\infty \Rightarrow g=O(f)\); constant \(\Rightarrow f=O(g)\) and \(g=O(f)\).</li>
@@ -66,33 +73,238 @@
     <div class="pitfall"><b>Pitfall:</b> \(O\) is an <b>upper</b> bound, so "worst case is \(O(n^2)\)" and "worst case is \(O(n^3)\)" can both be true. If asked for a <b>tight</b> bound, use \(\Theta\).</div>
   </div>
 
-  <h2 class="section" id="recurrences">1.2 Recurrences &amp; the Master Theorem</h2>
-  <div class="card">
-    <h4>Master Theorem</h4>
-    <p>For \(T(n) = a\,T(n/b) + f(n)\) with \(a\ge 1,\ b&gt;1\). Compare \(f(n)\) with the "watershed" \(n^{\log_b a}\):</p>
-    <table>
-      <tr><th>Case</th><th>Condition</th><th>Solution</th></tr>
-      <tr><td>1</td><td>\(f(n) = O(n^{\log_b a - \epsilon})\): \(f\) polynomially <b>smaller</b></td><td>\(T(n)=\Theta(n^{\log_b a})\)</td></tr>
-      <tr><td>2</td><td>\(f(n) = \Theta(n^{\log_b a})\): <b>same</b> order</td><td>\(T(n)=\Theta(n^{\log_b a}\log n)\)</td></tr>
-      <tr><td>3</td><td>\(f(n) = \Omega(n^{\log_b a + \epsilon})\), + regularity \(a f(n/b) \le c f(n),\ c&lt;1\)</td><td>\(T(n)=\Theta(f(n))\)</td></tr>
+  <h2 class="section" id="recurrences">1.2 Recurrences — how to analyze &amp; bound them</h2>
+  <div class="card rec-section">
+    <p class="rec-lead">A <b>recurrence</b> defines \(T(n)\) from \(T\) on smaller inputs. Pick a method, then bound.</p>
+
+    <h4 id="rec-howto">Pick a method</h4>
+    <div class="rec-method-grid">
+      <div class="rec-method">
+        <div class="rec-method-tag">Master</div>
+        <p>\(a\,T(n/b)+f(n)\)</p>
+        <span>equal split, constant \(a,b\)</span>
+      </div>
+      <div class="rec-method">
+        <div class="rec-method-tag">Tree</div>
+        <p>\(T(n/3)+T(2n/3)+\cdots\)</p>
+        <span>unequal splits</span>
+      </div>
+      <div class="rec-method">
+        <div class="rec-method-tag">Iterate</div>
+        <p>\(T(n-1)+f(n)\)</p>
+        <span>unfold to a sum</span>
+      </div>
+      <div class="rec-method">
+        <div class="rec-method-tag">Substitute</div>
+        <p>guess \(O\) / \(\Omega\)</p>
+        <span>prove by induction</span>
+      </div>
+    </div>
+
+    <h4>Recursion-tree diagrams</h4>
+    <div class="rec-diagrams">
+      <figure class="rec-fig">
+        <figcaption>\(T(n)=2T(n/2)+n\) — each level costs \(n\)</figcaption>
+        <svg class="rec-svg" viewBox="0 0 360 220" role="img" aria-label="Balanced recursion tree">
+          <!-- cost column -->
+          <rect x="292" y="10" width="58" height="170" rx="8" class="rec-cost-bg"/>
+          <text x="321" y="34" class="rec-cost">n</text>
+          <text x="321" y="104" class="rec-cost">n</text>
+          <text x="321" y="168" class="rec-cost">n</text>
+          <text x="321" y="192" class="rec-cost-sub">⋯</text>
+          <!-- root -->
+          <circle cx="150" cy="28" r="20" class="rec-node"/>
+          <text x="150" y="33" class="rec-node-lab">n</text>
+          <!-- level 1 -->
+          <line x1="150" y1="48" x2="85" y2="78" class="rec-edge"/>
+          <line x1="150" y1="48" x2="215" y2="78" class="rec-edge"/>
+          <circle cx="85" cy="98" r="18" class="rec-node"/>
+          <text x="85" y="103" class="rec-node-lab">n/2</text>
+          <circle cx="215" cy="98" r="18" class="rec-node"/>
+          <text x="215" y="103" class="rec-node-lab">n/2</text>
+          <!-- level 2 -->
+          <line x1="85" y1="116" x2="45" y2="142" class="rec-edge"/>
+          <line x1="85" y1="116" x2="115" y2="142" class="rec-edge"/>
+          <line x1="215" y1="116" x2="175" y2="142" class="rec-edge"/>
+          <line x1="215" y1="116" x2="255" y2="142" class="rec-edge"/>
+          <circle cx="45" cy="160" r="15" class="rec-node rec-node--small"/>
+          <text x="45" y="164" class="rec-node-lab sm">n/4</text>
+          <circle cx="115" cy="160" r="15" class="rec-node rec-node--small"/>
+          <text x="115" y="164" class="rec-node-lab sm">n/4</text>
+          <circle cx="175" cy="160" r="15" class="rec-node rec-node--small"/>
+          <text x="175" y="164" class="rec-node-lab sm">n/4</text>
+          <circle cx="255" cy="160" r="15" class="rec-node rec-node--small"/>
+          <text x="255" y="164" class="rec-node-lab sm">n/4</text>
+          <text x="180" y="212" class="rec-caption">1 + log₂ n levels  →  Θ(n log n)</text>
+        </svg>
+      </figure>
+
+      <figure class="rec-fig">
+        <figcaption>\(T(n)=T(n/3)+T(2n/3)+n\) — exam classic</figcaption>
+        <svg class="rec-svg" viewBox="0 0 360 220" role="img" aria-label="Unequal recursion tree">
+          <rect x="292" y="10" width="58" height="170" rx="8" class="rec-cost-bg"/>
+          <text x="321" y="34" class="rec-cost">≤n</text>
+          <text x="321" y="104" class="rec-cost">≤n</text>
+          <text x="321" y="168" class="rec-cost">≤n</text>
+          <text x="321" y="192" class="rec-cost-sub">⋯</text>
+          <circle cx="150" cy="28" r="20" class="rec-node"/>
+          <text x="150" y="33" class="rec-node-lab">n</text>
+          <line x1="150" y1="48" x2="70" y2="78" class="rec-edge"/>
+          <line x1="150" y1="48" x2="230" y2="78" class="rec-edge"/>
+          <circle cx="70" cy="98" r="18" class="rec-node"/>
+          <text x="70" y="103" class="rec-node-lab">n/3</text>
+          <circle cx="230" cy="98" r="18" class="rec-node"/>
+          <text x="230" y="103" class="rec-node-lab">2n/3</text>
+          <line x1="70" y1="116" x2="35" y2="142" class="rec-edge"/>
+          <line x1="70" y1="116" x2="100" y2="142" class="rec-edge"/>
+          <line x1="230" y1="116" x2="185" y2="142" class="rec-edge"/>
+          <line x1="230" y1="116" x2="270" y2="142" class="rec-edge"/>
+          <circle cx="35" cy="160" r="14" class="rec-node rec-node--small"/>
+          <text x="35" y="164" class="rec-node-lab sm">n/9</text>
+          <circle cx="100" cy="160" r="14" class="rec-node rec-node--small"/>
+          <text x="100" y="164" class="rec-node-lab sm">2n/9</text>
+          <circle cx="185" cy="160" r="14" class="rec-node rec-node--small"/>
+          <text x="185" y="164" class="rec-node-lab sm">2n/9</text>
+          <circle cx="270" cy="160" r="14" class="rec-node rec-node--small"/>
+          <text x="270" y="164" class="rec-node-lab sm">4n/9</text>
+          <text x="180" y="212" class="rec-caption">depth Θ(log n)  →  Θ(n log n)</text>
+        </svg>
+      </figure>
+    </div>
+    <div class="rec-tree-points">
+      <div>
+        <b>Balanced tree</b>
+        <ul>
+          <li>Level cost = \(n\) every time</li>
+          <li>\(1+\log_2 n\) levels</li>
+          <li>\(T=\Theta(n\log n)\)</li>
+        </ul>
+      </div>
+      <div>
+        <b>Unequal tree</b>
+        <ul>
+          <li>Sizes on a level still sum to \(n\) → cost ≤ \(n\)</li>
+          <li>Longest path: keep \(2n/3\) → \(\log_{3/2}n\)</li>
+          <li>Shortest: keep \(n/3\) → \(\log_3 n\); both \(\Theta(\log n)\)</li>
+          <li>Hence \(\Theta(n\log n)\)</li>
+        </ul>
+      </div>
+    </div>
+
+    <h4 id="master">Master theorem</h4>
+    <p class="rec-lead">Form \(T(n)=a\,T(n/b)+f(n)\) (\(a\ge1\), \(b&gt;1\)). Compare \(f\) to the critical power \(n^{\log_b a}\):</p>
+    <div class="rec-master-viz">
+      <div class="rec-master-case">
+        <svg class="rec-master-svg" viewBox="0 0 140 96" aria-hidden="true">
+          <!-- Case 1: cost grows toward leaves -->
+          <line x1="70" y1="22" x2="40" y2="42" class="rec-m-edge"/>
+          <line x1="70" y1="22" x2="100" y2="42" class="rec-m-edge"/>
+          <line x1="40" y1="48" x2="24" y2="68" class="rec-m-edge"/>
+          <line x1="40" y1="48" x2="52" y2="68" class="rec-m-edge"/>
+          <line x1="100" y1="48" x2="88" y2="68" class="rec-m-edge"/>
+          <line x1="100" y1="48" x2="116" y2="68" class="rec-m-edge"/>
+          <circle cx="70" cy="16" r="7" class="rec-m-node rec-m-node--faint"/>
+          <circle cx="40" cy="46" r="7" class="rec-m-node rec-m-node--mid"/>
+          <circle cx="100" cy="46" r="7" class="rec-m-node rec-m-node--mid"/>
+          <circle cx="24" cy="74" r="8" class="rec-m-node rec-m-node--hot"/>
+          <circle cx="52" cy="74" r="8" class="rec-m-node rec-m-node--hot"/>
+          <circle cx="88" cy="74" r="8" class="rec-m-node rec-m-node--hot"/>
+          <circle cx="116" cy="74" r="8" class="rec-m-node rec-m-node--hot"/>
+        </svg>
+        <strong>Case 1</strong>
+        <p>\(f\) much <em>smaller</em> than \(n^{\log_b a}\)</p>
+        <div class="rec-master-ans">\(T=\Theta(n^{\log_b a})\)</div>
+        <span>leaves dominate</span>
+      </div>
+      <div class="rec-master-case">
+        <svg class="rec-master-svg" viewBox="0 0 140 96" aria-hidden="true">
+          <!-- Case 2: same cost every level -->
+          <line x1="70" y1="22" x2="40" y2="42" class="rec-m-edge"/>
+          <line x1="70" y1="22" x2="100" y2="42" class="rec-m-edge"/>
+          <line x1="40" y1="48" x2="24" y2="68" class="rec-m-edge"/>
+          <line x1="40" y1="48" x2="52" y2="68" class="rec-m-edge"/>
+          <line x1="100" y1="48" x2="88" y2="68" class="rec-m-edge"/>
+          <line x1="100" y1="48" x2="116" y2="68" class="rec-m-edge"/>
+          <circle cx="70" cy="16" r="8" class="rec-m-node rec-m-node--hot"/>
+          <circle cx="40" cy="46" r="8" class="rec-m-node rec-m-node--hot"/>
+          <circle cx="100" cy="46" r="8" class="rec-m-node rec-m-node--hot"/>
+          <circle cx="24" cy="74" r="8" class="rec-m-node rec-m-node--hot"/>
+          <circle cx="52" cy="74" r="8" class="rec-m-node rec-m-node--hot"/>
+          <circle cx="88" cy="74" r="8" class="rec-m-node rec-m-node--hot"/>
+          <circle cx="116" cy="74" r="8" class="rec-m-node rec-m-node--hot"/>
+        </svg>
+        <strong>Case 2</strong>
+        <p>\(f\) <em>same order</em> as \(n^{\log_b a}\)</p>
+        <div class="rec-master-ans">\(T=\Theta(f\cdot\log n)\)</div>
+        <span>every level alike</span>
+      </div>
+      <div class="rec-master-case">
+        <svg class="rec-master-svg" viewBox="0 0 140 96" aria-hidden="true">
+          <!-- Case 3: root dominates -->
+          <line x1="70" y1="24" x2="40" y2="44" class="rec-m-edge"/>
+          <line x1="70" y1="24" x2="100" y2="44" class="rec-m-edge"/>
+          <line x1="40" y1="50" x2="24" y2="70" class="rec-m-edge"/>
+          <line x1="40" y1="50" x2="52" y2="70" class="rec-m-edge"/>
+          <line x1="100" y1="50" x2="88" y2="70" class="rec-m-edge"/>
+          <line x1="100" y1="50" x2="116" y2="70" class="rec-m-edge"/>
+          <circle cx="70" cy="16" r="10" class="rec-m-node rec-m-node--hot"/>
+          <circle cx="40" cy="48" r="7" class="rec-m-node rec-m-node--mid"/>
+          <circle cx="100" cy="48" r="7" class="rec-m-node rec-m-node--mid"/>
+          <circle cx="24" cy="76" r="5" class="rec-m-node rec-m-node--faint"/>
+          <circle cx="52" cy="76" r="5" class="rec-m-node rec-m-node--faint"/>
+          <circle cx="88" cy="76" r="5" class="rec-m-node rec-m-node--faint"/>
+          <circle cx="116" cy="76" r="5" class="rec-m-node rec-m-node--faint"/>
+        </svg>
+        <strong>Case 3</strong>
+        <p>\(f\) much <em>larger</em> + regularity</p>
+        <div class="rec-master-ans">\(T=\Theta(f(n))\)</div>
+        <span>root dominates</span>
+      </div>
+    </div>
+    <table class="rec-compact">
+      <tr><th>Case</th><th>Condition</th><th>Answer</th></tr>
+      <tr><td>1</td><td>\(f=O(n^{\log_b a-\epsilon})\), some \(\epsilon&gt;0\)</td><td>\(\Theta(n^{\log_b a})\)</td></tr>
+      <tr><td>2</td><td>\(f=\Theta(n^{\log_b a})\)</td><td>\(\Theta(f\cdot\log n)\)</td></tr>
+      <tr><td>3</td><td>\(f=\Omega(n^{\log_b a+\epsilon})\) and \(a f(n/b)\le c f(n)\), \(c&lt;1\)</td><td>\(\Theta(f)\)</td></tr>
     </table>
-    <div class="warn"><b>Gap trap:</b> if \(f\) is larger only by a <i>logarithmic</i> factor (e.g. \(f=n^{\log_b a}\log n\)), the Master Theorem <b>does not apply</b>. Use the recursion-tree method.</div>
-    <h4>Worked examples</h4>
-    <table>
-      <tr><th>Recurrence</th><th>\(n^{\log_b a}\)</th><th>Case</th><th>Result</th></tr>
-      <tr><td>Merge Sort: \(2T(n/2)+n\)</td><td>\(n^1\)</td><td>2</td><td>\(\Theta(n\log n)\)</td></tr>
-      <tr><td>Binary Search: \(T(n/2)+1\)</td><td>\(n^0\)</td><td>2</td><td>\(\Theta(\log n)\)</td></tr>
-      <tr><td>\(2T(n/2)+n^2\)</td><td>\(n^1\)</td><td>3</td><td>\(\Theta(n^2)\)</td></tr>
-      <tr><td>\(4T(n/2)+n\)</td><td>\(n^2\)</td><td>1</td><td>\(\Theta(n^2)\)</td></tr>
-      <tr><td>\(3T(n/4)+n\log n\)</td><td>\(n^{0.79}\)</td><td>3</td><td>\(\Theta(n\log n)\)</td></tr>
-      <tr><td>\(T(n-1)+n\)</td><td>-</td><td>iterate</td><td>\(\Theta(n^2)\)</td></tr>
+    <div class="note rec-note">
+      <b>Extension:</b> \(f=\Theta(n^{\log_b a}\log^k n)\) → \(T=\Theta(f\cdot\log^{k+1}n)\).
+      <b>Fails when:</b> only a log-gap (e.g. \(f=n/\log n\)) — no polynomial \(\epsilon\); use a tree instead.
+    </div>
+
+    <h4>Substitution &amp; iteration (short)</h4>
+    <div class="rec-two">
+      <div class="rec-mini">
+        <h5>Substitution</h5>
+        <ol>
+          <li>Guess form (\(cn\log n\), …)</li>
+          <li>Check base</li>
+          <li>Induct: plug IH into recurrence</li>
+          <li>For \(\Theta\): both \(O\) and \(\Omega\)</li>
+        </ol>
+        <p class="rec-ex">Tip: if \(cn^3\) fails on \(+n^2\), try \(cn^3-dn^2\).</p>
+      </div>
+      <div class="rec-mini">
+        <h5>Iteration</h5>
+        <ol>
+          <li>Unfold \(k\) times</li>
+          <li>Stop at the base case</li>
+          <li>Sum the series</li>
+        </ol>
+        <p class="rec-ex">\(T(n)=T(n-1)+n\) → \(1+\cdots+n=\Theta(n^2)\).</p>
+      </div>
+    </div>
+
+    <h4>Quick examples</h4>
+    <table class="rec-compact">
+      <tr><th>Recurrence</th><th>Method</th><th>Bound</th></tr>
+      <tr><td>\(9T(n/3)+n\)</td><td>Master 1</td><td>\(\Theta(n^2)\)</td></tr>
+      <tr><td>\(2T(n/2)+n\)</td><td>Master 2 / tree</td><td>\(\Theta(n\log n)\)</td></tr>
+      <tr><td>\(3T(n/4)+n\log n\)</td><td>Master 3</td><td>\(\Theta(n\log n)\)</td></tr>
+      <tr><td>\(T(n/3)+T(2n/3)+n\)</td><td>tree</td><td>\(\Theta(n\log n)\)</td></tr>
+      <tr><td>\(T(n-1)+n\)</td><td>iterate</td><td>\(\Theta(n^2)\)</td></tr>
+      <tr><td>\(T(2n/3)+1\)</td><td>Master 2</td><td>\(\Theta(\log n)\)</td></tr>
     </table>
-    <h4>Other methods</h4>
-    <ul>
-      <li><b>Substitution:</b> guess the form, prove by induction (verify base case and inductive step separately).</li>
-      <li><b>Recursion tree:</b> sum work per level × number of levels; great for guessing.</li>
-      <li><b>Iteration:</b> unfold the recurrence to the base case, count levels.</li>
-    </ul>
   </div>
 
   <h2 class="section" id="summations">1.3 Useful Sums &amp; Identities</h2>

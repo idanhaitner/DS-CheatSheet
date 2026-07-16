@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>7 · Amortized &amp; Union-Find</title>
-<link rel="stylesheet" href="assets/style.css?v=20260714steps2">
-<script src="assets/theme.js?v=20260713uf"></script>
+<link rel="stylesheet" href="assets/style.css?v=20260716rankblu">
+<script src="assets/theme.js?v=20260716ux"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
@@ -24,7 +24,6 @@
     <a href="06-graphs.html">6 · Graphs</a>
     <a href="07-advanced.html" class="active">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
-    <a href="09-assignments.html">9 · Homework</a>
   </nav>
 </aside>
 <main class="content">
@@ -100,11 +99,11 @@
         <label>Speed: <input type="range" class="uf-speed" min="60" max="1600" value="1100" step="20"></label>
       </div>
       <div class="legend">
-        <span><span class="sw" style="background:#3f51b5;border:1px solid #5c6bc0"></span> node</span>
-        <span><span class="sw" style="background:#c0533f;border:1px solid #ff6b81"></span> current / start</span>
-        <span><span class="sw" style="background:#5c6bc0;border:1px solid #7c9cff"></span> on Find path</span>
-        <span><span class="sw" style="background:#2f8f5f;border:1px solid #57e0c0"></span> root</span>
-        <span><span class="sw" style="background:#b45309;border:1px solid #fbbf24"></span> attach / compress</span>
+        <span><span class="sw" style="background:#e8eefc;border:2px solid #3b4f9a"></span> node</span>
+        <span><span class="sw" style="background:#ffe4e0;border:2px solid #c53d2e"></span> current / start</span>
+        <span><span class="sw" style="background:#dbe4ff;border:2px solid #4f6fd8"></span> on Find path</span>
+        <span><span class="sw" style="background:#d8f5e8;border:2px solid #1a7a4c"></span> root</span>
+        <span><span class="sw" style="background:#fff1d6;border:2px solid #b45309"></span> attach / compress</span>
       </div>
       <div class="uf-main">
         <div class="uf-stage" aria-label="Union-Find forest"></div>
@@ -120,69 +119,86 @@
     </div>
   </div>
 
-  <h2 class="section" id="deamortization">7.3 Deamortization</h2>
+  <h2 class="section" id="deamortization">7.3 Deamortization of rehashing</h2>
   <div class="card">
-    <p><b>Deamortization</b> spreads an expensive periodic operation across many cheap steps so that <b>every single operation costs O(1) in the worst case</b>: not just amortized O(1).</p>
-    <table>
-      <tr><th></th><th>Amortized</th><th>Deamortized</th></tr>
-      <tr><td>Rehash cost</td><td>\(\Theta(n)\) once, but <span class="tag b-O1">O(1)</span> amortized per insert</td><td><span class="tag b-O1">O(1)</span> worst-case per insert <b>and</b> per rehash step</td></tr>
-      <tr><td>When it spikes</td><td>One insert pays \(\Theta(n)\)</td><td>Work is spread: no spike</td></tr>
-    </table>
+    <p><b>Problem:</b> when a hash table grows, a normal rehash copies <em>all</em> \(n\) keys in one Insert → \(\Theta(n)\) spike. <b>Deamortization</b> spreads that copy over many Inserts so <b>every</b> Insert stays \(\Theta(1)\) worst-case.</p>
 
-    <h4>Problem: rehashing in a hash table (chaining)</h4>
-    <p>Goal: keep \(n/m \in \Theta(1)\) for \(\Theta(1)\) search and \(\Theta(n)\) space.</p>
+    <h4>Setup (chaining)</h4>
+    <p>Table \(T\) has \(m\) <b>cells</b> \(T[0],\ldots,T[m-1]\). Each cell is the head of a linked list of keys that hashed there. There are \(n\) keys total; we keep \(n/m\in\Theta(1)\).</p>
     <ul>
-      <li>Maintain load factor in \((1/4,\, 1)\).</li>
-      <li>When table has <b>\(m\) elements</b> → create new table of size <b>\(2m\)</b> and copy all elements.</li>
-      <li>When table has <b>\(m/4\) elements</b> → shrink to size <b>\(m/2\)</b> (deletions; lecture focuses on insertions).</li>
+      <li>When \(n=m\): grow to size \(2m\) (copy every key into a new table).</li>
+      <li>When \(n=m/4\): shrink to \(m/2\) (slides focus on growing).</li>
     </ul>
-    <p>Naive rehash costs \(\Theta(n)\) at once. Amortized analysis gives O(1) per insert, but one operation can still be \(\Theta(n)\). <b>Deamortization</b> fixes that.</p>
 
-    <h4>Rehashing algorithm (lecture) — \(2m\) steps</h4>
-    <span class="code-label">pseudocode</span>
-<pre><span class="cm">(1)</span> Create a hash table T' of size 2m
+    <h4>What a full rehash does</h4>
+    <p>Copy from \(T\) (size \(m\)) into a new table \(T'\) (size \(2m\)) by walking every cell and every key:</p>
+    <span class="code-label">Rehash — full copy</span>
+<pre><span class="cm">(1)</span> create T′ of size 2m
 <span class="cm">(2)</span> <span class="kw">for</span> i = 0 <span class="kw">to</span> m−1
-<span class="cm">(3)</span>     p ← T[i]
+<span class="cm">(3)</span>     p ← T[i]              <span class="cm">// open cell i</span>
 <span class="cm">(4)</span>     <span class="kw">while</span> p ≠ NULL
-<span class="cm">(5)</span>         Insert(T', p)
+<span class="cm">(5)</span>         Insert(T′, p)     <span class="cm">// copy this key</span>
 <span class="cm">(6)</span>         p ← p.next</pre>
-    <p>Exactly <b>\(2m\) steps</b>: scanning the \(m\) cells of \(T\), plus Insert(T′,·) for each of the \(m\) list elements.</p>
 
-    <h4>Insertion (deamortized) — lecture</h4>
-    <p>Always keep two tables: <b>\(T\)</b> (size \(m\)) and <b>\(T'\)</b> (size \(2m\)). When \(T\) contains exactly \(m/2\) elements, \(T'\) is empty. In each of the next \(m/2\) Insert operations:</p>
-    <span class="code-label">pseudocode</span>
-<pre><span class="kw">Insert</span>(x):
+    <div class="note">
+      <b>Count the tiny steps in that loop.</b> The lecture treats the copy as <b>\(2m\) atomic actions</b> (call them “copy steps”):
+      <ul style="margin:6px 0 0">
+        <li><b>\(m\) cell opens:</b> once per index, \(p\leftarrow T[i]\) (even if the list is empty).</li>
+        <li><b>\(m\) key copies:</b> once per key, <code>Insert(T′, key)</code> then \(p\leftarrow p.next\).</li>
+      </ul>
+      Doing all \(2m\) of them inside <em>one</em> Insert costs \(\Theta(n)\). Deamortization does only a <b>constant number</b> of them per Insert.
+    </div>
+
+    <h4>Deamortized Insert</h4>
+    <p>Keep two tables: live \(T\) (size \(m\)) and building \(T'\) (size \(2m\)). Remember where you paused in the copy: cell index \(i\) and list pointer \(p\).</p>
+
+    <p>Define one helper that does <b>exactly one</b> tiny action from the rehash loop:</p>
+    <span class="code-label">CopyOneStep — open a cell OR copy one key</span>
+<pre>CopyOneStep():
+    <span class="kw">if</span> p = NULL:                 <span class="cm">// finished the current list</span>
+        p ← T[i]                  <span class="cm">// open the next cell</span>
+        i ← i + 1
+    <span class="kw">else</span>:
+        Insert(T′, p)             <span class="cm">// copy this one key into T′</span>
+        p ← p.next</pre>
+
+    <p>Then Insert only calls that helper a constant number of times:</p>
+    <span class="code-label">Insert(x)</span>
+<pre>Insert(x):
     insert x into T
 
-    <span class="kw">if</span> the new element x was inserted <span class="kw">after</span> the current scan location:
-        perform <b>4 steps</b> of the previous algorithm
-    <span class="kw">otherwise</span>:
-        insert x into T'
-        perform <b>3 steps</b> of the previous algorithm
+    <span class="kw">if</span> h(x) ≥ i:                 <span class="cm">// scan has not reached x’s cell yet</span>
+        call CopyOneStep() <b>4</b> times
+    <span class="kw">else</span>:                       <span class="cm">// scan already passed x’s cell</span>
+        insert x into T′ as well  <span class="cm">// otherwise T′ would miss x</span>
+        call CopyOneStep() <b>3</b> times
 
-    <span class="kw">when</span> T has m elements:
-        T ← T'
-        create a new empty table T' of size 4m   <span class="cm">(smart array)</span></pre>
+    <span class="kw">if</span> |T| = m:                  <span class="cm">// copy finished; switch tables</span>
+        T ← T′
+        T′ ← new empty table of size 4m   <span class="cm">(smart array → Θ(1))</span></pre>
+
+    <div class="note">
+      <b>Example</b> (\(m=4\), keys \(1,8\) in \(T\), Insert(4)). After putting 4 into \(T\), the four <code>CopyOneStep</code> calls might be:
+      <ol style="margin:6px 0 0">
+        <li>\(p\leftarrow T[0]\) (open cell 0 → list \(1\to 8\))</li>
+        <li><code>Insert(T′, 1)</code>; \(p\leftarrow\) next</li>
+        <li><code>Insert(T′, 8)</code>; \(p\leftarrow\) NULL</li>
+        <li>\(p\leftarrow T[1]\) (open cell 1, empty)</li>
+      </ol>
+      Stop. Next Insert continues from cell 2.
+    </div>
 
     <table>
-      <tr><th>Component</th><th>Cost per Insert</th></tr>
-      <tr><td>Insert into \(T\)</td><td>\(\Theta(1)\)</td></tr>
-      <tr><td>3 or 4 rehashing steps</td><td>\(\Theta(1)\)</td></tr>
-      <tr><td>\(T \leftarrow T'\) + smart-array alloc</td><td>\(\Theta(1)\)</td></tr>
+      <tr><th>Why every Insert is \(\Theta(1)\)</th><th></th></tr>
+      <tr><td>Put \(x\) in \(T\) (and maybe \(T'\))</td><td>\(\Theta(1)\)</td></tr>
+      <tr><td>At most 4 calls to <code>CopyOneStep</code></td><td>\(\Theta(1)\)</td></tr>
+      <tr><td>When \(n=m\): swap + smart-array allocate</td><td>\(\Theta(1)\)</td></tr>
     </table>
-    <div class="note"><b>What is one “step” of the rehashing algorithm?</b>
-      Full rehashing is the for-loop over T that copies into T′. The lecture counts <b>exactly \(2m\) tiny steps</b>:
-      <ul style="margin:6px 0 0">
-        <li><b>Scan one cell</b> of T: read \(T[i]\) and set \(p \leftarrow T[i]\) (even if the list is empty) — costs 1 step.</li>
-        <li><b>Insert(T′, p)</b> for <em>one</em> list element, then \(p \leftarrow p.next\) — costs 1 step.</li>
-      </ul>
-      So “perform 4 steps” means: run the next 4 of those tiny actions (some mix of cell-scans and Insert(T′,·)), then stop and return from this Insert. Over \(m/2\) Inserts you finish all \(2m\) steps without ever paying \(\Theta(n)\) in one operation.
-    </div>
-    <div class="note"><b>Why 4?</b> Full rehashing = \(2m\) steps, spread over \(m/2\) Inserts \(\Rightarrow\) at most 4 steps per Insert. Worst-case Insert = <span class="tag b-O1">O(1)</span> (not only amortized).</div>
-    <div class="warn"><b>Smart array:</b> allocating T′ of size \(4m\) without initializing every cell is \(\Theta(1)\) (course model). Ordinary RAM would charge \(\Theta(m)\).</div>
+    <p>Why 4? Total copy work \(2m\) steps / \(m/2\) Inserts = 4 steps per Insert.</p>
+    <div class="warn"><b>Smart array:</b> allocating size \(4m\) without zeroing every cell costs \(\Theta(1)\) in the course model.</div>
 
     <h4>Animator</h4>
-    <p style="margin-top:0">Same scenario as the slides: <code>m = 4</code>, start with keys <b>1, 8</b> in T, then <b>Insert(4)</b> and <b>Insert(3)</b>. Watch T′ fill cell-by-cell, then the <b>switch</b> \(T \leftarrow T'\) and the new empty T′ of size \(4m\).</p>
+    <p style="margin-top:0">Demo: \(m=4\), start with <b>1</b> and <b>8</b>, then Insert(4), Insert(3). Each highlighted line is one <code>CopyOneStep</code>.</p>
     <div id="deam-viz" class="deam-viz-wrap">
       <div class="viz-controls">
         <button type="button" id="deam-play" class="viz-btn viz-primary">▶ Play</button>
@@ -192,20 +208,22 @@
         <label>Speed: <input type="range" id="deam-speed" min="100" max="1600" value="1100" step="20"></label>
       </div>
       <div class="legend">
-        <span><span class="sw" style="background:#3f51b5"></span> element in list</span>
-        <span><span class="sw" style="background:#c0533f"></span> current x / step</span>
-        <span><span class="sw" style="background:#0f766e;border:1px dashed #57e0c0"></span> already scanned cell</span>
-        <span style="font-size:13px;color:#57e0c0">▲ location</span> current scan location
+        <span><span class="sw" style="background:#e8eef8;border:1px solid #7c8db5"></span> cell index \(T[i]\)</span>
+        <span><span class="sw" style="background:#5b6fcf;border-radius:50%"></span> key in a list</span>
+        <span><span class="sw" style="background:#2f9e6a;border-radius:50%"></span> key just inserted</span>
+        <span><span class="sw" style="background:#7c3aed;border-radius:50%"></span> key being copied into \(T'\)</span>
+        <span><span class="sw" style="background:#d7f0ea;border:1px dashed #0d9488"></span> cells already read</span>
+        <span style="font-size:13px;color:#0d9488;font-weight:800">▲</span> current scan location
       </div>
       <div class="deam-main">
         <div id="deam-stage" class="deam-stage">Loading…</div>
-        <div id="deam-code" class="viz-code"></div>
       </div>
       <div id="deam-desc" class="viz-desc">Loading…</div>
       <div id="deam-panel" class="viz-panel"></div>
       <div class="viz-stats">
         <span>Step <b id="deam-step">0</b> / <b id="deam-total">0</b></span>
       </div>
+      <div id="deam-code" class="viz-code deam-code"></div>
     </div>
   </div>
 
@@ -232,8 +250,8 @@
   </div>
 </main>
 </div>
-<script src="assets/union-find.js?v=20260713uf" defer></script>
+<script src="assets/union-find.js?v=20260716rankblu" defer></script>
 <script src="assets/viz-code-helper.js" defer></script>
-<script src="assets/deamort.js?v=20260714steps2" defer></script>
+<script src="assets/deamort.js?v=20260716center" defer></script>
 </body>
 </html>

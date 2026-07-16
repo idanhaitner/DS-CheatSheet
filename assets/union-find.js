@@ -1,8 +1,8 @@
 /* Union-Find (Disjoint Sets) animator: Find + Union with optional rank / path compression */
 (function () {
   var SVGNS = 'http://www.w3.org/2000/svg';
-  var N = 8;
-  var LABELS = 'ABCDEFGH'.split('');
+  var N = 5;
+  var LABELS = 'ABCDE'.split('');
 
   var CODE = {
     find: [
@@ -36,6 +36,8 @@
 
     var parent = [];
     var rank = [];
+    var committedParent = [];
+    var committedRank = [];
     var frames = [];
     var idx = 0;
     var timer = null;
@@ -52,9 +54,29 @@
         parent[i] = i;
         rank[i] = 0;
       }
+      commitLive();
     }
 
     function cloneArr(a) { return a.slice(); }
+
+    function commitLive() {
+      committedParent = cloneArr(parent);
+      committedRank = cloneArr(rank);
+    }
+
+    function restoreCommitted() {
+      parent = cloneArr(committedParent);
+      rank = cloneArr(committedRank);
+    }
+
+    /** Apply the forest from the frame the user is looking at (so next Run starts from here). */
+    function commitFromFrame(f) {
+      if (!f) return;
+      committedParent = cloneArr(f.parent);
+      committedRank = cloneArr(f.rank);
+      parent = cloneArr(committedParent);
+      rank = cloneArr(committedRank);
+    }
 
     function rec(hi) {
       frames.push({
@@ -201,15 +223,19 @@
       return kids;
     }
 
+    /* Fewer nodes, larger circles — readable on screen without shrinking */
+    var NODE_R = 44;
+    var GAP_X = 130;
+    var GAP_Y = 130;
+    var TREE_GAP = 48;
+    var PAD_X = 48;
+    var PAD_Y = 64; /* room for rank above roots */
+
     function layoutForest(pArr, rankArr) {
       var kids = childrenOf(pArr);
       var roots = [];
       var i;
       for (i = 0; i < N; i++) if (pArr[i] === i) roots.push(i);
-
-      var GAP_X = 72;
-      var GAP_Y = 82;
-      var treeGap = 40;
 
       function subtreeWidth(u) {
         if (!kids[u].length) return 1;
@@ -219,7 +245,7 @@
       }
 
       var nodes = [];
-      var cursorX = 44;
+      var cursorX = PAD_X;
 
       roots.forEach(function (r) {
         var positions = {};
@@ -240,15 +266,19 @@
           positions[u] = {
             id: u,
             x: cursorX + mid * GAP_X,
-            y: 36 + depth * GAP_Y,
-            label: LABELS[u]
+            y: PAD_Y + depth * GAP_Y,
+            label: LABELS[u],
+            depth: depth,
+            isRoot: pArr[u] === u,
+            hasChildren: kids[u].length > 0,
+            hasParent: pArr[u] !== u
           };
         }
         place(r, 0, 0);
         Object.keys(positions).forEach(function (k) {
           nodes.push(positions[k]);
         });
-        cursorX += subtreeWidth(r) * GAP_X + treeGap;
+        cursorX += subtreeWidth(r) * GAP_X + TREE_GAP;
       });
 
       var edges = [];
@@ -256,13 +286,19 @@
         if (pArr[i] !== i) edges.push({ from: i, to: pArr[i] });
       }
 
-      var maxX = 120;
-      var maxY = 100;
+      var maxX = PAD_X + 80;
+      var maxY = PAD_Y + 40;
       nodes.forEach(function (n) {
         if (n.x > maxX) maxX = n.x;
         if (n.y > maxY) maxY = n.y;
       });
-      return { nodes: nodes, edges: edges, w: maxX + 56, h: maxY + 56, rankArr: rankArr };
+      return {
+        nodes: nodes,
+        edges: edges,
+        w: Math.max(maxX + PAD_X + 70, 520),
+        h: Math.max(maxY + PAD_Y + 44, 300),
+        rankArr: rankArr
+      };
     }
 
     function renderCode() {
@@ -291,6 +327,47 @@
       tableBox.innerHTML = html;
     }
 
+    function edgeEndpoints(a, b) {
+      /* Child → parent: stop at circle rims only (rank sits to the side, not under) */
+      var dx = b.x - a.x;
+      var dy = b.y - a.y;
+      var len = Math.sqrt(dx * dx + dy * dy) || 1;
+      var ux = dx / len;
+      var uy = dy / len;
+      var startGap = NODE_R + 3;
+      var endGap = NODE_R + 6;
+      return {
+        x1: a.x + ux * startGap,
+        y1: a.y + uy * startGap,
+        x2: b.x - ux * endGap,
+        y2: b.y - uy * endGap
+      };
+    }
+
+    function ensureMarkers(svg) {
+      var defs = document.createElementNS(SVGNS, 'defs');
+      function makeMarker(id, color) {
+        var m = document.createElementNS(SVGNS, 'marker');
+        m.setAttribute('id', id);
+        m.setAttribute('viewBox', '0 0 10 10');
+        m.setAttribute('refX', '9');
+        m.setAttribute('refY', '5');
+        /* userSpaceOnUse: size in SVG units, NOT × stroke-width (that made tips huge) */
+        m.setAttribute('markerUnits', 'userSpaceOnUse');
+        m.setAttribute('markerWidth', '9');
+        m.setAttribute('markerHeight', '9');
+        m.setAttribute('orient', 'auto');
+        var path = document.createElementNS(SVGNS, 'path');
+        path.setAttribute('d', 'M 0 1.5 L 9 5 L 0 8.5 z');
+        path.setAttribute('fill', color);
+        m.appendChild(path);
+        defs.appendChild(m);
+      }
+      makeMarker('uf-arrow', '#4a5568');
+      makeMarker('uf-arrow-active', '#0d9488');
+      svg.appendChild(defs);
+    }
+
     function render() {
       var f = frames[idx] || {
         parent: parent,
@@ -304,25 +381,38 @@
       var lay = layoutForest(f.parent, f.rank);
 
       var svg = document.createElementNS(SVGNS, 'svg');
-      svg.setAttribute('viewBox', '0 0 ' + Math.max(lay.w, 320) + ' ' + Math.max(lay.h, 120));
+      svg.setAttribute('viewBox', '0 0 ' + lay.w + ' ' + lay.h);
       svg.setAttribute('width', '100%');
-      svg.setAttribute('height', String(Math.max(lay.h, 120)));
+      svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      svg.setAttribute('class', 'uf-forest-svg');
+      /* Prefer filling the stage: taller display for slide-like trees */
+      var displayH = Math.max(380, Math.min(560, Math.round(lay.h * 1.25)));
+      svg.setAttribute('height', String(displayH));
+      ensureMarkers(svg);
 
       var byId = {};
       lay.nodes.forEach(function (n) { byId[n.id] = n; });
 
-      lay.edges.forEach(function (e) {
-        var a = byId[e.from];
-        var b = byId[e.to];
+      function drawEdge(fromId, toId, cls) {
+        var a = byId[fromId];
+        var b = byId[toId];
         if (!a || !b) return;
+        var ep = edgeEndpoints(a, b);
         var line = document.createElementNS(SVGNS, 'line');
-        line.setAttribute('x1', a.x);
-        line.setAttribute('y1', a.y - 16);
-        line.setAttribute('x2', b.x);
-        line.setAttribute('y2', b.y + 16);
-        line.setAttribute('class', 'uf-edge' +
-          (f.edge && f.edge.from === e.from && f.edge.to === e.to ? ' is-active' : ''));
+        line.setAttribute('x1', ep.x1);
+        line.setAttribute('y1', ep.y1);
+        line.setAttribute('x2', ep.x2);
+        line.setAttribute('y2', ep.y2);
+        line.setAttribute('class', cls);
+        line.setAttribute('marker-end',
+          cls.indexOf('is-active') >= 0 ? 'url(#uf-arrow-active)' : 'url(#uf-arrow)');
         svg.appendChild(line);
+      }
+
+      /* Draw edges first, then nodes + rank on top so labels never sit under arrows */
+      lay.edges.forEach(function (e) {
+        var active = f.edge && f.edge.from === e.from && f.edge.to === e.to;
+        drawEdge(e.from, e.to, 'uf-edge' + (active ? ' is-active' : ''));
       });
 
       if (f.edge && byId[f.edge.from] && byId[f.edge.to]) {
@@ -330,41 +420,63 @@
           return e.from === f.edge.from && e.to === f.edge.to;
         });
         if (!already) {
-          var a2 = byId[f.edge.from];
-          var b2 = byId[f.edge.to];
-          var guide = document.createElementNS(SVGNS, 'line');
-          guide.setAttribute('x1', a2.x);
-          guide.setAttribute('y1', a2.y - 16);
-          guide.setAttribute('x2', b2.x);
-          guide.setAttribute('y2', b2.y + 16);
-          guide.setAttribute('class', 'uf-edge is-active is-guide');
-          svg.appendChild(guide);
+          drawEdge(f.edge.from, f.edge.to, 'uf-edge is-active is-guide');
         }
       }
 
       lay.nodes.forEach(function (n) {
         var g = document.createElementNS(SVGNS, 'g');
         g.setAttribute('transform', 'translate(' + n.x + ',' + n.y + ')');
+        g.setAttribute('class', 'uf-node-g');
+
         var role = f.highlight[n.id] || 'normal';
         if (!f.highlight[n.id] && f.path.indexOf(n.id) >= 0) role = 'path';
+
         var circle = document.createElementNS(SVGNS, 'circle');
-        circle.setAttribute('r', '18');
+        circle.setAttribute('r', String(NODE_R));
         circle.setAttribute('class', 'uf-node uf-node--' + role);
         g.appendChild(circle);
+
         var text = document.createElementNS(SVGNS, 'text');
         text.setAttribute('text-anchor', 'middle');
         text.setAttribute('dominant-baseline', 'central');
         text.setAttribute('class', 'uf-node-label');
+        text.setAttribute('font-size', '34');
         text.textContent = n.label;
         g.appendChild(text);
-        if (f.parent[n.id] === n.id) {
-          var badge = document.createElementNS(SVGNS, 'text');
-          badge.setAttribute('y', '32');
+
+        /*
+         * Rank placement:
+         * - prefer under (clear of outgoing arrows)
+         * - else above (clear of incoming arrows from children)
+         * - else beside (only when both under and above are blocked by arrows)
+         */
+        var underBlocked = n.hasChildren;   /* arrows arrive at bottom */
+        var aboveBlocked = n.hasParent;     /* arrow leaves toward parent at top */
+        var place = 'under';
+        if (underBlocked && aboveBlocked) place = 'side';
+        else if (underBlocked) place = 'above';
+
+        var badge = document.createElementNS(SVGNS, 'text');
+        badge.setAttribute('class', 'uf-rank-badge' + (n.isRoot ? ' is-root' : ''));
+        badge.setAttribute('font-size', '18');
+        badge.textContent = 'rank ' + f.rank[n.id];
+
+        if (place === 'under') {
+          badge.setAttribute('x', '0');
+          badge.setAttribute('y', String(NODE_R + 22));
           badge.setAttribute('text-anchor', 'middle');
-          badge.setAttribute('class', 'uf-rank-badge');
-          badge.textContent = 'r=' + f.rank[n.id];
-          g.appendChild(badge);
+        } else if (place === 'above') {
+          badge.setAttribute('x', '0');
+          badge.setAttribute('y', String(-(NODE_R + 14)));
+          badge.setAttribute('text-anchor', 'middle');
+        } else {
+          badge.setAttribute('x', String(NODE_R + 12));
+          badge.setAttribute('y', '5');
+          badge.setAttribute('text-anchor', 'start');
         }
+        g.appendChild(badge);
+
         svg.appendChild(g);
       });
 
@@ -387,8 +499,19 @@
       if (btn) btn.textContent = '▶ Play';
     }
 
+    function isIdleOnly() {
+      return !frames.length || (frames.length === 1 && frames[0].line === -1 &&
+        (!frames[0].highlight || !Object.keys(frames[0].highlight).length));
+    }
+
+    function atLastFrame() {
+      return frames.length > 0 && idx >= frames.length - 1;
+    }
+
     function buildFrames(op) {
       stop();
+      /* Always regenerate from the last committed forest — never from a half-played mutation */
+      restoreCommitted();
       frames = [];
       idx = 0;
       if (op === 'find') {
@@ -402,38 +525,80 @@
         if (isNaN(b)) b = 1;
         genUnion(a, b);
       } else if (op === 'idle') {
-        rec({ desc: 'Forest ready. Choose Find or Union and press Run.', line: -1 });
+        rec({ desc: 'Forest ready. Choose Find or Union, then press Run.', line: -1 });
       }
+      /* Live parent was mutated while recording frames; keep display on frame 0,
+         but do NOT commit yet — commit when the animation finishes. */
       render();
     }
 
+    function finishIfAtEnd() {
+      if (atLastFrame()) commitFromFrame(frames[idx]);
+    }
+
     function runOp() {
+      syncOpts();
       buildFrames(mode);
       idx = 0;
       render();
+      /* One Run click: play the whole Union/Find so the merge is visible */
+      if (frames.length > 1) startPlay(true);
+      else commitFromFrame(frames[0]);
     }
 
     function step(dir) {
       stop();
+      if (dir > 0 && isIdleOnly()) {
+        syncOpts();
+        buildFrames(mode);
+        if (frames.length > 1) idx = 1;
+        else idx = 0;
+        render();
+        finishIfAtEnd();
+        return;
+      }
       if (!frames.length) return;
       idx = Math.min(frames.length - 1, Math.max(0, idx + dir));
       render();
+      finishIfAtEnd();
     }
 
-    function play() {
-      if (playing) { stop(); return; }
-      if (!frames.length) runOp();
-      if (idx >= frames.length - 1) { idx = 0; render(); }
+    function startPlay(fromStart) {
+      if (!frames.length) return;
+      if (fromStart || atLastFrame()) {
+        idx = 0;
+        render();
+      }
       playing = true;
       var btn = $('.uf-play');
       if (btn) btn.textContent = '⏸ Pause';
       var speedEl = $('.uf-speed');
       var speed = 1700 - parseInt(speedEl ? speedEl.value : 1100, 10);
-      timer = setInterval(function () {
-        if (idx >= frames.length - 1) { stop(); return; }
+      if (idx < frames.length - 1) {
         idx++;
         render();
+      }
+      if (timer) clearInterval(timer);
+      timer = setInterval(function () {
+        if (idx >= frames.length - 1) {
+          commitFromFrame(frames[idx]);
+          stop();
+          return;
+        }
+        idx++;
+        render();
+        if (atLastFrame()) commitFromFrame(frames[idx]);
       }, speed);
+    }
+
+    function play() {
+      if (playing) { stop(); return; }
+      if (isIdleOnly()) {
+        syncOpts();
+        buildFrames(mode);
+      }
+      if (!frames.length) return;
+      startPlay(atLastFrame());
     }
 
     function fillSelects() {
@@ -468,7 +633,7 @@
     function loadDemo() {
       stop();
       resetState();
-      var ops = [[0, 1], [2, 3], [4, 5], [6, 7], [0, 2], [4, 6], [0, 4]];
+      var ops = [[0, 1], [2, 3], [0, 2]];
       ops.forEach(function (pair) {
         var rx = findRoot(pair[0], parent);
         var ry = findRoot(pair[1], parent);
@@ -479,10 +644,11 @@
           else { parent[ry] = rx; rank[rx]++; }
         } else parent[ry] = rx;
       });
+      commitLive();
       frames = [];
       idx = 0;
       rec({
-        desc: 'Demo forest after Unions: (A,B) (C,D) (E,F) (G,H) (A,C) (E,G) (A,E). Try Find or Union.',
+        desc: 'Demo forest after Unions: (A,B) (C,D) (A,C). E is still alone. Try Find or Union.',
         line: -1
       });
       renderCode();
@@ -507,7 +673,7 @@
     var resetBtn = $('.uf-reset');
     var demoBtn = $('.uf-demo');
     var speedEl = $('.uf-speed');
-    if (runBtn) runBtn.onclick = function () { syncOpts(); runOp(); };
+    if (runBtn) runBtn.onclick = function () { runOp(); };
     if (playBtn) playBtn.onclick = play;
     if (prevBtn) prevBtn.onclick = function () { step(-1); };
     if (nextBtn) nextBtn.onclick = function () { step(1); };
@@ -518,7 +684,9 @@
       buildFrames('idle');
     };
     if (demoBtn) demoBtn.onclick = function () { syncOpts(); loadDemo(); };
-    if (speedEl) speedEl.oninput = function () { if (playing) { stop(); play(); } };
+    if (speedEl) speedEl.oninput = function () {
+      if (playing) { stop(); startPlay(false); }
+    };
     ['.uf-opt-rank', '.uf-opt-compress'].forEach(function (sel) {
       var el = $(sel);
       if (el) el.addEventListener('change', syncOpts);

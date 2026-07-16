@@ -223,7 +223,7 @@
       nodes.push({
         id: 'k' + k, label: String(k), x: x, y: y,
         role: avlNodeRole(ki, hi),
-        bf: hi.showBf && after.bf[k] ? after.bf[k] : null
+        bf: (hi.showAllBf || hi.showBf) && after.bf[k] ? after.bf[k] : null
       });
     });
 
@@ -236,6 +236,7 @@
   }
 
   function avlPushRotationAnim(frames, rootRef, baseHi, applyRotate, meta) {
+    baseHi = baseHi || {};
     var before = avlSnapshotPositions(rootRef[0], baseHi);
     var geomTargets = avlGeomTargets(meta.pivotNode, meta.dir, before.pos);
     var rotated = applyRotate();
@@ -252,7 +253,8 @@
         inserted: baseHi.inserted,
         deleted: baseHi.deleted,
         path: baseHi.path,
-        showBf: s === ROT_SUBSTEPS
+        showAllBf: !!baseHi.showAllBf,
+        showBf: s === ROT_SUBSTEPS || !!baseHi.showAllBf
       }, t, meta.descBase, meta.panel));
     }
   }
@@ -434,7 +436,9 @@
       var x = leafX * spacing;
       leafX++;
       var bf = avlBf(n);
-      var bfBadge = hi.showBf ? avlImbalanceBadge(n) : null;
+      var bfBadge = null;
+      if (hi.showAllBf) bfBadge = 'bf ' + (bf > 0 ? '+' : '') + bf;
+      else if (hi.showBf) bfBadge = avlImbalanceBadge(n);
       nodes.push({
         id: id, label: String(n.key), x: x, y: depth * rowDy + 40,
         role: role(n.key), bf: bfBadge
@@ -729,7 +733,8 @@
     btInsertNonFull(node.children[i], key, frames, rootRef);
   }
 
-  function btInsert(root, key, frames) {
+  /* 1-pass insert: split every full node before entering it (lecture). */
+  function btInsert1Pass(root, key, frames) {
     if (!root) {
       var n = btNode([key], [], true);
       frames.push(btFrame('Empty tree: create root [' + key + '].', n, {}));
@@ -740,7 +745,7 @@
       return root;
     }
     var rootRef = [root];
-    frames.push(btFrame('Insert <b>' + key + '</b>: descend from root.', root, {}));
+    frames.push(btFrame('<b>1-pass</b> insert <b>' + key + '</b>: split full nodes on the way down.', root, {}));
 
     if (root.keys.length === btMaxKeys()) {
       frames.push(btFrame('Root is <b>full</b>: split before descending.', root, { heavy: root.keys.join(',') }));
@@ -751,8 +756,112 @@
     }
 
     btInsertNonFull(rootRef[0], key, frames, rootRef);
-    frames.push(btFrame('Insert <b>' + key + '</b> complete.', rootRef[0], {}));
+    frames.push(btFrame('Insert <b>' + key + '</b> complete (1-pass).', rootRef[0], {}));
     return rootRef[0];
+  }
+
+  /* 2-pass insert (lecture): find leaf first; if full, split from lowest
+     non-full ancestor's child down to the leaf; then insert. */
+  function btFindInsertPath(root, key) {
+    var nodes = [root];
+    var idxs = [];
+    var lastRoom = root.keys.length < btMaxKeys() ? 0 : -1;
+    var cur = root;
+    while (!cur.leaf) {
+      var i = 0;
+      while (i < cur.keys.length && key > cur.keys[i]) i++;
+      idxs.push(i);
+      cur = cur.children[i];
+      nodes.push(cur);
+      if (cur.keys.length < btMaxKeys()) lastRoom = nodes.length - 1;
+    }
+    return { nodes: nodes, idxs: idxs, lastRoom: lastRoom, leaf: cur };
+  }
+
+  function btInsert2Pass(root, key, frames) {
+    if (!root) {
+      var n0 = btNode([key], [], true);
+      frames.push(btFrame('Empty tree: create root [' + key + '].', n0, {}));
+      return n0;
+    }
+    if (btSearch(root, key)) {
+      frames.push(btFrame('<b>' + key + '</b> already in tree.', root, {}));
+      return root;
+    }
+
+    var rootRef = [root];
+    frames.push(btFrame(
+      '<b>2-pass</b> insert <b>' + key + '</b>: find the leaf first (no splits yet).',
+      root, {},
+      'Track the lowest node with room (≤ 2t−2 keys).'));
+
+    var info = btFindInsertPath(rootRef[0], key);
+    var d;
+    for (d = 0; d < info.nodes.length - 1; d++) {
+      frames.push(btFrame(
+        'Descend into child ' + (info.idxs[d] + 1) + ' of [' + info.nodes[d].keys.join(', ') + '].',
+        rootRef[0], { path: info.nodes[d].keys.join(','), target: key },
+        info.nodes[d].keys.length < btMaxKeys()
+          ? 'This node has room — remember it as lowest non-full.'
+          : 'This node is full — may need to split later.'));
+    }
+
+    if (info.leaf.keys.length < btMaxKeys()) {
+      frames.push(btFrame(
+        'Leaf [' + info.leaf.keys.join(', ') + '] has room — insert <b>' + key + '</b>.',
+        rootRef[0], { target: key, heavy: info.leaf.keys.join(',') }));
+      btInsertKey(info.leaf, key);
+      frames.push(btFrame(
+        'Leaf is now [' + info.leaf.keys.join(', ') + ']. Insert complete (2-pass).',
+        rootRef[0], { heavy: info.leaf.keys.join(',') }));
+      return rootRef[0];
+    }
+
+    frames.push(btFrame(
+      'Leaf [' + info.leaf.keys.join(', ') + '] is <b>full</b>. Split from lowest non-full ancestor down to the leaf.',
+      rootRef[0], { heavy: info.leaf.keys.join(',') },
+      'Lecture 2-pass: split path w′…v, then insert.'));
+
+    var guard = 0;
+    while (guard++ < 64) {
+      info = btFindInsertPath(rootRef[0], key);
+      if (info.leaf.keys.length < btMaxKeys()) break;
+
+      if (info.lastRoom < 0) {
+        frames.push(btFrame(
+          'Entire path is full (incl. root): grow height, then continue splits.',
+          rootRef[0], { heavy: info.nodes[0].keys.join(',') }));
+        var nr = btNode([], [rootRef[0]], false);
+        btSplitChild(nr, 0, frames, rootRef);
+        rootRef[0] = nr;
+        frames.push(btFrame('New root after root split.', rootRef[0], { newroot: String(rootRef[0].keys[0]) }));
+        continue;
+      }
+
+      var start = info.lastRoom + 1;
+      var parent = info.nodes[start - 1];
+      var cidx = info.idxs[start - 1];
+      frames.push(btFrame(
+        'Split next full node on the path (child ' + (cidx + 1) + ' of [' + parent.keys.join(', ') + ']).',
+        rootRef[0], { heavy: parent.children[cidx].keys.join(',') },
+        'Parent has room for the median.'));
+      btSplitChild(parent, cidx, frames, rootRef);
+    }
+
+    info = btFindInsertPath(rootRef[0], key);
+    frames.push(btFrame(
+      'Path cleared. Insert <b>' + key + '</b> into leaf [' + info.leaf.keys.join(', ') + '].',
+      rootRef[0], { target: key, heavy: info.leaf.keys.join(',') }));
+    btInsertKey(info.leaf, key);
+    frames.push(btFrame(
+      'Leaf is now [' + info.leaf.keys.join(', ') + ']. Insert complete (2-pass).',
+      rootRef[0], { heavy: info.leaf.keys.join(',') }));
+    return rootRef[0];
+  }
+
+  function btInsert(root, key, frames, passMode) {
+    if (passMode === '2') return btInsert2Pass(root, key, frames);
+    return btInsert1Pass(root, key, frames);
   }
 
   function btBorrowFromPrev(parent, idx, frames, root) {
@@ -854,7 +963,55 @@
     btDeleteFromNode(root, node.children[i], key, frames);
   }
 
-  function btDelete(root, key, frames) {
+  /* 2-pass delete: find & remove first; shift/merge underfull children on the way back up. */
+  function btDeleteFromNode2Pass(root, node, key, frames) {
+    var i = 0;
+    while (i < node.keys.length && key > node.keys[i]) i++;
+
+    if (i < node.keys.length && node.keys[i] === key && !node.leaf) {
+      frames.push(btFrame('Key <b>' + key + '</b> in internal node: replace with successor (then fix on the way up).', root, { deleted: key }));
+      var succ = node.children[i + 1].keys.length ? node.children[i + 1].keys[0] : null;
+      if (node.children[i].keys.length > btMinKeys()) {
+        var pred2 = btGetPred(node.children[i]);
+        node.keys[i] = pred2;
+        btDeleteFromNode2Pass(root, node.children[i], pred2, frames);
+      } else if (succ != null) {
+        node.keys[i] = succ;
+        btDeleteFromNode2Pass(root, node.children[i + 1], succ, frames);
+      } else {
+        btDeleteFromNode2Pass(root, node.children[i], key, frames);
+      }
+      btFixChild(root, node, Math.min(i, node.children.length - 1), frames);
+      return;
+    }
+
+    if (node.leaf) {
+      if (i < node.keys.length && node.keys[i] === key) btRemoveFromLeaf(node, key, frames, root);
+      return;
+    }
+
+    frames.push(btFrame(
+      '2-pass: descend to delete <b>' + key + '</b> (no shift/merge yet).',
+      root, { target: key, path: node.keys.join(',') }));
+    var childIdx = i;
+    btDeleteFromNode2Pass(root, node.children[childIdx], key, frames);
+    if (childIdx >= node.children.length) childIdx = node.children.length - 1;
+    btFixChild(root, node, childIdx, frames);
+  }
+
+  function btFixChild(root, parent, idx, frames) {
+    if (!parent || !parent.children || !parent.children.length) return;
+    if (idx < 0) idx = 0;
+    if (idx >= parent.children.length) idx = parent.children.length - 1;
+    var child = parent.children[idx];
+    if (!child || child.keys.length >= btMinKeys()) return;
+    frames.push(btFrame(
+      '2-pass fix: child [' + child.keys.join(', ') + '] underfull — shift or merge.',
+      root, { heavy: child.keys.join(',') }));
+    btFill(parent, idx, frames, root);
+  }
+
+  function btDelete(root, key, frames, passMode) {
     if (!root) {
       frames.push(btFrame('Tree is empty.', null, {}));
       return null;
@@ -863,17 +1020,24 @@
       frames.push(btFrame('<b>' + key + '</b> not found.', root, {}));
       return root;
     }
-    frames.push(btFrame('Delete <b>' + key + '</b>: ensure nodes on path have ≥ t keys.', root, {}));
+    var modeLabel = passMode === '2' ? '2-pass' : '1-pass';
+    frames.push(btFrame(
+      '<b>' + modeLabel + '</b> delete <b>' + key + '</b>' +
+        (passMode === '2'
+          ? ': find first, then fix underflows on the way up.'
+          : ': ensure nodes on the path have ≥ t keys before entering.'),
+      root, {}));
     if (root.keys.length === 1 && root.children.length === 2 &&
         root.children[0].keys.length === btMinKeys() && root.children[1].keys.length === btMinKeys()) {
       frames.push(btFrame('Root has only one key and min children: may shrink height after merge.', root, {}));
     }
-    btDeleteFromNode(root, root, key, frames);
+    if (passMode === '2') btDeleteFromNode2Pass(root, root, key, frames);
+    else btDeleteFromNode(root, root, key, frames);
     if (root.keys.length === 0 && root.children.length > 0) {
       frames.push(btFrame('Root empty after delete: promote sole child as new root.', root.children[0], { newroot: 'root' }));
       root = root.children[0];
     }
-    frames.push(btFrame('Delete <b>' + key + '</b> complete.', root, {}));
+    frames.push(btFrame('Delete <b>' + key + '</b> complete (' + modeLabel + ').', root, {}));
     return root;
   }
 
@@ -881,7 +1045,7 @@
     var root = null;
     keys.forEach(function (k) {
       var fr = [];
-      root = btInsert(root, k, fr);
+      root = btInsert(root, k, fr, '1');
     });
     return root;
   }
@@ -1164,6 +1328,39 @@
     var rafId = null;
     var accum = 0;
     var lastTs = 0;
+    var passMode = '1';
+
+    function getPassMode() {
+      if (kind !== 'btree') return '1';
+      var on = wrap.querySelector('.bt-pass-btn.is-on');
+      return on && on.getAttribute('data-pass') === '2' ? '2' : '1';
+    }
+
+    function wirePassToggle() {
+      if (kind !== 'btree') return;
+      var btns = wrap.querySelectorAll('.bt-pass-btn');
+      if (!btns.length) return;
+      btns.forEach(function (btn) {
+        btn.onclick = function () {
+          btns.forEach(function (b) { b.classList.toggle('is-on', b === btn); });
+          passMode = getPassMode();
+          var hint = $('.bt-pass-hint');
+          if (hint) {
+            hint.innerHTML = passMode === '2'
+              ? '<b>2-pass:</b> find the leaf first; if full, split from the lowest non-full ancestor down to the leaf, then insert.'
+              : '<b>1-pass:</b> before entering a full node, split it on the way down so the leaf always has room.';
+          }
+          haltPlayback();
+          frames = [btFrame(
+            'Pass mode → <b>' + passMode + '-pass</b>. Insert or delete a key.',
+            tree, {},
+            passMode === '2' ? 'Find first, then fix.' : 'Fix while descending.')];
+          idx = 0;
+          render(true);
+        };
+      });
+      passMode = getPassMode();
+    }
 
     function frameDuration(fr) {
       var speedVal = parseInt($('.viz-speed').value, 10) || 1600;
@@ -1369,14 +1566,15 @@
             'Press <b>Balance Tree</b> when <b>|h(L)\u2212h(R)| &gt; 1</b>.')]);
         }
       } else {
-        if (op === 'insert') tree = btInsert(tree, key, steps);
-        else tree = btDelete(tree, key, steps);
+        passMode = getPassMode();
+        if (op === 'insert') tree = btInsert(tree, key, steps, passMode);
+        else tree = btDelete(tree, key, steps, passMode);
         var btDup = steps.length && steps[steps.length - 1].desc.indexOf('already') >= 0;
         if (btDup || (steps.length && steps[steps.length - 1].desc.indexOf('complete') >= 0)) {
           frames = steps;
         } else {
           frames = steps.concat([btFrame(
-            (op === 'insert' ? 'Insert' : 'Delete') + ' <b>' + key + '</b> done.',
+            (op === 'insert' ? 'Insert' : 'Delete') + ' <b>' + key + '</b> done (' + passMode + '-pass).',
             tree, {})]);
         }
       }
@@ -1397,8 +1595,14 @@
         });
         frames = [avlFrame('Reset to [' + initKeys.join(', ') + ']. Insert or delete a key.', tree, { showBf: true })];
       } else {
+        passMode = getPassMode();
         tree = btFromKeys(initKeys);
-        frames = [btFrame('Reset to keys [' + initKeys.join(', ') + ']. Insert or delete a key. (t = 2)', tree, {})];
+        frames = [btFrame(
+          'Reset to keys [' + initKeys.join(', ') + ']. Mode: <b>' + passMode + '-pass</b> (t = 2).',
+          tree, {},
+          passMode === '2'
+            ? 'Find leaf first; split path only if needed.'
+            : 'Split full nodes before entering them.')];
       }
       idx = 0;
       autoFit = true;
@@ -1434,12 +1638,374 @@
     }, { passive: false });
 
     ensureZoomControls();
+    wirePassToggle();
     var playBtn = $('.viz-play');
     if (playBtn && kind === 'avl') playBtn.textContent = 'Balance Tree';
     reset();
   }
 
+  /* ── AVL rotation lab: all 4 cases + primitives ── */
+  function avlClone(n) {
+    if (!n) return null;
+    var c = avlNode(n.key, avlClone(n.left), avlClone(n.right));
+    c.h = n.h;
+    return c;
+  }
+
+  function avlBuild(k, L, R) {
+    var n = avlNode(k, L || null, R || null);
+    avlUpdateH(n);
+    return n;
+  }
+
+  /* Classic textbook shapes with T1… subtrees (numeric keys). */
+  var AVL_ROT_CASES = {
+    right: {
+      id: 'right',
+      title: 'Right rotate',
+      short: 'Right',
+      tag: 'primitive',
+      formula: 'RightRotate(z): y = z.left; z.left = y.right; y.right = z',
+      why: 'Promotes the left child. Used alone for the <b>LL</b> case.',
+      build: function () {
+        /*     z=40          y=20
+              /   \         /   \
+            y=20  T3=50 → T1=10  z=40
+           /  \                 /  \
+         T1=10 T2=30          T2=30 T3=50 */
+        return avlBuild(40, avlBuild(20, avlBuild(10), avlBuild(30)), avlBuild(50));
+      },
+      animate: function (rootRef, frames) {
+        var z = rootRef[0];
+        var roles = avlRotateRolesRight(z);
+        avlPushRotationAnim(frames, rootRef, { showAllBf: true }, function () {
+          return avlRotateRight(z, {});
+        }, {
+          roles: roles, pivotNode: z, dir: 'right',
+          descBase: 'Right-rotate at pivot <b>' + z.key + '</b>',
+          panel: 'y rises; z falls to y’s right; former y.right (T2) becomes z.left.'
+        });
+      }
+    },
+    left: {
+      id: 'left',
+      title: 'Left rotate',
+      short: 'Left',
+      tag: 'primitive',
+      formula: 'LeftRotate(z): y = z.right; z.right = y.left; y.left = z',
+      why: 'Promotes the right child. Used alone for the <b>RR</b> case.',
+      build: function () {
+        /*   z=20               y=40
+            /   \              /   \
+          T1=10  y=40   →   z=20  T3=50
+                /  \        /  \
+              T2=30 T3=50  T1=10 T2=30 */
+        return avlBuild(20, avlBuild(10), avlBuild(40, avlBuild(30), avlBuild(50)));
+      },
+      animate: function (rootRef, frames) {
+        var z = rootRef[0];
+        var roles = avlRotateRolesLeft(z);
+        avlPushRotationAnim(frames, rootRef, { showAllBf: true }, function () {
+          return avlRotateLeft(z, {});
+        }, {
+          roles: roles, pivotNode: z, dir: 'left',
+          descBase: 'Left-rotate at pivot <b>' + z.key + '</b>',
+          panel: 'y rises; z falls to y’s left; former y.left (T2) becomes z.right.'
+        });
+      }
+    },
+    ll: {
+      id: 'll',
+      title: 'LL case',
+      short: 'LL',
+      tag: 'single',
+      formula: 'bf(z)=+2 and bf(z.left)≥0 → RightRotate(z)',
+      why: 'Insert/delete made the <b>left–left</b> path heavy. One right rotation restores balance.',
+      build: function () {
+        /* unbalanced after inserting on LL spine:
+                40⁺²
+               /    \
+             20⁺¹    50
+            /   \
+          10⁺¹   30
+          /
+         5 */
+        return avlBuild(40,
+          avlBuild(20, avlBuild(10, avlBuild(5), null), avlBuild(30)),
+          avlBuild(50));
+      },
+      animate: function (rootRef, frames) {
+        var hi = { showAllBf: true };
+        rootRef[0] = avlRebalance(rootRef[0], hi, {
+          frames: frames, rootRef: rootRef, baseHi: { showAllBf: true }
+        });
+      }
+    },
+    rr: {
+      id: 'rr',
+      title: 'RR case',
+      short: 'RR',
+      tag: 'single',
+      formula: 'bf(z)=−2 and bf(z.right)≤0 → LeftRotate(z)',
+      why: 'Heavy on the <b>right–right</b> path. Mirror of LL: one left rotation.',
+      build: function () {
+        return avlBuild(20,
+          avlBuild(10),
+          avlBuild(40, avlBuild(30), avlBuild(50, null, avlBuild(60))));
+      },
+      animate: function (rootRef, frames) {
+        var hi = { showAllBf: true };
+        rootRef[0] = avlRebalance(rootRef[0], hi, {
+          frames: frames, rootRef: rootRef, baseHi: { showAllBf: true }
+        });
+      }
+    },
+    lr: {
+      id: 'lr',
+      title: 'LR case',
+      short: 'LR',
+      tag: 'double',
+      formula: 'bf(z)=+2 and bf(z.left)<0 → LeftRotate(z.left) then RightRotate(z)',
+      why: 'Heavy on <b>left–right</b>. First straighten the child (left rotate), then right-rotate z.',
+      build: function () {
+        /*     40⁺²
+              /    \
+            20⁻¹    50
+           /  \
+         10   30⁺¹
+             /
+            25 */
+        return avlBuild(40,
+          avlBuild(20, avlBuild(10), avlBuild(30, avlBuild(25), null)),
+          avlBuild(50));
+      },
+      animate: function (rootRef, frames) {
+        var hi = { showAllBf: true };
+        rootRef[0] = avlRebalance(rootRef[0], hi, {
+          frames: frames, rootRef: rootRef, baseHi: { showAllBf: true }
+        });
+      }
+    },
+    rl: {
+      id: 'rl',
+      title: 'RL case',
+      short: 'RL',
+      tag: 'double',
+      formula: 'bf(z)=−2 and bf(z.right)>0 → RightRotate(z.right) then LeftRotate(z)',
+      why: 'Heavy on <b>right–left</b>. Mirror of LR: right-rotate the child, then left-rotate z.',
+      build: function () {
+        return avlBuild(20,
+          avlBuild(10),
+          avlBuild(40, avlBuild(30, null, avlBuild(35)), avlBuild(50)));
+      },
+      animate: function (rootRef, frames) {
+        var hi = { showAllBf: true };
+        rootRef[0] = avlRebalance(rootRef[0], hi, {
+          frames: frames, rootRef: rootRef, baseHi: { showAllBf: true }
+        });
+      }
+    }
+  };
+
+  function createRotationLab(wrap) {
+    var $ = function (sel) { return wrap.querySelector(sel); };
+    var stage = $('.tree-stage');
+    if (!stage) return;
+
+    var caseId = 'll';
+    var startTree = null;
+    var frames = [];
+    var idx = 0;
+    var playing = false;
+    var rafId = null;
+    var accum = 0;
+    var lastTs = 0;
+    var zoom = 1;
+    var panX = 0;
+    var panY = 0;
+    var autoFit = true;
+    var stableBounds = null;
+
+    function caseDef() { return AVL_ROT_CASES[caseId] || AVL_ROT_CASES.ll; }
+
+    function updateCaseUI() {
+      var c = caseDef();
+      wrap.querySelectorAll('.avl-rot-case').forEach(function (btn) {
+        btn.classList.toggle('is-on', btn.getAttribute('data-case') === caseId);
+      });
+      var title = $('.avl-rot-title');
+      var formula = $('.avl-rot-formula');
+      var why = $('.avl-rot-why');
+      if (title) title.innerHTML = c.title + ' <span class="avl-rot-tag avl-rot-tag-' + c.tag + '">' + c.tag + '</span>';
+      if (formula) formula.innerHTML = '<code>' + c.formula + '</code>';
+      if (why) why.innerHTML = c.why;
+    }
+
+    function frameDuration(fr) {
+      var speedVal = parseInt($('.viz-speed').value, 10) || 1400;
+      if (fr && fr.anim) return Math.max(14, 42 - speedVal * 0.018);
+      return Math.max(80, 1000 - speedVal * 0.45);
+    }
+
+    function updateMeta(fr) {
+      var descEl = $('.viz-desc');
+      var panelEl = $('.viz-panel');
+      var stepEl = $('.viz-step');
+      var totalEl = $('.viz-total');
+      if (descEl) descEl.innerHTML = fr.desc;
+      if (panelEl) panelEl.innerHTML = fr.panel || '';
+      if (stepEl) stepEl.textContent = idx;
+      if (totalEl) totalEl.textContent = Math.max(0, frames.length - 1);
+    }
+
+    function applyView(svg, fr) {
+      var bounds = playing && stableBounds ? stableBounds : frameBounds(fr);
+      if (autoFit && !playing) { zoom = 1; panX = 0; panY = 0; }
+      applyTreeView(svg, bounds, zoom, panX, panY);
+      var aspect = bounds.h / Math.max(bounds.w, 1);
+      svg.setAttribute('height', String(Math.round(Math.min(420, Math.max(220, stage.clientWidth * aspect)))));
+    }
+
+    function render() {
+      if (!frames.length) return;
+      var fr = frames[Math.min(idx, frames.length - 1)];
+      stage.innerHTML = '';
+      var svg = document.createElementNS(SVGNS, 'svg');
+      svg.setAttribute('width', '100%');
+      svg.classList.add('tree-viz-svg');
+      drawAvlFrame(svg, fr);
+      applyView(svg, fr);
+      stage.appendChild(svg);
+      updateMeta(fr);
+    }
+
+    function halt() {
+      playing = false;
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+      accum = 0;
+      lastTs = 0;
+      stableBounds = null;
+      var btn = $('.viz-play');
+      if (btn) btn.textContent = '▶ Play rotation';
+    }
+
+    function tick(ts) {
+      if (!playing) return;
+      if (!lastTs) lastTs = ts;
+      accum += ts - lastTs;
+      lastTs = ts;
+      var fr = frames[Math.min(idx, frames.length - 1)];
+      var dur = frameDuration(fr);
+      var advanced = false;
+      while (accum >= dur && idx < frames.length - 1) {
+        accum -= dur;
+        idx++;
+        advanced = true;
+      }
+      if (advanced) render();
+      if (idx >= frames.length - 1) {
+        halt();
+        render();
+        return;
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function startPlay() {
+      if (frames.length <= 1) return;
+      if (idx >= frames.length - 1) idx = 0;
+      playing = true;
+      stableBounds = frameBounds(frames[idx]);
+      accum = 0;
+      lastTs = 0;
+      var btn = $('.viz-play');
+      if (btn) btn.textContent = '⏸ Pause';
+      render();
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function loadCase(id, autoPlay) {
+      halt();
+      caseId = id;
+      updateCaseUI();
+      var c = caseDef();
+      startTree = c.build();
+      var rootRef = [avlClone(startTree)];
+      frames = [avlFrame(
+        '<b>' + c.title + '</b> — unbalanced start. Watch bf labels; red = pivot, teal = new root.',
+        rootRef[0],
+        { showAllBf: true, pivot: rootRef[0].key },
+        c.why
+      )];
+      c.animate(rootRef, frames);
+      frames.push(avlFrame(
+        '<b>' + c.title + '</b> done — tree is balanced again (|bf| ≤ 1).',
+        rootRef[0],
+        { showAllBf: true, newroot: rootRef[0].key },
+        'Mnemonic: rotate <b>opposite</b> the heavy side. Double cases straighten the child first.'
+      ));
+      idx = 0;
+      autoFit = true;
+      render();
+      if (autoPlay) startPlay();
+    }
+
+    wrap.querySelectorAll('.avl-rot-case').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        loadCase(btn.getAttribute('data-case'), true);
+      });
+    });
+
+    $('.viz-play').onclick = function () {
+      if (playing) { halt(); return; }
+      startPlay();
+    };
+    $('.viz-next').onclick = function () {
+      halt();
+      idx = Math.min(frames.length - 1, idx + 1);
+      render();
+    };
+    $('.viz-prev').onclick = function () {
+      halt();
+      idx = Math.max(0, idx - 1);
+      render();
+    };
+    $('.viz-reset').onclick = function () {
+      loadCase(caseId, false);
+    };
+    var tourBtn = $('.avl-rot-tour');
+    if (tourBtn) {
+      tourBtn.onclick = function () {
+        var order = ['right', 'left', 'll', 'rr', 'lr', 'rl'];
+        var i = 0;
+        function next() {
+          if (i >= order.length) return;
+          loadCase(order[i], true);
+          i++;
+          var check = setInterval(function () {
+            if (!playing && idx >= frames.length - 1) {
+              clearInterval(check);
+              setTimeout(next, 550);
+            }
+          }, 120);
+        }
+        next();
+      };
+    }
+
+    stage.addEventListener('wheel', function (e) {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      autoFit = false;
+      zoom = Math.max(0.4, Math.min(4, zoom * (e.deltaY < 0 ? 1.12 : 1 / 1.12)));
+      render();
+    }, { passive: false });
+
+    loadCase('ll', false);
+  }
+
   function init() {
+    document.querySelectorAll('.avl-rot-lab').forEach(createRotationLab);
     document.querySelectorAll('.avl-viz-wrap').forEach(function (w) {
       createInteractive(w, 'avl');
     });
