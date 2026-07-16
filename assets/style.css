@@ -1066,66 +1066,224 @@ hr { border: none; border-top: 1px solid var(--line); margin: 24px 0; }
 .gviz-legend-compact > span { display: inline-flex; align-items: center; gap: 6px; }
 .gviz-legend-compact .sw + .sw { margin-left: -4px; }
 
-/* ---------- AVL rotation diagram sheets ---------- */
+/* ---------- AVL rotations (monochrome slate cards) ---------- */
+.avl-rot-lead {
+  margin: 0 0 12px;
+  font-size: 15px;
+  line-height: 1.5;
+  max-width: 64ch;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-weight: 400;
+}
 .avl-rot-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 14px;
-  margin: 0 0 14px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid var(--line-strong);
-  background: var(--viz-bg);
+  gap: 8px 16px;
+  margin: 0 0 22px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  font-family: var(--font-display);
+}
+[data-theme="dark"] .avl-rot-legend {
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 .avl-leg {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 13px;
-  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+}
+.avl-leg b {
+  color: #1e293b;
   font-weight: 600;
 }
-.avl-leg b { color: var(--ink); font-weight: 800; }
+[data-theme="dark"] .avl-leg { color: var(--muted); }
+[data-theme="dark"] .avl-leg b { color: var(--ink); }
 .avl-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
   flex-shrink: 0;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 2px #fff;
 }
-.avl-rot-block {
-  margin: 0 0 18px;
+[data-theme="dark"] .avl-dot { box-shadow: 0 0 0 2px var(--card-solid); }
+.avl-dot--z { background: #fb7185; }
+.avl-dot--y { background: #818cf8; }
+.avl-dot--x { background: #a78bfa; }
+.avl-dot--new { background: #34d399; }
+.avl-dot--t { background: #94a3b8; }
+
+.avl-rot-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 0 0 20px;
+  align-items: stretch;
 }
-.avl-rot-title {
-  margin: 0 0 8px;
-  font-size: 17px;
-  font-weight: 800;
+.avl-rot-pair .avl-rot-card {
+  margin: 0;
+  min-width: 0;
+}
+.avl-rot-pair .avl-rot-card__body {
+  padding: 0.9rem 1rem 0.75rem;
+}
+.avl-rot-pair .avl-rot-svg--single {
+  min-width: 0;
+}
+@media (max-width: 980px) {
+  .avl-rot-pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+.avl-rot-card {
+  margin: 0 0 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--card-solid);
+  box-shadow: 0 4px 18px var(--shadow);
+  overflow: hidden;
+  font-family: var(--font-display);
+}
+.avl-rot-card:last-of-type {
+  margin-bottom: 8px;
+}
+.avl-rot-card__head {
+  padding: 1.05rem 1.3rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+}
+.avl-rot-card__head h5 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
   color: var(--ink);
+  letter-spacing: -0.01em;
 }
-.avl-rot-title span {
-  color: var(--accent2);
-  font-weight: 700;
+.avl-rot-card__head h5 span {
+  margin-left: 12px;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--muted);
 }
-.avl-rot-stage {
-  border-radius: 14px;
-  border: 1px solid rgba(124, 156, 255, 0.28);
-  background:
-    radial-gradient(120% 80% at 10% 0%, rgba(124, 156, 255, 0.14), transparent 50%),
-    #0c1024;
-  padding: 10px 8px 6px;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+.avl-rot-card__body {
+  padding: 1.1rem 1.25rem 0.85rem;
   overflow-x: auto;
+  background: var(--card-solid);
 }
-[data-theme="light"] .avl-rot-stage {
-  border-color: #3a4678;
-  box-shadow: 0 6px 22px rgba(20, 30, 70, 0.18);
-}
-.avl-rot-sheet {
+
+.avl-rot-svg {
   display: block;
   width: 100%;
-  min-width: 520px;
   height: auto;
+  font-family: var(--font-display);
 }
+.avl-rot-svg text {
+  font-family: var(--font-display);
+}
+.avl-rot-svg--single { min-width: 620px; }
+.avl-rot-svg--double { min-width: 900px; }
+
+.avl-rot-svg .avl-e,
+.avl-rot-svg .avl-e--edge,
+.avl-rot-svg .avl-e--ok,
+.avl-rot-svg .avl-e--mid {
+  stroke: #d5dce7;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  opacity: 1;
+}
+[data-theme="dark"] .avl-rot-svg .avl-e,
+[data-theme="dark"] .avl-rot-svg .avl-e--edge,
+[data-theme="dark"] .avl-rot-svg .avl-e--ok,
+[data-theme="dark"] .avl-rot-svg .avl-e--mid {
+  stroke: #64748b;
+  opacity: 0.85;
+}
+
+.avl-rot-svg .avl-n circle {
+  stroke: #ffffff;
+  stroke-width: 3;
+  r: 19px;
+}
+[data-theme="dark"] .avl-rot-svg .avl-n circle { stroke: var(--card-solid); }
+.avl-rot-svg .avl-n--z circle { fill: #fb7185; }
+.avl-rot-svg .avl-n--y circle { fill: #818cf8; }
+.avl-rot-svg .avl-n--x circle { fill: #a78bfa; }
+.avl-rot-svg .avl-n--new circle { fill: #34d399; }
+.avl-rot-svg .avl-n__t {
+  fill: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.avl-rot-svg .avl-t polygon {
+  fill: #f8fafc;
+  stroke: #d5dce7;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+[data-theme="dark"] .avl-rot-svg .avl-t polygon {
+  fill: #232a52;
+  stroke: #64748b;
+}
+.avl-rot-svg .avl-t__t {
+  fill: #475569;
+  font-size: 16px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+[data-theme="dark"] .avl-rot-svg .avl-t__t { fill: var(--ink); }
+
+.avl-rot-svg .avl-delta {
+  fill: #334155;
+  font-size: 20px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+[data-theme="dark"] .avl-rot-svg .avl-delta { fill: var(--ink); }
+
+.avl-rot-svg .avl-cap {
+  fill: #64748b;
+  font-size: 19px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+[data-theme="dark"] .avl-rot-svg .avl-cap { fill: var(--muted); }
+
+.avl-rot-svg .avl-flow__lab {
+  fill: #64748b;
+  font-size: 18px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+.avl-rot-svg .avl-flow__then {
+  fill: #94a3b8;
+  font-size: 16px;
+  font-weight: 500;
+  text-anchor: middle;
+}
+.avl-rot-svg .avl-flow__arr {
+  fill: none;
+  stroke: #94a3b8;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+[data-theme="dark"] .avl-rot-svg .avl-flow__lab,
+[data-theme="dark"] .avl-rot-svg .avl-flow__then { fill: var(--muted); }
+[data-theme="dark"] .avl-rot-svg .avl-flow__arr { stroke: var(--muted); }
 
 .graph-viz-wrap,
 .tree-viz-wrap,
