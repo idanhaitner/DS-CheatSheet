@@ -422,9 +422,9 @@
     var rowDy = maxD <= 4 ? 68 : Math.max(48, Math.min(68, 380 / (maxD + 1)));
 
     function role(k) {
-      if (hi.pivot === k) return 'pivot';
-      if (hi.newroot === k) return 'newroot';
-      if (hi.inserted === k || hi.deleted === k) return 'heavy';
+      if (hi.found === k || hi.newroot === k) return 'newroot';
+      if (hi.start === k || hi.inserted === k || hi.deleted === k) return 'heavy';
+      if (hi.cursor === k || hi.pivot === k) return 'pivot';
       if (pathSet[k]) return 'path';
       return 'normal';
     }
@@ -588,6 +588,133 @@
   function avlMin(n) {
     while (n.left) n = n.left;
     return n;
+  }
+
+  function avlMax(n) {
+    while (n.right) n = n.right;
+    return n;
+  }
+
+  /* Path of nodes from root to key (inclusive), or null if missing. */
+  function avlFindPath(root, key) {
+    var path = [];
+    var n = root;
+    while (n) {
+      path.push(n);
+      if (key === n.key) return path;
+      n = key < n.key ? n.left : n.right;
+    }
+    return null;
+  }
+
+  function avlPathKeys(path) {
+    return path.map(function (n) { return n.key; });
+  }
+
+  /**
+   * Step-through Tree-Successor / Tree-Predecessor.
+   * Highlights: start=heavy (violet), walk path=blue, cursor=pivot (red), answer=newroot (teal).
+   */
+  function avlSuccessorPred(root, key, frames, which) {
+    var isSucc = which === 'succ';
+    var label = isSucc ? 'Successor' : 'Predecessor';
+    var verb = isSucc ? 'successor' : 'predecessor';
+
+    if (!root) {
+      frames.push(avlFrame('Tree is empty: no ' + verb + '.', null, {}));
+      return;
+    }
+
+    var path = avlFindPath(root, key);
+    if (!path) {
+      frames.push(avlFrame(
+        '<b>' + key + '</b> not in tree — cannot compute ' + verb + '.',
+        root, { path: [] },
+        'Search failed.'));
+      return;
+    }
+
+    var x = path[path.length - 1];
+    var startKeys = avlPathKeys(path);
+
+    frames.push(avlFrame(
+      '<b>' + label + '(' + key + ')</b>: found node (violet). Check ' +
+        (isSucc ? 'right' : 'left') + ' child.',
+      root,
+      { start: key, path: startKeys, cursor: key },
+      isSucc
+        ? 'If x.right exists → min of right subtree; else climb to lowest ancestor that came from the <b>left</b>.'
+        : 'If x.left exists → max of left subtree; else climb to lowest ancestor that came from the <b>right</b>.'));
+
+    var child = isSucc ? x.right : x.left;
+    if (child) {
+      var side = isSucc ? 'right' : 'left';
+      var extreme = isSucc ? 'minimum (keep going left)' : 'maximum (keep going right)';
+      frames.push(avlFrame(
+        '<b>' + key + '</b> has a ' + side + ' child <b>' + child.key + '</b> → take the ' + extreme + '.',
+        root,
+        { start: key, cursor: child.key, path: startKeys.concat([child.key]), subtree: child.key },
+        'Case 1: ' + verb + ' lives in the ' + side + ' subtree.'));
+
+      var cur = child;
+      var walk = startKeys.concat([child.key]);
+      while (isSucc ? cur.left : cur.right) {
+        cur = isSucc ? cur.left : cur.right;
+        walk = walk.concat([cur.key]);
+        frames.push(avlFrame(
+          'Descend to <b>' + cur.key + '</b> (' + (isSucc ? 'left' : 'right') + ').',
+          root,
+          { start: key, cursor: cur.key, path: walk.slice(), subtree: child.key },
+          'Still looking for the ' + (isSucc ? 'min' : 'max') + ' of the subtree.'));
+      }
+
+      frames.push(avlFrame(
+        '<b>' + label + '(' + key + ') = ' + cur.key + '</b> (teal).',
+        root,
+        { start: key, found: cur.key, path: walk, cursor: cur.key },
+        'Done — ' + (isSucc ? 'leftmost' : 'rightmost') + ' node in the ' + side + ' subtree.'));
+      return;
+    }
+
+    frames.push(avlFrame(
+      '<b>' + key + '</b> has no ' + (isSucc ? 'right' : 'left') + ' child → climb ancestors.',
+      root,
+      { start: key, cursor: key, path: startKeys },
+      isSucc
+        ? 'Walk up while we arrived as a <b>right</b> child; first ancestor we came from as a <b>left</b> child is the successor.'
+        : 'Walk up while we arrived as a <b>left</b> child; first ancestor we came from as a <b>right</b> child is the predecessor.'));
+
+    for (var i = path.length - 1; i >= 1; i--) {
+      var childN = path[i];
+      var parentN = path[i - 1];
+      var cameFromLeft = parentN.left === childN;
+      var wantFromLeft = isSucc; /* succ: stop when came from left; pred: stop when came from right */
+
+      frames.push(avlFrame(
+        'Climb to parent <b>' + parentN.key + '</b> (arrived as ' +
+          (cameFromLeft ? 'left' : 'right') + ' child).',
+        root,
+        { start: key, cursor: parentN.key, path: avlPathKeys(path.slice(0, i + 1)) },
+        cameFromLeft === wantFromLeft
+          ? 'Came from the ' + (wantFromLeft ? 'left' : 'right') + ' → this ancestor is the ' + verb + '.'
+          : 'Came from the ' + (cameFromLeft ? 'left' : 'right') + ' → keep climbing.'));
+
+      if (cameFromLeft === wantFromLeft) {
+        frames.push(avlFrame(
+          '<b>' + label + '(' + key + ') = ' + parentN.key + '</b> (teal).',
+          root,
+          { start: key, found: parentN.key, cursor: parentN.key, path: avlPathKeys(path.slice(0, i)) },
+          'Lowest ancestor whose ' + (isSucc ? 'left' : 'right') + ' child lies on the path to x.'));
+        return;
+      }
+    }
+
+    frames.push(avlFrame(
+      '<b>' + label + '(' + key + ')</b> does not exist — <b>' + key + '</b> is the ' +
+        (isSucc ? 'maximum' : 'minimum') + '.',
+      root,
+      { start: key, path: startKeys },
+      'Climbed to the root without finding a qualifying ancestor.'));
   }
 
   function avlDelete(root, key, frames, deferBalance) {
@@ -1322,7 +1449,7 @@
     var panX = 0;
     var panY = 0;
     var autoFit = true;
-    var initKeys = kind === 'avl' ? [30, 20, 40, 10] : [20, 40, 10, 30, 50];
+    var initKeys = kind === 'avl' ? [40, 20, 60, 10, 30, 50, 70] : [20, 40, 10, 30, 50];
     var stableBounds = null;
     var liveSvg = null;
     var rafId = null;
@@ -1586,6 +1713,27 @@
       render(true);
     }
 
+    function runSuccPred(which) {
+      haltPlayback();
+      var key = parseKey();
+      if (key === null) {
+        frames = [avlFrame('Enter a valid key (1–99).', tree, {})];
+        idx = 0;
+        render(true);
+        return;
+      }
+      var steps = [];
+      avlSuccessorPred(tree, key, steps, which);
+      frames = steps;
+      idx = 0;
+      autoFit = true;
+      zoom = 1;
+      panX = 0;
+      panY = 0;
+      render(true);
+      if (frames.length > 1) startPlayback();
+    }
+
     function reset() {
       stop();
       if (kind === 'avl') {
@@ -1593,7 +1741,10 @@
         initKeys.forEach(function (k) {
           tree = avlInsert(tree, k, null, false);
         });
-        frames = [avlFrame('Reset to [' + initKeys.join(', ') + ']. Insert or delete a key.', tree, { showBf: true })];
+        frames = [avlFrame(
+          'Reset to [' + initKeys.join(', ') + ']. Insert / delete, or try <b>Successor</b> / <b>Predecessor</b>.',
+          tree, { showBf: true },
+          'Succ/Pred: violet = start · red = cursor · blue = path · teal = answer.')];
       } else {
         passMode = getPassMode();
         tree = btFromKeys(initKeys);
@@ -1614,6 +1765,10 @@
 
     $('.viz-insert').onclick = function () { runOp('insert'); };
     $('.viz-delete').onclick = function () { runOp('delete'); };
+    var succBtn = $('.viz-succ');
+    var predBtn = $('.viz-pred');
+    if (succBtn) succBtn.onclick = function () { runSuccPred('succ'); };
+    if (predBtn) predBtn.onclick = function () { runSuccPred('pred'); };
     $('.viz-reset').onclick = reset;
     $('.viz-play').onclick = play;
     $('.viz-next').onclick = function () { step(1); };

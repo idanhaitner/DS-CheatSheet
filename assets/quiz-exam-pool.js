@@ -583,5 +583,138 @@ window.QUIZ_EXAM_POOL = [
     "explain": "LZ78 emits (0,a)(1,c)(0,b)(2,a)(1,*).",
     "viz": "sort",
     "id": "2021b-q1a"
+  },
+  {
+    "q": "Let A be a subset of the edges of some MST. Which is the exact lecture definition of an edge (u,v) ∈ E∖A being SAFE for A?",
+    "c": [
+      "(u,v) is the lightest edge in E∖A",
+      "A ∪ {(u,v)} is a subset of the edge set of some MST",
+      "(u,v) does not close a cycle with A",
+      "(u,v) is the lightest edge incident to u or v"
+    ],
+    "a": 1,
+    "cat": "concept",
+    "type": "mcq",
+    "explain": "Safe = adding it keeps A extendable to an MST: A ∪ {(u,v)} ⊆ E(T) for some MST T. Asked verbatim on 2026 Moed A.",
+    "viz": "graph",
+    "id": "2026a-q4b"
+  },
+  {
+    "q": "The cut property states that (u,v) is safe for A when three conditions hold. Which is NOT one of them?",
+    "c": [
+      "A is a subset of some MST",
+      "The cut (S, V∖S) respects A",
+      "(u,v) is a light edge crossing the cut",
+      "(u,v) is the unique minimum-weight edge crossing the cut"
+    ],
+    "a": 3,
+    "cat": "concept",
+    "type": "mcq",
+    "explain": "Uniqueness is not required — any minimum-weight crossing edge is light and safe.",
+    "viz": "graph",
+    "id": "mstB-cutprop"
+  },
+  {
+    "q": "In Prim's algorithm, when u is extracted from Q, the proof that (u.π, u) is safe uses the cut (S, V∖S) where S is:",
+    "c": [
+      "The set of vertices adjacent to u",
+      "The set of vertices already extracted from Q",
+      "The set of vertices still in Q",
+      "The connected component of u in G"
+    ],
+    "a": 1,
+    "cat": "concept",
+    "type": "mcq",
+    "explain": "S = extracted vertices: the cut respects A, and u's minimum key makes (u.π, u) the lightest crossing edge ⇒ safe. This was 2026A Q4c.",
+    "viz": "graph",
+    "id": "2026a-q4c"
+  },
+  {
+    "q": "Binary counter with Increment (cost = bit flips), starting at zero. Claim: a single Increment costs O(1) amortized over any sequence of n Increments.",
+    "c": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "a": 0,
+    "cat": "concept",
+    "type": "asn",
+    "explain": "Bit i flips ≤ n/2^i times, total < 2n flips ⇒ O(1) amortized (accounting: $2 per Increment, $1 stored on every 1-bit).",
+    "viz": "sort",
+    "id": "moedB-counter"
+  },
+  {
+    "q": "In the accounting method, which invariant must the charges ĉᵢ satisfy?",
+    "c": [
+      "Σĉᵢ = Σcᵢ exactly at the end of the sequence",
+      "ĉᵢ ≥ cᵢ for every single operation i",
+      "For every prefix j: Σ_{i≤j} cᵢ ≤ Σ_{i≤j} ĉᵢ",
+      "The bank balance must be exactly 0 after every operation"
+    ],
+    "a": 2,
+    "cat": "concept",
+    "type": "mcq",
+    "explain": "The credit (bank) may never go negative at ANY point — a prefix condition, not just at the end, and individual ops may be undercharged.",
+    "viz": "sort",
+    "id": "moedB-accounting"
+  },
+  {
+    "q": "Union-Find forest with path compression: why store RANK instead of the actual height?",
+    "c": [
+      "Rank is smaller, saving memory",
+      "Path compression can silently decrease heights, so true height cannot be maintained in O(1); rank stays a valid upper bound",
+      "Height cannot be computed for a forest",
+      "Rank equals the size of the set"
+    ],
+    "a": 1,
+    "cat": "concept",
+    "type": "mcq",
+    "explain": "Compression shortens paths, so stored heights would become stale. Rank never decreases and still upper-bounds the height — enough for union by rank.",
+    "viz": "graph",
+    "id": "moedB-rank"
+  },
+  {
+    "q": "Strings of length n over {a,b,c,d} where each letter appears at least once. What is the MINIMUM total Huffman-encoded length, up to Θ?",
+    "c": [
+      "Θ(log n)",
+      "Θ(n) — about n + O(1) bits, via a maximally skewed distribution",
+      "Exactly 2n bits",
+      "Θ(n log n)"
+    ],
+    "a": 1,
+    "cat": "concept",
+    "type": "mcq",
+    "explain": "2026A Q2c: take a^{n−3}bcd → code lengths 1,2,3,3 → (n−3)+2+3+3 = n+5 bits. Balanced frequencies give 2n — the maximum, not minimum.",
+    "viz": "sort",
+    "id": "2026a-q2c"
+  },
+  {
+    "q": "LZ78 with log n bits per phrase. What is the minimum possible total encoding length of a length-n string, up to Θ?",
+    "c": [
+      "Θ(log² n)",
+      "Θ(√n · log n)",
+      "Θ(n)",
+      "Θ(n / log n)"
+    ],
+    "a": 1,
+    "cat": "concept",
+    "type": "mcq",
+    "explain": "2026A Q2d: the i-th phrase has length ≤ i, so n ≤ p(p+1)/2 ⇒ p = Ω(√n); phrases of lengths 1,2,…,p achieve it ⇒ Θ(√n log n).",
+    "viz": "sort",
+    "id": "2026a-q2d"
+  },
+  {
+    "q": "AVL tree: delete a leaf z, exactly one LL rotation occurs (at x), then re-insert z. Claim: the tree returns to its exact original shape.",
+    "c": [
+      "Always true",
+      "Sometimes true",
+      "Never true"
+    ],
+    "a": 2,
+    "cat": "concept",
+    "type": "asn",
+    "explain": "2026A Q3: after the rotation the old root moved down; re-inserting z raises a subtree height by at most 1 (balance −1, not −2), so no reverse rotation ever fires.",
+    "viz": "bst",
+    "id": "2026a-q3"
   }
 ];

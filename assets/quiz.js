@@ -30,7 +30,7 @@
     { q: 'Open addressing on delete often needs…', c: ['Rebuilding the whole table', 'Tombstone markers', 'Doubly linked chains', 'A BST per slot'], a: 1, cat: 'structure', type: 'mcq', viz: 'hash' },
     { q: 'Why does Dijkstra fail with negative edges?', c: ['Uses too much memory', 'Finalized vertices are never updated', 'Requires a DAG', 'Only works on trees'], a: 1, cat: 'concept', type: 'mcq', viz: 'dijkstra' },
     { q: 'Comparison sort lower bound (worst case)?', c: ['Ω(n)', 'Ω(n log n)', 'Ω(n²)', 'Ω(n!)'], a: 1, cat: 'concept', type: 'mcq' },
-    { q: 'Cut property (MST): a safe edge is…', c: ['Max weight in a cycle', 'Min weight crossing a cut', 'Any edge in a BFS tree', 'Heaviest in the graph'], a: 1, cat: 'concept', type: 'mcq', viz: 'mst' },
+    { q: 'Cut property (MST): a light edge crossing a cut that respects A is…', c: ['Unsafe for A', 'Safe for A', 'Always a bridge', 'Heaviest in the graph'], a: 1, cat: 'concept', type: 'mcq', viz: 'mst', explain: 'By the cut property: light + respects A ⇒ safe for A.' },
     { q: 'Load factor α < 1 is required for…', c: ['Chaining only', 'Open addressing', 'Skip lists', 'AVL trees'], a: 1, cat: 'concept', type: 'mcq', viz: 'hash' },
     { q: 'Is merge sort stable?', c: ['True', 'False'], a: 0, cat: 'concept', type: 'tf', explain: 'Merge takes the left equal key first.', viz: 'sort' },
     { q: 'Is standard in-place quicksort stable?', c: ['True', 'False'], a: 1, cat: 'concept', type: 'tf', explain: 'Partition swaps can reorder equal keys.', viz: 'sort' },

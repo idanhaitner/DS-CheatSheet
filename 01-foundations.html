@@ -24,6 +24,7 @@
     <a href="06-graphs.html">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
+    <a href="09-cram.html">9 · Cram Recap</a>
   </nav>
 </aside>
 <main class="content">
@@ -71,6 +72,7 @@
       <li>\(\log(n!) = \Theta(n\log n)\) (Stirling): so comparison sorting needs \(\Omega(n\log n)\).</li>
     </ul>
     <div class="pitfall"><b>Pitfall:</b> \(O\) is an <b>upper</b> bound, so "worst case is \(O(n^2)\)" and "worst case is \(O(n^3)\)" can both be true. If asked for a <b>tight</b> bound, use \(\Theta\).</div>
+    <div class="pitfall"><b>Not every pair is comparable:</b> "for all \(f,g\): \(f=O(g)\) or \(g=O(f)\)" is <b>false</b>. Counterexample from the lecture: \(f(n)=n\) vs \(g(n)=n^2\) for even \(n\), \(1\) for odd \(n\) — neither bounds the other. Classic true/false bait.</div>
   </div>
 
   <h2 class="section" id="recurrences">1.2 Recurrences — how to analyze &amp; bound them</h2>
@@ -326,6 +328,7 @@
       <tr><th>Concept</th><th>Definition / formula</th></tr>
       <tr><td>Probability</td><td>\(P(A)\in[0,1]\); \(P(\Omega)=1\); \(P(\emptyset)=0\)</td></tr>
       <tr><td>Union</td><td>\(P(A\cup B)=P(A)+P(B)-P(A\cap B)\)</td></tr>
+      <tr><td><b>Union bound</b></td><td>\(P\!\left(\bigcup_i A_i\right)\le\sum_i P(A_i)\) — no independence needed; the lecture's tool for "no bad event happens" arguments</td></tr>
       <tr><td>Independence</td><td>\(P(A\cap B)=P(A)\cdot P(B)\)</td></tr>
       <tr><td>Conditional</td><td>\(P(A\mid B)=\dfrac{P(A\cap B)}{P(B)}\)</td></tr>
       <tr><td><b>Expectation</b></td><td>\(E[X]=\sum_i x_i\,P(X=x_i)\)</td></tr>

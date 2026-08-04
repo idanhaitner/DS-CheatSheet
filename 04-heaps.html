@@ -24,6 +24,7 @@
     <a href="06-graphs.html">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
+    <a href="09-cram.html">9 · Cram Recap</a>
   </nav>
 </aside>
 <main class="content">
@@ -93,6 +94,17 @@ right(i)  = 2*i + 2</pre>
         <div class="viz-stats">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
       </div>
     </div>
+
+    <div class="heap-theory">
+      <h4 id="buildheap-proof">Why BuildHeap is Θ(n) — the proof (know it cold)</h4>
+      <p>BuildMaxHeap runs MaxHeapify from the <b>last internal node</b> (index \(\lfloor n/2\rfloor - 1\)) down to the root — leaves are already heaps. Naive count: \(n/2\) calls × \(O(\log n)\) = \(O(n\log n)\), but that's loose:</p>
+      <ul>
+        <li>MaxHeapify on a node of height \(h\) costs \(O(h)\), and there are at most \(\lceil n/2^{h+1}\rceil\) nodes of height \(h\).</li>
+        <li>Total: \(\sum_{h} \frac{n}{2^{h+1}}\cdot O(h) = O\big(n\sum_{h=0}^{\infty} \frac{h}{2^h}\big) = O(2n) = O(n)\), using \(\sum h/2^h = 2\).</li>
+      </ul>
+      <div class="pitfall" id="heap-not-sorted"><b>2026A trap — heap ≠ sorted:</b> BuildMinHeap only guarantees parent ≤ children, <b>not</b> a sorted array. Even with many duplicates it can output e.g. \([1,3,2,3,3,2,3]\) (valid min-heap, not sorted). Answers of the form "always sorted" are wrong; "sometimes" needs one counterexample + one positive example.</div>
+      <div class="note"><b>Structural quiz facts:</b> in a max-heap with distinct keys, the largest is at \(A[0]\), the 2nd largest is a child of the root, but the 3rd largest can sit at depth 1 <em>or</em> 2 (any of up to 6 cells for \(n=10\)). IncreaseKey <b>rejects</b> a key smaller than the current one; Insert = append \(-\infty\), then IncreaseKey.</div>
+    </div>
   </div>
 
   <h2 class="section" id="huffman">4.2 Huffman Coding</h2>
@@ -111,7 +123,25 @@ right(i)  = 2*i + 2</pre>
       <tr><td>Decode message</td><td><span class="tag b-On">O(N)</span></td><td>Walk the tree one bit at a time; each source symbol read once</td></tr>
       <tr><td>Space</td><td><span class="tag b-On">O(n)</span></td><td>Tree has 2n−1 nodes; code table has n entries</td></tr>
     </table>
-    <p><b>Expected code length:</b> \(\sum_c freq(c)\cdot depth(c)\): weighted path length; Huffman minimizes this among all prefix codes. An optimal Huffman tree is a <b>full</b> binary tree; the two least-frequent symbols are <b>siblings</b> at the deepest level.</p>
+    <p><b>Cost of a code:</b> \(\mathrm{cost}(T)=\sum_c freq(c)\cdot depth(c)\) = total encoded bits; Huffman minimizes this among all prefix codes. An optimal prefix code is <b>not unique</b> (ties break both ways). An optimal tree is always <b>full</b> (every internal node has 2 children).</p>
+
+    <h4 id="huffman-proof">Optimality proof (lecture 11 — never asked yet, prime Moed B material)</h4>
+    <p><b>Sibling lemma (exchange argument):</b> there exists an optimal prefix tree in which the two least-frequent symbols \(x,y\) are <b>siblings at the deepest level</b>.
+    <em>Proof:</em> take any optimal tree; a deepest leaf must have a sibling leaf (else delete the unary node — cheaper, contradiction). Swap \(x,y\) with those two deepest sibling leaves: each swap moves a rarer symbol deeper and a more frequent one shallower, so the cost does not increase. ∎</p>
+    <p><b>Theorem (Huffman is optimal), induction on alphabet size \(|C|\):</b></p>
+    <ol>
+      <li>Let \(T\) = Huffman's tree, \(S\) = an optimal tree with \(x,y\) siblings (exists by the lemma).</li>
+      <li>Contract \(x,y\) into one symbol \(z\) with \(z.freq = x.freq + y.freq\), giving trees \(T', S'\) over the smaller alphabet \(C'\).</li>
+      <li>\(\mathrm{cost}(T) = \mathrm{cost}(T') + z.freq\) and \(\mathrm{cost}(S) = \mathrm{cost}(S') + z.freq\) (removing the two leaves saves exactly one bit per occurrence of \(x\) or \(y\)).</li>
+      <li>\(T'\) is a Huffman tree on \(C'\), optimal by induction ⟹ \(\mathrm{cost}(T')\le \mathrm{cost}(S')\) ⟹ \(\mathrm{cost}(T)\le \mathrm{cost}(S)\). ∎</li>
+    </ol>
+
+    <h4 id="huffman-minmax">Min / max total bits (2026A Q2c pattern)</h4>
+    <p>Question type: "over all strings of length \(n\) with constraints, what is the minimum/maximum number of bits Huffman produces?"</p>
+    <ul>
+      <li><b>Minimize</b> ⟹ make the distribution <b>as skewed as possible</b>: one symbol dominates and gets a length-1 code. Example over \(\{a,b,c,d\}\), each appearing ≥ once: \(a^{n-3}bcd\) → lengths 1,2,3,3 → total \((n-3)+2+3+3 = n+5\) bits.</li>
+      <li><b>Maximize / balanced</b> ⟹ equal frequencies \(n/4\) each → all codes length 2 → \(2n\) bits. Balanced = worst for compression, not best!</li>
+    </ul>
 
     <h4>Interactive animator</h4>
     <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Preset demo: string <b>AAAAABBBCEEED</b> → frequencies <b>A=5, B=3, C=1, D=1, E=3</b> (B and E share freq 3; C and D share freq 1). Watch repeated <code>extractMin</code> merges build the tree. Left edge = <b>0</b>, right = <b>1</b>.</p>
@@ -175,6 +205,14 @@ right(i)  = 2*i + 2</pre>
       <tr><td>Decode</td><td><span class="tag b-On">O(N)</span></td><td>One pass; each token outputs ≥ 1 new character and adds one dictionary entry</td></tr>
       <tr><td>Space</td><td><span class="tag b-On">O(N)</span></td><td>Dictionary grows to O(N) phrases in the worst case</td></tr>
     </table>
+    <h4 id="lz-bits">LZ78 phrase-count bounds (2026A Q2d pattern)</h4>
+    <p><b>Lecture definition:</b> each block = the <b>longest prefix of the remaining text that equals a previous block, plus one character</b>; block \(i\) is encoded as a pair \((j, c)\) = (index of parent block, last char), costing \(\approx\log_2 n\) bits. So <b>total bits = (#phrases) · log n</b>, and min/max questions reduce to counting phrases \(p\):</p>
+    <ul>
+      <li><b>Key bound:</b> the \(i\)-th <em>new</em> phrase has length at most \(i\) (previous block + 1 char, and blocks grow by at most one char at a time). Hence \(n \le 1+2+\cdots+p = \frac{p(p+1)}{2}\) ⟹ \(p = \Omega(\sqrt n)\), i.e. <b>you can never do better than \(\Theta(\sqrt n)\) phrases</b>.</li>
+      <li><b>Tight:</b> phrases of lengths \(1,2,\ldots,p\) (e.g. \(a\,|\,ab\,|\,abc\,|\,abcd\,|\,abcda\,|\,\ldots\)) achieve it ⟹ minimum total bits \(=\Theta(\sqrt n \log n)\). <b>Not</b> \(\Theta(\log n)\) — phrase lengths grow by +1 per step, not exponentially.</li>
+    </ul>
+    <div class="note"><b>Encode time (lecture):</b> trie with linked-list children \(\Theta(\sigma n)\); with hashed children (or one global hash on pairs \((j,c)\)) expected \(\Theta(n)\). Decode rebuilds the trie with parent pointers in \(\Theta(n)\).</div>
+
     <div class="note">
       <b>Huffman vs Lempel-Ziv:</b>
       <ul style="margin:4px 0">

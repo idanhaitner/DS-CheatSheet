@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2 · Sorting + Animator</title>
-<link rel="stylesheet" href="assets/style.css?v=20260716ux">
+<link rel="stylesheet" href="assets/style.css?v=20260804analysis">
 <script src="assets/theme.js?v=20260716ux"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
@@ -24,6 +24,7 @@
     <a href="06-graphs.html">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
+    <a href="09-cram.html">9 · Cram Recap</a>
   </nav>
 </aside>
 <main class="content">
@@ -180,6 +181,43 @@
       <tr><td>Worst (sorted + last-pivot)</td><td><span class="tag b-On2">Θ(n²)</span></td></tr>
     </table>
     <div class="pitfall"><b>Worst case</b> occurs when the pivot is always min/max → splits of size (n−1, 0): \(T(n)=T(n-1)+\Theta(n)=\Theta(n^2)\). A deterministic last-element pivot triggers this on already-sorted input. Fix with <a href="#sel-rand-partition"><b>RandomizedPartition</b></a> (or median-of-three).</div>
+    <p style="margin-bottom:0">Expected-time proof for randomized Quicksort uses the <a href="#rg-analysis"><b>green/red recursion-tree coloring</b></a> below (same technique as Randomized-Select).</p>
+  </div>
+
+  <!-- ===== GREEN / RED ANALYSIS ===== -->
+  <h2 class="section" id="rg-analysis">2.2.1 Green / red analysis (Quicksort → Select)</h2>
+  <div class="card">
+    <p style="margin-top:0">Color the recursion tree: each call is a node \(v\) with \(\mathrm{size}(v)\) = subarray length. Root is always <b>green</b>. Child \(v\) is <b>green</b> if \(\mathrm{size}(v)\le\tfrac34\cdot\mathrm{size}(\mathrm{parent})\) (good split); otherwise <b>red</b>.</p>
+    <div class="rg-legend-inline">
+      <span class="g"><i></i> green: size ≤ ¾ · parent</span>
+      <span class="r"><i></i> red: size &gt; ¾ · parent</span>
+    </div>
+    <h4>Interactive animator</h4>
+    <div class="analysis-viz-wrap" data-mode="rg">
+      <div class="viz-controls">
+        <label>View:
+          <select class="rg-mode viz-select">
+            <option value="tree" selected>Colored tree</option>
+            <option value="contra">At most one red child</option>
+            <option value="cost">cost(v) absorbs red chain</option>
+            <option value="compare">Quicksort vs Select</option>
+          </select>
+        </label>
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1200" step="20"></label>
+      </div>
+      <div class="analysis-stage"></div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+    </div>
+    <div class="note">
+      <b>Three anchors:</b>
+      (1) at most one red child (otherwise sizes &gt; 1½·parent) ·
+      (2) \(\Pr[\text{red continues}]\le 1/2^i\) ⇒ \(E[\mathrm{cost}(v)]\le 2\cdot\mathrm{size}(v)\) ·
+      (3) Quicksort = \(O(\log n)\) green layers × \(O(n)\); Select = single path × geometric series.
+    </div>
   </div>
 
   <!-- ===== HEAP ===== -->
@@ -478,12 +516,28 @@
     </div>
 
     <p>Average <span class="tag b-On">Θ(n)</span> (uniform input) · Worst <span class="tag b-On2">Θ(n²)</span> (all in one bucket).</p>
+
+    <h4 id="bucket-proof">Expected Θ(n) — the indicator proof (lecture 13)</h4>
+    <p>Cost \(=\Theta(n) + \sum_i O(n_i^2)\) where \(n_i\) = size of bucket \(i\) (insertion sort is quadratic). By symmetry it suffices to bound \(E[n_0^2]\):</p>
+    <ul>
+      <li>\(n_0 = \sum_j X_j\) with \(X_j\) = indicator that \(A[j]\) lands in bucket 0; \(\Pr[X_j{=}1] = 1/n\).</li>
+      <li>\(E[n_0^2] = \sum_j E[X_j^2] + \sum_{j\neq k} E[X_j X_k] = n\cdot\frac1n + n(n{-}1)\cdot\frac{1}{n^2} = 2 - \frac1n < 2\) (independence gives \(E[X_jX_k]=1/n^2\)).</li>
+      <li>Total: \(\Theta(n) + n\cdot O(2) = \Theta(n)\). ∎</li>
+    </ul>
+    <div class="note"><b>Terminology trap (lecture emphasizes it):</b> Bucket sort is <b>deterministic</b> — this is an <b>average-case</b> bound (expectation over the <em>input</em> distribution), not "worst-case expected" (expectation over the <em>algorithm's</em> coins, like randomized quicksort). Exams love this distinction.</div>
   </div>
 
   <!-- ===== LOWER BOUND ===== -->
   <h2 class="section" id="lowerbound">The Comparison-Sort Lower Bound</h2>
   <div class="card">
     <p>Any comparison-only sort is a <b>decision tree</b>: internal nodes are comparisons, leaves are permutations. There are \(n!\) orderings, so \(\ge n!\) leaves. A binary tree with \(L\) leaves has height \(\ge \log_2 L\), so worst-case comparisons \(\ge \log_2(n!) = \Theta(n\log n)\).</p>
+    <h4 id="lowerbound-proof">The full proof, exam-writable (lecture 13)</h4>
+    <ol>
+      <li><b>Lemma:</b> a binary tree of height \(h\) has at most \(2^h\) leaves. <em>Proof by induction on \(h\):</em> \(h=0\) → 1 leaf; removing the root leaves two trees of height \(\le h-1\), each with \(\le 2^{h-1}\) leaves ⟹ \(\le 2^h\) total. ✓</li>
+      <li>The tree must have \(\ge n!\) leaves (every permutation must be reachable — otherwise some input is answered wrong).</li>
+      <li>So \(2^h \ge n!\) ⟹ \(h \ge \log_2(n!)\).</li>
+      <li>Bound the factorial without Stirling: \(n! \ge (n/2)^{n/2}\) (the top \(n/2\) factors are each \(\ge n/2\)) ⟹ \(h \ge \frac{n}{2}\log\frac{n}{2} = \Omega(n\log n)\). ∎</li>
+    </ol>
     <div class="note"><b>Conclusion:</b> Merge/Heap sort are asymptotically <b>optimal</b> comparison sorts. Counting/Radix/Bucket beat this only by not being comparison-based.</div>
   </div>
 
@@ -778,13 +832,13 @@
 
   <h2 class="section" id="sel-rand-analysis">2.4.4 Expected-time analysis</h2>
   <div class="card">
-    <p>Same green/red coloring idea as in the randomized Quicksort analysis:</p>
+    <p>Same <a href="#rg-analysis">green/red coloring</a> as randomized Quicksort — but Select’s recursion tree is a <b>path</b> (one recursive call), not a full binary tree:</p>
     <ul>
       <li>A node \(v\) is <b>green</b> if it is the root, or \(\mathrm{size}(v) \le \tfrac34 \cdot \mathrm{size}(\mathrm{parent})\). Otherwise <b>red</b>.</li>
       <li>A green node has at most one red child; \(\Pr[\text{red child}] \le 1/2\).</li>
       <li>For green \(v\): \(E[\mathrm{cost}(v)] \le 2\cdot\mathrm{size}(v)\).</li>
     </ul>
-    <p>Along the unique path of green nodes \(u_0,u_1,\ldots\) in a Select recursion tree:</p>
+    <p>Along the unique path of green nodes \(u_0,u_1,\ldots\):</p>
     \[
       \mathrm{size}(u_i) \le \Bigl(\tfrac34\Bigr)^i n
       \qquad\Rightarrow\qquad
@@ -793,6 +847,7 @@
         = O(n).
     \]
     <p>So expected time of Randomized-Select is <span class="tag b-On">\(\Theta(n)\)</span>. Worst case is still <span class="tag b-On2">\(O(n^2)\)</span> if every pivot is extreme (low probability).</p>
+    <div class="note"><b>vs Quicksort:</b> there each green layer sums to \(n\) across many nodes × \(O(\log n)\) layers = \(n\log n\). Here one green per layer → geometric series only. Step through the compare view in <a href="#rg-analysis">§2.2.1</a>.</div>
   </div>
 
   <h2 class="section" id="sel-deterministic">2.4.5 Deterministic Select (median of medians)</h2>
@@ -818,8 +873,20 @@
       <li>Return the index of \(x\) in \(A\).</li>
     </ol>
 
-    <h4>Why the pivot is good</h4>
-    <p>At least roughly half of the group-medians are \(\ge x\), and each such group contributes at least 3 elements \(\ge x\). Same for elements \(\le x\). Lecture bound:</p>
+    <h4>Why the pivot is good — \(3n/10\) visual proof</h4>
+    <p>At least roughly half of the group-medians are \(\ge x\), and each such group contributes at least 3 elements \(\ge x\). Same for elements \(\le x\).</p>
+    <div class="analysis-viz-wrap" data-mode="mom">
+      <div class="viz-controls">
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1100" step="20"></label>
+      </div>
+      <div class="analysis-stage"></div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+    </div>
+    <p>Lecture bound:</p>
     \[
       \#\{ \text{elements } > x \} \;\ge\; \tfrac{3}{10}n - 6
       \qquad\text{(and likewise for }{<}\,x\text{)}.
@@ -915,5 +982,6 @@
 </div>
 <script src="assets/viz-code-helper.js"></script>
 <script src="assets/sorting.js?v=20260713linear" defer></script>
+<script src="assets/analysis-viz.js?v=20260804analysis" defer></script>
 </body>
 </html>

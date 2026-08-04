@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>6 · Graphs + Animator</title>
-<link rel="stylesheet" href="assets/style.css?v=20260716ux">
+<link rel="stylesheet" href="assets/style.css?v=20260804analysis">
 <script src="assets/theme.js?v=20260716ux"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
@@ -24,6 +24,7 @@
     <a href="06-graphs.html" class="active">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
+    <a href="09-cram.html">9 · Cram Recap</a>
   </nav>
 </aside>
 <main class="content">
@@ -237,6 +238,12 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
         color[u] = black</pre>
     <p>Time <span class="tag b-On">O(V + E)</span> · Space <span class="tag b-On">O(V)</span> (queue + color/dist/parent arrays).</p>
     <div class="note"><b>BFS tree:</b> edges used when first discovering a white vertex form a tree. <b>Not every shortest path</b> is a tree edge: but tree distance equals shortest distance. Exams sometimes ask how many <b>distinct BFS trees</b> exist (depends on tie-breaking when enqueueing neighbors).</div>
+    <h4 id="bfs-correctness">Correctness (layer argument — provable in 4 lines)</h4>
+    <ol>
+      <li>Let \(\delta(s,v)\) = true shortest distance. If \(\delta(s,v)=k\), then every neighbor \(w\) of \(v\) has \(\delta(s,w)\ge k-1\), and at least one neighbor has \(\delta(s,w)=k-1\).</li>
+      <li><b>Invariant (induction on layers):</b> the vertices that enter the queue with \(d=i\) are exactly \(\{v : \delta(s,v)=i\}\) — layer \(i\) is fully processed before layer \(i+1\) starts (FIFO).</li>
+      <li>Hence at termination \(v.d=\delta(s,v)\) for every reachable \(v\), and following \(\pi\) pointers gives an actual shortest path. ∎</li>
+    </ol>
   </div>
 
   <h2 class="section" id="dfs">6.3 DFS: Depth-First Search</h2>
@@ -301,6 +308,44 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
       black + \(d[u]&gt;d[v]\) → <b>cross</b>.
       Watch the animation: <b>E→B</b> back (cycle), <b>A→D</b> forward, <b>C→D</b> cross.
     </div>
+
+    <h4 id="dfs-theorems">The formal DFS theorems (statements you must be able to quote + prove)</h4>
+    <table>
+      <tr><th>Theorem</th><th>Statement</th></tr>
+      <tr>
+        <td><b>Parenthesis theorem</b></td>
+        <td>For any \(u,v\): \(v\) is a descendant of \(u\) in the DFS forest ⟺ \([d[v],f[v]] \subseteq [d[u],f[u]]\); neither is a descendant of the other ⟺ the intervals are <b>disjoint</b>. (Intervals never partially overlap.)</td>
+      </tr>
+      <tr>
+        <td><b>White-path theorem</b></td>
+        <td>\(v\) is a descendant of \(u\) ⟺ at time \(d[u]\) there is a path \(u \rightsquigarrow v\) consisting entirely of <b>white</b> vertices (except \(u\) itself, which is gray).</td>
+      </tr>
+      <tr>
+        <td><b>Cycle ⟺ back edge</b></td>
+        <td>A directed graph has a cycle ⟺ DFS produces at least one <b>back edge</b>.</td>
+      </tr>
+    </table>
+    <p><b>Proof sketches (lecture 15):</b></p>
+    <ul>
+      <li><b>White-path (⇐, the hard direction), by contradiction:</b> let \(v'\) be the <em>first</em> vertex on the white path that is not a descendant of \(u\), and \(w\) its predecessor on the path (a descendant of \(u\)). By the parenthesis theorem \(f[w] &lt; d[v']\) — but then \(w\) finished while its neighbor \(v'\) was still white, contradicting DFS (a vertex never turns black with a white neighbor).</li>
+      <li><b>Back ⟹ cycle:</b> back edge \((u,v)\) + tree path \(v \rightsquigarrow u\) = cycle. <b>Cycle ⟹ back:</b> let \(v\) = first vertex of the cycle discovered, \(u\) = its predecessor on the cycle. At time \(d[v]\) the cycle forms a white path \(v \rightsquigarrow u\) ⟹ (white-path theorem) \(u\) is a descendant of \(v\) ⟹ \((u,v)\) is a back edge.</li>
+      <li><b>Topological-sort correctness</b> (edge \((u,v)\) ⟹ \(f[v] &lt; f[u]\)): if \(d[u] &lt; d[v]\), the white-path theorem makes \(v\) a descendant of \(u\), so \([d[v],f[v]]\) nests inside \([d[u],f[u]]\). If \(d[v] &lt; d[u]\), there is no path \(v \rightsquigarrow u\) (DAG!), so \(u\) is not a descendant of \(v\) and the intervals are disjoint with \(v\)'s entirely first. Either way \(f[v]&lt;f[u]\). ∎</li>
+    </ul>
+
+    <h4 id="white-path-viz">White-path theorem — animated example</h4>
+    <p style="margin-top:0">Graph \(\{a,b,c,d\}\) with edges \(a\to b,\ a\to c,\ b\to c,\ c\to d,\ d\to b\). DFS from \(a\) (neighbors in letter order). Watch the white path at discovery time predict descendants, then classify forward / back edges.</p>
+    <div class="analysis-viz-wrap" data-mode="whitepath">
+      <div class="viz-controls">
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1300" step="20"></label>
+      </div>
+      <div class="analysis-stage"></div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+    </div>
+    <div class="note"><b>Takeaway:</b> at \(d[a]\), path \(a\to b\to c\) is white ⇒ \(c\) must end up a descendant of \(a\) (and does: tree \(a\to b\to c\to d\)). Later \(a\to c\) is <b>forward</b>; \(d\to b\) is <b>back</b> (cycle).</div>
 
     <div class="note"><b>Exam mnemonic:</b> “cycles, topo sort, finish times, components” → <b>DFS</b>. Same <span class="tag b-On">O(V + E)</span> time as BFS with adjacency list.</div>
     <div class="graph-viz-wrap" data-modes='["dfs"]' data-default="dfs" data-scenario="dfs-dir">
@@ -508,6 +553,53 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
   <h2 class="section" id="mst">6.5 Minimum Spanning Tree (MST)</h2>
   <div class="card">
     <p>Connected, weighted, undirected graph → spanning tree of <b>minimum total weight</b> (exactly \(|V|-1\) edges, no cycles).</p>
+
+    <h4 id="mst-theory">Definitions: cut, light edge, safe edge</h4>
+    <div class="warn"><b>Asked verbatim on Moed A 2026 (18 pts):</b> define a safe edge, then prove the edge Prim adds is safe. Memorize the exact wording below.</div>
+    <table>
+      <tr><th>Term</th><th>Definition (lecture wording)</th></tr>
+      <tr><td><b>Cut</b> (חתך)</td><td>A partition \((S,\ V\setminus S)\) of the vertices.</td></tr>
+      <tr><td>Edge <b>crosses</b> the cut</td><td>One endpoint in \(S\), the other in \(V\setminus S\).</td></tr>
+      <tr><td>Cut <b>respects</b> \(A\subseteq E\)</td><td><b>No</b> edge of \(A\) crosses the cut.</td></tr>
+      <tr><td><b>Light edge</b> (of a cut)</td><td>A minimum-weight edge among all edges crossing the cut.</td></tr>
+      <tr><td><b>Safe edge</b> (קשת בטוחה)</td><td>Let \(A\) be a set of edges that is a subset of some MST. An edge \((u,v)\in E\setminus A\) is <b>safe for \(A\)</b> if \(A\cup\{(u,v)\}\) is also a subset of the edge set of some MST.</td></tr>
+    </table>
+    <span class="code-label">GenericMST — why "safe" is the right notion</span>
+<pre><span class="kw">GenericMST</span>(G, w):
+    A ← ∅
+    <span class="kw">while</span> A is not a spanning tree:
+        find an edge (u,v) that is <b>safe</b> for A
+        A ← A ∪ {(u,v)}
+    <span class="kw">return</span> A</pre>
+    <p>Invariant: \(A\) is always a subset of some MST. Kruskal and Prim are both instances of GenericMST: their entire correctness reduces to showing that the edge they pick is safe.</p>
+
+    <h4 id="cut-property">The Cut Property (safe-edge theorem) + proof</h4>
+    <p><b>Helper (Theorem 2 from the lecture):</b> for a tree \(T\) and a non-tree edge \(e\): (1) \(T+e\) contains <b>exactly one</b> simple cycle \(C\) (through \(e\)); (2) for any \(e'\in C\), \(T+e-e'\) is again a tree.</p>
+    <p><b>Theorem (cut property).</b> Let \(A\) be a subset of some MST, let \((S, V\setminus S)\) be a cut that <b>respects</b> \(A\), and let \((u,v)\) be a <b>light</b> edge crossing the cut. Then \((u,v)\) is <b>safe for \(A\)</b>.</p>
+    <p><b>Proof (exchange argument):</b></p>
+    <ol>
+      <li>Let \(T\) be an MST with \(A\subseteq E(T)\). If \((u,v)\in E(T)\), done.</li>
+      <li>Otherwise, \(T+(u,v)\) contains a unique cycle \(C\) through \((u,v)\).</li>
+      <li>\(u\in S\), \(v\in V\setminus S\), so walking around \(C\) must cross the cut again: there is another edge \((x,y)\in C\) crossing the cut.</li>
+      <li>\(T' = T + (u,v) - (x,y)\) is a tree (Theorem 2).</li>
+      <li>\((u,v)\) is light and \((x,y)\) crosses the cut ⟹ \(w(u,v)\le w(x,y)\) ⟹ \(w(T')\le w(T)\) ⟹ \(T'\) is also an MST.</li>
+      <li>The cut respects \(A\) ⟹ \((x,y)\notin A\) ⟹ \(A\cup\{(u,v)\}\subseteq E(T')\). So \((u,v)\) is safe. ∎</li>
+    </ol>
+
+    <h4 id="mst-correctness">Why Kruskal and Prim are correct (one line each)</h4>
+    <ul>
+      <li><b>Kruskal</b> adds \((u,v)\) only when \(u,v\) are in different components of \((V,A)\). Take \(S\) = the component containing \(u\). This cut respects \(A\) (components are never split), and \((u,v)\) is the lightest crossing edge (edges are scanned in increasing weight order) ⟹ safe.</li>
+      <li><b>Prim</b> extracts \(u\) with minimum key. Take \(S\) = the vertices already extracted. The cut respects \(A\) (all of \(A\) is inside \(S\)); \(u.key = w(u, u.\pi)\) is the minimum key in \(Q\), so \((u.\pi, u)\) is the lightest edge crossing the cut ⟹ safe by the cut property. ∎ <b>(This is exactly the 2026A Q4c proof.)</b></li>
+    </ul>
+
+    <h4 id="prim-variant">Exam variant (2026A Q4a): Prim when \(Q\) starts with only \(r\)</h4>
+    <p>Standard Prim inserts <b>all</b> of \(V\) into \(Q\). If instead \(Q=\{r\}\) initially, the loop body must distinguish "first time seen" (Insert) from "already in \(Q\)" (Decrease-Key):</p>
+<pre><span class="kw">for each</span> neighbor v of u:
+    <span class="kw">if</span> v was never in Q and v not extracted:   <span class="cm">// newly discovered</span>
+        v.π ← u;  v.key ← w(u,v);  <b>Insert</b>(Q, v)
+    <span class="kw">else if</span> v ∈ Q and w(u,v) &lt; v.key:          <span class="cm">// found a lighter connection</span>
+        v.π ← u;  <b>Decrease-Key</b>(Q, v, w(u,v))</pre>
+    <div class="note">Same \(O(E\log V)\): still \(\le V\) Inserts, \(\le V\) Extract-Mins, \(\le E\) Decrease-Keys.</div>
 
     <h4>Edge membership (exam tests)</h4>
     <table>
@@ -839,5 +931,6 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
 </div>
 <script src="assets/viz-code-helper.js"></script>
 <script src="assets/graph.js?v=20260713dfs2" defer></script>
+<script src="assets/analysis-viz.js?v=20260804analysis" defer></script>
 </body>
 </html>

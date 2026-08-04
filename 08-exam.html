@@ -24,13 +24,14 @@
     <a href="06-graphs.html">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html" class="active">8 · Exam Reference</a>
+    <a href="09-cram.html">9 · Cram Recap</a>
   </nav>
 </aside>
 <main class="content">
   <div class="pagehead">
     <div class="crumbs"><a href="index.html">Home</a> › Exam Reference</div>
     <h1>8 · Exam Reference</h1>
-    <p>Master tables · what to use when · pitfalls &amp; strategy</p>
+    <p>Master tables · Moed B proof drill · quiz · pitfalls · <a href="09-cram.html">Cram Recap</a></p>
   </div>
   <div class="inner">
 
@@ -39,8 +40,8 @@
       <h2>Practice Quiz</h2>
       <p>Multiple choice, True/False, and Always / Sometimes / Never — closed-form DS questions with short explanations.</p>
       <div class="quiz-launch-stats">
-        <span class="quiz-launch-stat"><b id="quiz-stat-count">62</b>questions</span>
-        <span class="quiz-launch-stat"><b id="quiz-stat-asn">16</b>A / S / N</span>
+        <span class="quiz-launch-stat"><b id="quiz-stat-count">71</b>questions</span>
+        <span class="quiz-launch-stat"><b id="quiz-stat-asn">18</b>A / S / N</span>
         <span class="quiz-launch-stat"><b>6</b>per round</span>
       </div>
       <button type="button" class="viz-btn viz-primary quiz-start-btn" id="quiz-start">▶ Start Quiz</button>
@@ -301,7 +302,7 @@
         <span class="exam-check-year-prog" aria-hidden="true"></span>
       </summary>
       <div class="exam-check-year-body">
-      <label class="exam-check-item" data-exam="2026-a" title="illustrated solution (your writeup)">
+      <label class="exam-check-item" data-exam="2026-a" title="safe edge + Prim proof · Huffman/LZ78 min-bits · BuildMinHeap trap · Hash+UF runs ADT · Hash+DLL+SkipList ADT">
         <input type="checkbox">
         <span class="exam-check-label"><b>Moed A</b></span>
         <a class="exam-check-link" href="../Exams/2026/2026A-solution.pdf" target="_blank" rel="noopener">solution</a>
@@ -646,7 +647,7 @@
       </div>
       <div class="exam-ask-item">
         <h5>Graphs</h5>
-        <p>Edge membership tests (some / every MST); Kruskal and Prim; reductions. See <a href="06-graphs.html#mst">§6.5</a>.</p>
+        <p>Edge membership tests (some / every MST); Kruskal and Prim; reductions. <b>New (2026A):</b> safe-edge definition + cut-property proof + Prim correctness — <a href="06-graphs.html#mst-theory">§6.5 theory</a>.</p>
       </div>
       <div class="exam-ask-item">
         <h5>Union-Find</h5>
@@ -678,6 +679,57 @@
         <li>Prefer <b>Θ</b> when tight; name the <b>theorem</b> you use.</li>
       </ul>
     </div>
+  </div>
+
+  <h2 class="section" id="moedb-drill">8.4 Moed B drill: definitions &amp; proofs from the lectures</h2>
+  <div class="card">
+    <p style="margin-top:0"><b>The 2026A lesson:</b> 28 of 100 points were "quote the lecture definition / reproduce the lecture proof" (safe edge + Prim correctness, Huffman/LZ78 min-bits). Everything below is lecture material that fits that pattern. Each row links to the full writeup on this site.</p>
+
+    <h4>Definitions to quote verbatim</h4>
+    <table>
+      <tr><th>Definition</th><th>Where</th><th>Status vs past exams</th></tr>
+      <tr><td><b>Safe edge</b> + cut / respects / light edge</td><td><a href="06-graphs.html#mst-theory">§6.5</a></td><td><b>asked 2026A</b> — will repeat in some form</td></tr>
+      <tr><td>Accounting method: <b>prefix credit invariant</b></td><td><a href="07-advanced.html#amortized">§7.1</a></td><td>high risk — proof-style definition</td></tr>
+      <tr><td>AVL tree (incl. height(NULL) = −1); rank vs height in Union-Find</td><td><a href="03-trees.html#avl">§3.5</a> · <a href="07-advanced.html#unionfind">§7.2</a></td><td>"why rank, not height?" is classic bait</td></tr>
+      <tr><td>B-tree: \(t{-}1\)/\(2t{-}1\) key bounds, all leaves same depth</td><td><a href="03-trees.html#btree">§3.7</a></td><td>appears in true/false regularly</td></tr>
+      <tr><td><b>Universal hash family</b> (\(\Pr[h(x){=}h(y)]\le 1/m\), \(a\neq 0\))</td><td><a href="05-hashing.html#universal">§5.2</a></td><td>never asked — fresh material</td></tr>
+      <tr><td>Complete binary tree ("delete consecutive leaves right-to-left"); heap property</td><td><a href="04-heaps.html#heap">§4.1</a></td><td>wording matters in A/S/N questions</td></tr>
+      <tr><td>Stable / in-place; <b>average-case vs worst-case-expected</b></td><td><a href="02-sorting.html#bucket-proof">§2.3</a></td><td>conceptual trap the lecture stresses</td></tr>
+      <tr><td>BB[α] bounded balance</td><td><a href="07-advanced.html#bb-alpha">§7.5</a></td><td>never asked — fresh material</td></tr>
+    </table>
+
+    <h4>Proofs to be able to write start-to-finish</h4>
+    <table>
+      <tr><th>Proof</th><th>Core trick</th><th>Where</th></tr>
+      <tr><td><b>Cut property</b> + Prim adds safe edges</td><td>exchange argument on the unique cycle</td><td><a href="06-graphs.html#cut-property">§6.5</a></td></tr>
+      <tr><td>BuildHeap Θ(n)</td><td>\(\sum_h h/2^h = 2\), count nodes per height</td><td><a href="04-heaps.html#buildheap-proof">§4.1</a></td></tr>
+      <tr><td>Huffman optimality</td><td>sibling lemma (exchange) + induction on \(|C|\)</td><td><a href="04-heaps.html#huffman-proof">§4.2</a></td></tr>
+      <tr><td>Comparison sort Ω(n log n)</td><td>leaf lemma + \(n!\ge (n/2)^{n/2}\)</td><td><a href="02-sorting.html#lowerbound-proof">§2 lower bound</a></td></tr>
+      <tr><td>AVL height ≤ 1.44 log n</td><td>\(n_k = n_{k-1}+n_{k-2}+1 = F_{k+3}-1\)</td><td><a href="03-trees.html#avl-height-proof">§3.5</a></td></tr>
+      <tr><td>Skip list E[height] ≤ log n + 2; search ≤ 2log n + 5</td><td>indicators + split the sum at log n; backward search</td><td><a href="05-hashing.html#sl-proofs">§5.1</a></td></tr>
+      <tr><td>Binary counter O(1) amortized (both methods)</td><td>bit i flips n/2^i times; $1 on every 1-bit</td><td><a href="07-advanced.html#binary-counter">§7.1</a></td></tr>
+      <tr><td>Weighted union O(m + n log n)</td><td>set doubles each time your pointer moves</td><td><a href="07-advanced.html#uf-linkedlist">§7.2</a></td></tr>
+      <tr><td>White-path / parenthesis / topo-sort correctness</td><td>interval nesting + "black vertex has no white neighbor"</td><td><a href="06-graphs.html#dfs-theorems">§6.3</a></td></tr>
+      <tr><td>Bucket sort expected Θ(n)</td><td>\(E[n_0^2] = 2-1/n\) via indicators</td><td><a href="02-sorting.html#bucket-proof">§2.3.3</a></td></tr>
+      <tr><td>B-tree 3/2m structural ops; BB[α] rebuild</td><td>credit invariants on nodes</td><td><a href="07-advanced.html#btree-amortized">§7.4</a> · <a href="07-advanced.html#bb-alpha">§7.5</a></td></tr>
+      <tr><td>LZ78 minimum bits Θ(√n log n)</td><td>i-th phrase length ≤ i ⟹ p = Ω(√n)</td><td><a href="04-heaps.html#lz-bits">§4.3</a></td></tr>
+    </table>
+
+    <h4>The 2026A design-question patterns (Q5/Q6 — 40 pts)</h4>
+    <table>
+      <tr><th>Requirement</th><th>Structure</th><th>Key idea</th></tr>
+      <tr>
+        <td>Aggregates (Min/Max/Sum) over <b>runs of consecutive integers</b>, Insert O(α(n))</td>
+        <td><b>Hash + Union-Find</b></td>
+        <td>Each run = one UF set; store min/max/sum/cnt <b>on the representative</b>; Insert(x) = MakeSet + look up H[x−1], H[x+1] + up to 2 Unions (merge aggregates).</td>
+      </tr>
+      <tr>
+        <td>Pred/Succ in O(1), Insert O(1) if x±1 present, else O(log n)</td>
+        <td><b>Hash + sorted DLL + Skip List</b></td>
+        <td>DLL gives pred/succ by pointer chase; hash finds neighbors for O(1) splice; skip list (isolated keys or run-minima only) locates the splice point when no neighbor exists.</td>
+      </tr>
+    </table>
+    <div class="note"><b>Takeaway pattern:</b> "store the aggregate on the set representative" turns any per-group query into Find + O(1). Works for any associative op (min, max, sum, count). Union-Find is no longer just Kruskal's helper.</div>
   </div>
 
   <div class="note" style="text-align:center;margin-top:30px">
@@ -716,7 +768,7 @@
 </div>
 
 <script src="assets/exam-checklist.js?v=20260716fold" defer></script>
-<script src="assets/quiz-exam-pool.js?v=20260716lines"></script>
-<script src="assets/quiz.js?v=20260716lines" defer></script>
+<script src="assets/quiz-exam-pool.js?v=20260727moedb"></script>
+<script src="assets/quiz.js?v=20260727moedb" defer></script>
 </body>
 </html>

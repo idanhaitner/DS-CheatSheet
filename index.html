@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DS Cheat Sheet: Home</title>
-<link rel="stylesheet" href="assets/style.css?v=20260716ux">
+<link rel="stylesheet" href="assets/style.css?v=20260804analysis">
 <script src="assets/theme.js?v=20260716ux"></script>
 </head>
 <body>
@@ -22,6 +22,7 @@
     <a href="06-graphs.html">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
+    <a href="09-cram.html">9 · Cram Recap</a>
   </nav>
 </aside>
 <main class="content">
@@ -30,29 +31,30 @@
     <p>Visual study guide with step-through animations — tuned for BGU exam definitions.</p>
   </div>
   <div class="inner">
+    <div class="card cram-launch">
+      <h2>Already know the material?</h2>
+      <p style="margin:0;color:var(--muted)">Moed B / second sitting — skip the long chapters. One dense page: definitions, tables, traps, last-30-min checklist.</p>
+      <a class="cram-cta" href="09-cram.html">Open Cram Recap →</a>
+    </div>
+
     <div class="hero-banner card">
       <div class="hero-banner-inner">
         <h2>Study by chapter</h2>
         <p>Definitions from the lecture slides, interactive animators, and a practice quiz.</p>
         <div class="feature-pills">
-          <span class="feature-pill accent2">B-tree 1-pass / 2-pass</span>
-          <span class="feature-pill">MST edge-membership tests</span>
-          <span class="feature-pill accent2">Deamortized rehash</span>
-          <span class="feature-pill">Dark &amp; light mode</span>
+          <span class="feature-pill accent2">Safe edge + Prim proof (2026A!)</span>
+          <span class="feature-pill">Green/red Quicksort · MoM 3n/10</span>
+          <span class="feature-pill accent2">White-path theorem animator</span>
+          <span class="feature-pill">Binary counter · accounting</span>
         </div>
       </div>
     </div>
 
     <div class="note">
-      <b>How to use.</b> Sidebar → chapter. Long pages unfold a section TOC.
-      Animations live in
-      <a href="02-sorting.html">Sorting</a>,
-      <a href="03-trees.html">Trees</a>,
-      <a href="04-heaps.html">Heaps</a>,
-      <a href="05-hashing.html">Hashing</a>,
-      <a href="06-graphs.html">Graphs</a>,
-      <a href="07-advanced.html">Amortized</a>.
-      Drill with the <a href="08-exam.html#quiz">quiz</a> and <a href="08-exam.html#exam-checklist">moed checklist</a>.
+      <b>How to use.</b>
+      Retaking / already fluent → <a href="09-cram.html"><b>Cram Recap</b></a>.
+      Otherwise: sidebar → chapter (TOC unfolds). Animators in Sorting / Trees / Heaps / Hashing / Graphs / Amortized.
+      Drill: <a href="08-exam.html#quiz">quiz</a> · <a href="08-exam.html#exam-checklist">moed checklist</a> · <a href="08-exam.html#moedb-drill">proof drill</a>.
     </div>
 
     <h2 class="section">Complexity tags</h2>
@@ -85,8 +87,8 @@
           <h4><a href="02-sorting.html">Sorting</a></h4>
         </div>
         <ul>
-          <li>Animated comparison &amp; linear sorts</li>
-          <li>Selection / order statistics</li>
+          <li>Animated sorts · <a href="02-sorting.html#rg-analysis">green/red Quicksort</a></li>
+          <li>Selection · <a href="02-sorting.html#sel-deterministic">MoM 3n/10 proof</a> · <a href="02-sorting.html#bucket-proof">bucket</a></li>
         </ul>
       </div>
       <div class="card topic-card">
@@ -105,7 +107,8 @@
           <h4><a href="04-heaps.html">Heaps &amp; Compression</a></h4>
         </div>
         <ul>
-          <li>Binary heap · Huffman · LZ</li>
+          <li><a href="04-heaps.html#buildheap-proof">BuildHeap Θ(n)</a> · <a href="04-heaps.html#huffman-proof">Huffman proof</a></li>
+          <li><a href="04-heaps.html#lz-bits">LZ78 √n bound</a></li>
         </ul>
       </div>
       <div class="card topic-card">
@@ -114,7 +117,8 @@
           <h4><a href="05-hashing.html">Skip Lists &amp; Hashing</a></h4>
         </div>
         <ul>
-          <li>Skip lists · chaining · probing · Bloom</li>
+          <li><a href="05-hashing.html#sl-proofs">Skip-list proofs</a> · reverse-path viz · <a href="05-hashing.html#universal">universal hashing</a></li>
+          <li>Chaining · probing · Bloom</li>
         </ul>
       </div>
       <div class="card topic-card">
@@ -123,8 +127,8 @@
           <h4><a href="06-graphs.html">Graphs</a></h4>
         </div>
         <ul>
-          <li>BFS/DFS · <a href="06-graphs.html#mst">MST edge membership</a></li>
-          <li>Kruskal · Prim · Dijkstra · Bellman-Ford</li>
+          <li>BFS/DFS · <a href="06-graphs.html#white-path-viz">white-path animator</a> · <a href="06-graphs.html#mst-theory">safe edge</a></li>
+          <li>Kruskal · Prim (+ correctness) · Dijkstra · Bellman-Ford</li>
         </ul>
       </div>
       <div class="card topic-card">
@@ -133,17 +137,27 @@
           <h4><a href="07-advanced.html">Amortized &amp; Union-Find</a></h4>
         </div>
         <ul>
-          <li><a href="07-advanced.html#deamortization">Deamortized rehash</a> · B-tree accounting</li>
-          <li>Union-Find animator</li>
+          <li><a href="07-advanced.html#binary-counter">Binary counter</a> · accounting · <a href="07-advanced.html#deamortization">deamortized rehash</a></li>
+          <li>Union-Find proofs · <a href="07-advanced.html#bb-alpha">BB[α] trees</a></li>
         </ul>
       </div>
       <div class="card topic-card">
         <div class="topic-card-head">
-          <span class="topic-num">8–9</span>
+          <span class="topic-num">8</span>
           <h4><a href="08-exam.html">Exam</a></h4>
         </div>
         <ul>
-          <li>Tables · quiz · checklist · HW patterns</li>
+          <li>Tables · quiz · checklist · <a href="08-exam.html#moedb-drill">Moed B proof drill</a></li>
+        </ul>
+      </div>
+      <div class="card topic-card">
+        <div class="topic-card-head">
+          <span class="topic-num">9</span>
+          <h4><a href="09-cram.html">Cram Recap</a></h4>
+        </div>
+        <ul>
+          <li>Full course in one scan — for people who already know it</li>
+          <li>Know-cold defs · traps · last 30 minutes</li>
         </ul>
       </div>
     </div>

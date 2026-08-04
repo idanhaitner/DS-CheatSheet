@@ -24,6 +24,7 @@
     <a href="06-graphs.html">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
+    <a href="09-cram.html">9 · Cram Recap</a>
   </nav>
 </aside>
 <main class="content">
@@ -124,6 +125,7 @@
       <li><b>Successor:</b> if right child exists → min of right subtree; else → lowest ancestor whose left child is also an ancestor of x.</li>
       <li><b>Predecessor:</b> if left child exists → max of left subtree; else → lowest ancestor whose right child is also an ancestor of x.</li>
     </ul>
+    <div class="note">Step-through animation (both cases): <a href="#avl"><b>AVL animator → Successor / Predecessor</b></a>.</div>
     <h4>Deletion: 3 cases</h4>
     <ol>
       <li><b>No children:</b> remove it.</li>
@@ -141,6 +143,18 @@
       <tr><td>Insert</td><td><span class="tag b-Olog">O(log n)</span>: at most <b>1</b> (single/double) rotation</td></tr>
       <tr><td>Delete</td><td><span class="tag b-Olog">O(log n)</span>: up to <b>O(log n)</b> rotations to the root</td></tr>
     </table>
+
+    <h4 id="avl-height-proof">Height proof: \(h \le 1.44\log n\) (lecture 5 — full proof)</h4>
+    <p>Let \(n_k\) = the <b>minimum</b> number of nodes in an AVL tree of height \(k\). A minimal tree = root + minimal subtree of height \(k{-}1\) + minimal subtree of height \(k{-}2\):</p>
+    <p style="text-align:center">\(n_k = n_{k-1} + n_{k-2} + 1,\qquad n_0=1,\ n_1=2\ \ (n_2=4,\ n_3=7,\ldots)\)</p>
+    <ul>
+      <li><b>Claim (induction):</b> \(n_k = F_{k+3} - 1\) (Fibonacci). Base: \(n_0=1=F_3-1\), \(n_1=2=F_4-1\). Step: \(n_k=(F_{k+2}-1)+(F_{k+1}-1)+1=F_{k+3}-1\). ✓</li>
+      <li>Since \(F_k \approx \varphi^k/\sqrt5\) with \(\varphi=\frac{1+\sqrt5}{2}\): any AVL with \(n\) nodes and height \(k\) satisfies \(n \ge n_k \ge \varphi^{k+3}/\sqrt5 - O(1)\) ⟹ \(k \le \log_\varphi n + O(1) \approx \mathbf{1.44\log_2 n}\). ∎</li>
+    </ul>
+
+    <div class="note"><b>Which rotation? (lecture decision rule)</b> Let \(x\) = the <b>lowest</b> unbalanced node; the case (LL/LR/RL/RR) is decided by \(x\)'s <b>tallest grandchild</b> side. <b>Tie-breaker (happens only in Delete):</b> if LL and LR tie — treat as <b>LL</b> (single rotation); RR/RL tie — treat as <b>RR</b>.</div>
+    <div class="pitfall"><b>2026A Q3 lesson — rotations are not "undone" by re-inserting:</b> delete a node, suffer an LL rotation, then re-insert the same node — the tree does <b>not</b> return to its original shape (the rotation moved the root; re-inserting adds a leaf but never rotates back, since the re-insert raises a subtree height by at most 1, giving balance factor −1, not −2). Claims of the form "the structure is restored" are false whenever a rotation actually occurred.</div>
+
     <h4 id="avl-rotations">All rotations</h4>
     <p class="avl-rot-lead"><code>bf = h(L) − h(R)</code>. The balance line above each tree shows the height difference at the first unbalanced node.</p>
     <div class="avl-rot-legend" aria-label="Color legend">
@@ -560,13 +574,15 @@
     </table>
     <div class="note"><b>Mnemonic:</b> rotate <b>opposite</b> the heavy side (left-heavy → right rotate). Double cases first rotate the child so they collapse to a single case. Insert needs ≤1 rotation; delete may need rotations all the way to the root.</div>
 
-    <h4>Insert / delete animator</h4>
-    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Insert or delete a key: the node is added/removed <b>without</b> auto-rebalancing. Press <b>Balance Tree</b> when <b>|h(L)−h(R)| &gt; 1</b>. Use <b>Fit</b> / <b>+/−</b> or Ctrl+scroll to zoom. <span style="color:#ff6b81"><b>Red</b></span> = pivot · <span style="color:#a78bfa"><b>Purple</b></span> = rotating subtree · <span style="color:#57e0c0"><b>Teal</b></span> = promoted root · <span style="color:#7c4dff"><b>Violet</b></span> = inserted / deleted.</p>
+    <h4>Insert / delete / successor / predecessor animator</h4>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Insert or delete a key: the node is added/removed <b>without</b> auto-rebalancing. Press <b>Balance Tree</b> when <b>|h(L)−h(R)| &gt; 1</b>. Use <b>Successor</b> / <b>Predecessor</b> on the key in the box to step through Tree-Successor / Tree-Predecessor (subtree case + ancestor climb). Use <b>Fit</b> / <b>+/−</b> or Ctrl+scroll to zoom. <span style="color:#ff6b81"><b>Red</b></span> = pivot / cursor · <span style="color:#a78bfa"><b>Purple</b></span> = rotating subtree · <span style="color:#57e0c0"><b>Teal</b></span> = answer / promoted root · <span style="color:#7c4dff"><b>Violet</b></span> = start / inserted / deleted · <span style="color:#7c9cff"><b>Blue</b></span> = search path.</p>
     <div class="tree-viz-wrap avl-viz-wrap">
       <div class="viz-controls">
-        <label>Key: <input type="number" class="viz-key" min="1" max="99" value="25" style="width:56px"></label>
+        <label>Key: <input type="number" class="viz-key" min="1" max="99" value="20" style="width:56px"></label>
         <button type="button" class="viz-btn viz-primary viz-insert">Insert</button>
         <button type="button" class="viz-btn viz-delete">Delete</button>
+        <button type="button" class="viz-btn viz-succ" title="Tree-Successor of key">Successor</button>
+        <button type="button" class="viz-btn viz-pred" title="Tree-Predecessor of key">Predecessor</button>
         <button type="button" class="viz-btn viz-reset">Reset</button>
         <button type="button" class="viz-btn viz-play">Balance Tree</button>
         <button type="button" class="viz-btn viz-prev">◀ Step</button>
@@ -723,7 +739,7 @@
 </main>
 </div>
 <script src="assets/viz-code-helper.js?v=20260712ost" defer></script>
-<script src="assets/trees.js?v=20260716avlfix" defer></script>
+<script src="assets/trees.js?v=20260804succpred" defer></script>
 <script src="assets/ost.js?v=20260712smaller2" defer></script>
 </body>
 </html>

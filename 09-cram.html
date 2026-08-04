@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>9 · Cram Recap</title>
+<link rel="stylesheet" href="assets/style.css?v=20260727cram">
+<script src="assets/theme.js?v=20260716ux"></script>
+<script src="assets/mathjax-init.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">DS Cheat Sheet<small>Data Structures · Exam Study Guide</small></div>
+  <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">Menu</button>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="01-foundations.html">1 · Foundations</a>
+    <a href="02-sorting.html">2 · Sorting</a>
+    <a href="03-trees.html">3 · Structures &amp; Trees</a>
+    <a href="04-heaps.html">4 · Heaps &amp; Compression</a>
+    <a href="05-hashing.html">5 · Skip Lists &amp; Hashing</a>
+    <a href="06-graphs.html">6 · Graphs</a>
+    <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
+    <a href="08-exam.html">8 · Exam Reference</a>
+    <a href="09-cram.html" class="active">9 · Cram Recap</a>
+  </nav>
+</aside>
+<main class="content">
+  <div class="pagehead">
+    <div class="crumbs"><a href="index.html">Home</a> › Cram Recap</div>
+    <h1>9 · Cram Recap</h1>
+    <p>You already know this — one dense pass before the exam. Deep links only when you blank.</p>
+  </div>
+  <div class="inner cram">
+
+  <div class="warn">
+    <b>How to use:</b> scan top→bottom once. Red boxes = 2026A-style traps / “write the definition”.
+    Need a full proof? click the § links. Quiz: <a href="08-exam.html#quiz">§8</a>.
+  </div>
+
+  <!-- ========== KNOW COLD ========== -->
+  <h2 class="section" id="know-cold">0 · Quote these cold</h2>
+  <div class="card cram-card">
+    <ul class="cram-list">
+      <li><b>Safe edge:</b> \(A\subseteq\) some MST; \((u,v)\) safe for \(A\) iff \(A\cup\{(u,v)\}\subseteq\) some MST. → <a href="06-graphs.html#mst-theory">§6.5</a></li>
+      <li><b>Cut property:</b> \(A\subseteq\) MST, cut respects \(A\), light edge across cut ⇒ safe. Exchange on unique cycle.</li>
+      <li><b>Prim safe:</b> \(S=\) extracted verts; light edge = \((u.\pi,u)\). Kruskal: \(S=\) component of \(u\).</li>
+      <li><b>Accounting invariant:</b> every prefix \(\sum c_i\le\sum\hat c_i\) (bank never negative mid-sequence).</li>
+      <li><b>Universal \(\mathcal H\):</b> \(\Pr[h(x)=h(y)]\le 1/m\) for \(x\neq y\). Family \(f_{a,b}\) with \(a\neq 0\).</li>
+      <li><b>AVL:</b> \(|h_L-h_R|\le 1\), \(h(\mathrm{NULL})=-1\). Height \(n_k=n_{k-1}+n_{k-2}+1=F_{k+3}-1\Rightarrow\le 1.44\log n\).</li>
+      <li><b>B-tree \(t\):</b> non-root keys \(\in[t{-}1,\,2t{-}1]\); all leaves same depth; \(h\le\log_t\frac{n+1}{2}\).</li>
+      <li><b>Complete BT:</b> perfect, or perfect minus consecutive right-to-left leaves.</li>
+    </ul>
+  </div>
+
+  <!-- ========== COMPLEXITY ========== -->
+  <h2 class="section" id="tables">1 · Complexity flash</h2>
+  <div class="card cram-card">
+    <div class="table-wrap">
+    <table class="cram-table">
+      <tr><th>Structure</th><th>Search</th><th>Insert</th><th>Delete</th><th>Min</th><th>Note</th></tr>
+      <tr><td>AVL / balanced BST</td><td>\(O(\log n)\)</td><td>\(O(\log n)\)</td><td>\(O(\log n)\)</td><td>\(O(\log n)\)</td><td>insert ≤1 rot; delete \(O(h)\) rots</td></tr>
+      <tr><td>Skip list</td><td>\(E:\log n\)</td><td>\(E:\log n\)</td><td>\(E:1\)*</td><td>\(1\)</td><td>*pointer given; worst \(O(n)\)</td></tr>
+      <tr><td>Hash chain</td><td>\(E:1+\alpha\)</td><td>\(1\)</td><td>\(E:1+\alpha\)</td><td>\(n\)</td><td>worst \(O(n)\); DLL delete \(O(1)\)</td></tr>
+      <tr><td>Heap</td><td>\(n\)</td><td>\(\log n\)</td><td>\(\log n\)†</td><td>\(1\)</td><td>†extract only; build \(\Theta(n)\)</td></tr>
+      <tr><td>UF rank+PC</td><td colspan="4">\(m\) ops: \(\Theta(m\alpha(n))\)</td><td>single Find still \(O(\log n)\)</td></tr>
+    </table>
+    </div>
+    <div class="table-wrap" style="margin-top:12px">
+    <table class="cram-table">
+      <tr><th>Algo</th><th>Time</th><th>When</th></tr>
+      <tr><td>Merge / Heap sort</td><td>\(\Theta(n\log n)\)</td><td>comparison; Merge stable</td></tr>
+      <tr><td>Quick / Rand-Select</td><td>\(E:\Theta(n\log n)\) / \(E:\Theta(n)\)</td><td>worst \(n^2\) without random</td></tr>
+      <tr><td>MoM Select</td><td>\(\Theta(n)\)</td><td>\(T=T(n/5)+T(7n/10)+n\)</td></tr>
+      <tr><td>Counting / Radix / Bucket</td><td>\(\Theta(n+k)\) / \(\Theta(d(n+b))\) / avg \(\Theta(n)\)</td><td>not comparison</td></tr>
+      <tr><td>BFS / DFS / Topo</td><td>\(O(V+E)\)</td><td>unweighted SP / cycle·topo / DAG order</td></tr>
+      <tr><td>Kruskal / Prim</td><td>\(O(E\log V)\)</td><td>MST via cut property</td></tr>
+      <tr><td>Dijkstra / BF</td><td>\(O((V+E)\log V)\) / \(O(VE)\)</td><td>nonneg / neg OK + cycle detect</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <!-- ========== FOUNDATIONS ========== -->
+  <h2 class="section" id="foundations">2 · Foundations</h2>
+  <div class="card cram-card">
+    <div class="cram-cols">
+      <div>
+        <h4>Asymptotics</h4>
+        <ul class="cram-list">
+          <li>\(O\) upper, \(\Omega\) lower, \(\Theta=O\cap\Omega\).</li>
+          <li>Not every pair comparable (even/odd counterex).</li>
+          <li>\(f=O(g)\Leftrightarrow g=\Omega(f)\). \(\Theta\) symmetric.</li>
+          <li>Poly \(b_kn^k+\cdots=\Theta(n^k)\).</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Master / trees</h4>
+        <ul class="cram-list">
+          <li>\(aT(n/b)+f\): compare \(f\) to \(n^{\log_b a}\) with \(\varepsilon\)-gap.</li>
+          <li>Case 3 needs regularity \(af(n/b)\le cf\), \(c&lt;1\).</li>
+          <li>Fails: \(n/\log n\) (no poly gap) → tree.</li>
+          <li>\(T(n/3)+T(2n/3)+n=\Theta(n\log n)\).</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Probability</h4>
+        <ul class="cram-list">
+          <li>Linearity: always (no independence).</li>
+          <li>Indicator: \(E[X_A]=\Pr[A]\).</li>
+          <li>Geo(\(p\)): \(E=1/p\). Bin: \(np\).</li>
+          <li>Union bound: no independence.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SORTING ========== -->
+  <h2 class="section" id="sorting">3 · Sorting &amp; Select</h2>
+  <div class="card cram-card">
+    <ul class="cram-list">
+      <li><b>Ω(n log n):</b> ≥n! leaves; binary ≤2ʰ leaves; \(n!\ge(n/2)^{n/2}\). → <a href="02-sorting.html#lowerbound-proof">proof</a></li>
+      <li><b>Stable:</b> Counting (downto), Merge, Radix (needs stable digit). Quick/Heap: no.</li>
+      <li><b>Radix:</b> LSD; after \(i\) digits sorted; base \(b=n\) when \(u&gt;n\) → \(\Theta(n\log u/\log n)\); \(u\le n^c\Rightarrow\Theta(n)\).</li>
+      <li><b>Bucket avg:</b> \(E[n_0^2]=2-1/n\) via indicators → Θ(n). Deterministic; avg ≠ worst-case expected.</li>
+      <li><b>Partition:</b> zones ≤pivot / &gt;pivot / unexamined / pivot. Quick worst: always (n−1,0).</li>
+      <li><b>MoM:</b> ≥\(\frac3{10}n-6\) on each side of pivot; recurse ≤\(\frac7{10}n+6\).</li>
+    </ul>
+  </div>
+
+  <!-- ========== TREES ========== -->
+  <h2 class="section" id="trees">4 · Trees</h2>
+  <div class="card cram-card">
+    <div class="cram-cols">
+      <div>
+        <h4>BST / AVL</h4>
+        <ul class="cram-list">
+          <li>Delete 2 kids → successor (no left child).</li>
+          <li>Succ: right→min, else climb while right-child.</li>
+          <li>Case by tallest grandchild; delete tie → LL/RR.</li>
+          <li>Rotate ≠ undone by re-insert (2026A).</li>
+        </ul>
+      </div>
+      <div>
+        <h4>B-tree</h4>
+        <ul class="cram-list">
+          <li>Split: median up; two × (t−1) keys.</li>
+          <li>1-pass: fix full/thin <em>before</em> enter.</li>
+          <li>2-pass: find then fix path suffix.</li>
+          <li>Delete internal: replace by successor (lecture ≠ CLRS).</li>
+        </ul>
+      </div>
+      <div>
+        <h4>OST</h4>
+        <ul class="cram-list">
+          <li><code>size</code> on node; Select/Rank \(O(\log n)\).</li>
+          <li>vs Indexable SL: expected OK → width; worst-case → OST.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== HEAP / COMPRESS ========== -->
+  <h2 class="section" id="heap-comp">5 · Heap &amp; Compression</h2>
+  <div class="card cram-card">
+    <ul class="cram-list">
+      <li><b>BuildHeap Θ(n):</b> ≤n/2ʰ⁺¹ nodes height \(h\); \(\sum h/2^h=2\). → <a href="04-heaps.html#buildheap-proof">§4.1</a></li>
+      <li><b>Heap ≠ sorted</b> (2026A). 3rd-largest can sit depth 1 or 2.</li>
+      <li><b>Huffman:</b> sibling lemma → induct on |C|; cost(T)=cost(T′)+z.freq. Min bits = skewed; max = balanced.</li>
+      <li><b>LZ78:</b> phrase = longest prior block + 1 char → (j,c). Min phrases Ω(√n) since lengths ≤1..p. Bits Θ(√n log n).</li>
+    </ul>
+  </div>
+
+  <!-- ========== HASH / SKIP ========== -->
+  <h2 class="section" id="hash">6 · Skip list &amp; Hash</h2>
+  <div class="card cram-card">
+    <div class="cram-cols">
+      <div>
+        <h4>Skip list</h4>
+        <ul class="cram-list">
+          <li>Promote w.p. 1/2; \(E[|S_i|]=n/2^i\); space ~2n.</li>
+          <li>\(E[h]\le\log n+2\) (split sum).</li>
+          <li>Backward search: \(E\le 2\log n+5\).</li>
+          <li>Delete (ptr): \(E[H]=1\Rightarrow\Theta(1)\).</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Hash</h4>
+        <ul class="cram-list">
+          <li>α=n/m; keep α∈[1/4,1] with rehash.</li>
+          <li>Universal → \(E[\text{list}]\le1+\alpha\).</li>
+          <li>Max bin \(\Theta(\log n/\log\log n)\) whp.</li>
+          <li>LP delete: tombstone or reinsert run.</li>
+          <li>Bloom: no FN; FP \((1-e^{-kn/m})^k\); no delete.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== GRAPHS ========== -->
+  <h2 class="section" id="graphs">7 · Graphs</h2>
+  <div class="card cram-card">
+    <div class="cram-cols">
+      <div>
+        <h4>BFS / DFS</h4>
+        <ul class="cram-list">
+          <li>BFS: layers = δ; unweighted SP.</li>
+          <li>Parenthesis: nest ⟺ descendant.</li>
+          <li>White-path: white path at d[u] ⟺ desc.</li>
+          <li>Cycle ⟺ back edge (digraph).</li>
+          <li>Topo: decreasing f; prove f[v]&lt;f[u].</li>
+          <li>Undirected DFS: only tree+back.</li>
+        </ul>
+      </div>
+      <div>
+        <h4>MST / SSSP</h4>
+        <ul class="cram-list">
+          <li>GenericMST: always add safe edge.</li>
+          <li>e in some MST? BFS on lighter edges.</li>
+          <li>e in every MST? BFS on ≤w without e.</li>
+          <li>Dijkstra: no neg edges.</li>
+          <li>BF: |V|−1 relax; extra pass = neg cycle.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pitfall" style="margin-top:10px"><b>2026A Prim variant:</b> if \(Q=\{r\}\) only — Insert new verts, DecreaseKey if already in Q.</div>
+  </div>
+
+  <!-- ========== AMORTIZED ========== -->
+  <h2 class="section" id="amort">8 · Amortized &amp; UF</h2>
+  <div class="card cram-card">
+    <ul class="cram-list">
+      <li><b>Only Aggregate + Accounting</b> in course (no Φ).</li>
+      <li><b>Counter:</b> bit \(i\) flips \(n/2^i\); total &lt;2n. Accounting: charge $2; $1 on every 1-bit. → <a href="07-advanced.html#binary-counter">§7.1</a></li>
+      <li><b>Multipop:</b> Push charge 2; Pop/Multi 0. Each elem $1.</li>
+      <li><b>Rehash:</b> Insert charge $3; shrink at n=m/4 → m/2.</li>
+      <li><b>Weighted union:</b> pointer updates ≤log n per elem → \(O(m+n\log n)\).</li>
+      <li><b>Rank ≠ height:</b> PC shortens height; rank is upper bound only.</li>
+      <li><b>B-tree amort:</b> charge 3/2; credits on thin/full nodes; ≤(3/2)m structural ops.</li>
+      <li><b>BB[α]:</b> rebuild highest unbalanced; α=1/3 charge \(4(h+1)\); ≥M/3 inserts fund rebuild.</li>
+      <li><b>Deamort rehash:</b> over m/2 inserts do 3–4 copy steps; every Insert O(1) worst.</li>
+    </ul>
+  </div>
+
+  <!-- ========== ADT PATTERNS ========== -->
+  <h2 class="section" id="adt">9 · Design patterns (2026A style)</h2>
+  <div class="card cram-card">
+    <table class="cram-table">
+      <tr><th>Need</th><th>Combine</th></tr>
+      <tr><td>Membership O(1) + order / Succ</td><td>Hash + AVL / Skip / DLL</td></tr>
+      <tr><td>Aggregates on consecutive-int runs, Insert ~α(n)</td><td>Hash + UF; min/max/sum on <b>rep</b></td></tr>
+      <tr><td>Pred/Succ O(1); Insert O(1) if neighbor exists</td><td>Hash + sorted DLL (+ Skip for gaps)</td></tr>
+      <tr><td>Select / Rank dynamic worst-case</td><td>OST (<code>size</code>)</td></tr>
+      <tr><td>DeleteMax + Search</td><td>Heap + Hash (or AVL)</td></tr>
+      <tr><td>Components / Kruskal</td><td>UF (+ Hash if keys not 1..n)</td></tr>
+    </table>
+    <p class="cram-tip">Write fields first → each op 3–5 lines → bound. State which partial-credit variant you solve.</p>
+  </div>
+
+  <!-- ========== TRAPS ========== -->
+  <h2 class="section" id="traps">10 · Trap checklist</h2>
+  <div class="card cram-card">
+    <ul class="cram-list cram-traps">
+      <li>buildHeap is \(\Theta(n)\), not \(n\log n\). Heap order ≠ BST order ≠ sorted array.</li>
+      <li>Quicksort \(\Theta(n^2)\) on sorted with fixed pivot. Not stable.</li>
+      <li>Bucket worst \(n^2\); don’t claim worst-case linear.</li>
+      <li>Dijkstra fails with negative edges → BF.</li>
+      <li>BFS = fewest edges, not weighted SP.</li>
+      <li>Spanning tree ≠ MST. Light edge ≠ “any tree edge”.</li>
+      <li>Plain BST worst \(O(n)\). AVL insert ≤1 rot ≠ delete.</li>
+      <li>Skip Delete with <code>width</code> is \(E:O(\log n)\), not \(O(1)\).</li>
+      <li>Master without \(\varepsilon\)-gap fails. Prefer Θ when tight; name the theorem.</li>
+      <li>UF representative can change after Union — don’t cache across Unions.</li>
+      <li>Amortized ≠ average over inputs; sequence worst-case.</li>
+      <li>Potential method: <b>not in lectures</b> — don’t invent it.</li>
+    </ul>
+  </div>
+
+  <!-- ========== 30 MIN ========== -->
+  <h2 class="section" id="last30">11 · Last 30 minutes</h2>
+  <div class="card cram-card">
+    <ol class="cram-list">
+      <li>Re-read §0 definitions out loud (safe edge, accounting, AVL height, universal).</li>
+      <li>Sketch cut-property exchange + Prim one-liner on paper.</li>
+      <li>Sketch BuildHeap sum + Huffman sibling lemma.</li>
+      <li>One ADT sketch: Hash+UF runs <em>or</em> Hash+DLL+Skip.</li>
+      <li>Open <a href="08-exam.html#quiz">quiz</a> — 1 ASN + 1 MST + 1 amort round.</li>
+    </ol>
+    <p class="cram-tip">Deep dives: <a href="08-exam.html#moedb-drill">§8.4 drill</a> · <a href="06-graphs.html#mst-theory">MST theory</a> · <a href="07-advanced.html#binary-counter">counter</a> · <a href="04-heaps.html#huffman-proof">Huffman</a></p>
+  </div>
+
+  </div>
+</main>
+</div>
+</body>
+</html>

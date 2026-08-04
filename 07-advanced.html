@@ -24,30 +24,57 @@
     <a href="06-graphs.html">6 · Graphs</a>
     <a href="07-advanced.html" class="active">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
+    <a href="09-cram.html">9 · Cram Recap</a>
   </nav>
 </aside>
 <main class="content">
   <div class="pagehead">
     <div class="crumbs"><a href="index.html">Home</a> › Amortized &amp; Union-Find</div>
     <h1>7 · Advanced Analysis</h1>
-    <p>Amortized analysis · deamortization · union-find</p>
+    <p>Amortized analysis · deamortization · union-find · BB[α]</p>
   </div>
   <div class="inner">
 
   <h2 class="section" id="amortized">7.1 Amortized Analysis</h2>
   <div class="card">
-    <p>Average cost <b>per operation over a worst-case sequence</b>: not a probabilistic average. Guarantees any sequence of \(m\) operations costs at most \(m\times(\text{amortized cost})\).</p>
+    <p>Average cost <b>per operation over a worst-case sequence</b>: not a probabilistic average. If any sequence of \(n\) ops takes \(T(n)\) worst-case, the amortized cost per op is \(T(n)/n\). The course teaches <b>two</b> methods (the potential method is not in the lectures):</p>
     <table>
       <tr><th>Method</th><th>Idea</th><th>Example</th></tr>
-      <tr><td><b>Aggregate</b></td><td>Total cost of m ops is \(T(m)\); amortized = \(T(m)/m\).</td><td><b>Dynamic array (doubling):</b> n insertions copy at most n + n/2 + n/4 + … &lt; 2n elements total → \(T(n)=O(n)\) ⟹ <span class="tag b-O1">O(1)</span> amortized per insert.</td></tr>
-      <tr><td><b>Accounting</b></td><td>Assign each op a charge \(\hat c_i\); cheap ops overpay to bank credit. Require bank ≥ 0: \(\sum\hat c_i\ge\sum c_i\).</td><td><b>Same dynamic array:</b> charge <b>3 coins</b> per insert: 1 pays the insert, 2 go to the bank. When the array doubles (cost n), pay from the bank (each of the n/2 elements since last resize saved 2 coins). Bank never goes negative ⟹ <span class="tag b-O1">O(1)</span> amortized.</td></tr>
+      <tr><td><b>Aggregate</b></td><td>Total cost of n ops is \(T(n)\); amortized = \(T(n)/n\).</td><td><b>Dynamic array (doubling):</b> n insertions copy at most n + n/2 + n/4 + … &lt; 2n elements total → \(T(n)=O(n)\) ⟹ <span class="tag b-O1">O(1)</span> amortized per insert.</td></tr>
+      <tr><td><b>Accounting</b></td><td>Assign each op a charge \(\hat c_i\); cheap ops overpay to bank credit stored on objects. <b>Invariant (know the formal version!):</b> for <b>every prefix</b> \(j\): \(\sum_{i=1}^{j} c_i \le \sum_{i=1}^{j} \hat c_i\) — the bank never goes negative at any point, not just at the end.</td><td><b>Same dynamic array:</b> charge <b>3 coins</b> per insert: 1 pays the insert, 2 go to the bank. When the array doubles (cost n), pay from the bank (each of the n/2 elements since last resize saved 2 coins). Bank never goes negative ⟹ <span class="tag b-O1">O(1)</span> amortized.</td></tr>
     </table>
-    <h4>Classic results</h4>
-    <ul>
-      <li><b>Dynamic array (doubling):</b> n insertions cost O(n) total ⟹ <b>O(1) amortized</b> per insert.</li>
-      <li><b>Stack with Multipop:</b> any sequence of push/pop/multipop on n elements is O(n) total ⟹ <b>O(1) amortized</b> (each element pushed once, popped at most once).</li>
-      <li><b>Binary counter increment:</b> n increments flip O(n) bits total ⟹ <b>O(1) amortized</b> per increment.</li>
-    </ul>
+
+    <h4 id="binary-counter">Binary counter — the full worked example</h4>
+    <p>Counter stored in bit array \(A[0..k{-}1]\) (\(A[0]\) = LSB), starting at all zeros. Cost = number of <b>bit flips</b>.</p>
+    <span class="code-label">Increment(A)</span>
+<pre><span class="kw">Increment</span>(A):
+    i ← 0
+    <span class="kw">while</span> i &lt; k <span class="kw">and</span> A[i] = 1:
+        A[i] ← 0                <span class="cm">// flip trailing 1s to 0</span>
+        i ← i + 1
+    <span class="kw">if</span> i &lt; k: A[i] ← 1          <span class="cm">// first 0 becomes 1</span></pre>
+    <p><b>Worst case of a single Increment:</b> \(\Theta(k)\) flips (e.g. \(0111\ldots1 \to 1000\ldots0\)). But amortized it's O(1), two ways:</p>
+    <table>
+      <tr><th>Aggregate</th><th>Accounting</th></tr>
+      <tr>
+        <td>Bit \(i\) flips once every \(2^i\) increments ⟹ at most \(\lfloor n/2^i\rfloor\) flips in \(n\) increments. Total flips \(< \sum_{i=0}^{\infty} n/2^i = 2n\) ⟹ \(T(n)=\Theta(n)\) ⟹ <span class="tag b-O1">O(1)</span> amortized.</td>
+        <td>Charge <b>$2</b> per Increment. <b>Credit invariant: every bit that equals 1 stores $1.</b> The 1→0 flips are paid by the credits sitting on those bits; $1 of the charge pays the single 0→1 flip; the remaining $1 is stored on the new 1. Invariant holds ⟹ <span class="tag b-O1">O(1)</span> amortized.</td>
+      </tr>
+    </table>
+    <div class="note"><b>Exam form:</b> "state the credit invariant and prove Increment is O(1) amortized" — the invariant sentence in bold is the answer they grade.</div>
+
+    <h4 id="multipop">Stack with Multipop — accounting</h4>
+    <p>\(\textsf{Multipop}(S,k)\): pop until empty or \(k\) elements popped. A single Multipop costs \(\Theta(n)\), but:</p>
+    <table>
+      <tr><th>Op</th><th>Actual cost \(c_i\)</th><th>Charge \(\hat c_i\)</th></tr>
+      <tr><td>Push</td><td>1</td><td><b>2</b> ($1 pays the push, $1 stored on the element)</td></tr>
+      <tr><td>Pop / Multipop</td><td>1 / #popped</td><td><b>0</b> (paid by the $1 credit on each popped element)</td></tr>
+    </table>
+    <p><b>Invariant:</b> every stacked element holds $1. Total charge \(\le 2n\) ⟹ <span class="tag b-O1">O(1)</span> amortized. (Aggregate view: each element is pushed once and popped at most once ⟹ \(T(n)=O(n)\).)</p>
+
+    <h4 id="rehash-amortized">Hash table rehashing — accounting ($3 trick)</h4>
+    <p>Chaining, load factor \(\alpha=n/m\) kept in \([1/4,\,1]\): grow to \(2m\) when \(n=m\); shrink to \(m/2\) when \(n=m/4\). Rehash costs \(\Theta(m)\).</p>
+    <p><b>Insert charge = $3:</b> $1 pays the insert, $2 stay in the table. After a grow-rehash the credit resets to 0; the next rehash happens only after \(m\) more inserts, which deposit \(2m\) dollars — enough to pay for moving all keys. ⟹ Insert is <span class="tag b-O1">O(1)</span> amortized (expected). <b>Self-check from the slides:</b> what is the minimal charge that still works for Delete with the shrink rule?</p>
   </div>
 
   <h2 class="section" id="unionfind">7.2 Union-Find (Disjoint Sets)</h2>
@@ -59,18 +86,41 @@
       <tr><td><code>Find(x)</code></td><td>return representative of x's set</td></tr>
       <tr><td><code>Union(x,y)</code></td><td>merge the two sets</td></tr>
     </table>
+    <h4 id="uf-linkedlist">Linked-list implementation + weighted union (lecture proof)</h4>
+    <p>Each set = linked list + set object (head = representative, tail, size); every element points to its set object, so <code>Find</code> is \(\Theta(1)\). <code>Union</code> appends one list to the other and updates the set-pointers of every moved element.</p>
+    <div class="pitfall"><b>Naive union is Θ(n) even amortized:</b> MakeSet(1..n) then Union(2,1), Union(3,2), …, Union(n,n−1) appending the <em>growing</em> list each time updates \(2+3+\cdots+n=\Theta(n^2)\) pointers over \(2n{-}1\) ops. "Amortized" does not automatically mean fast.</div>
+    <p><b>Weighted-union heuristic:</b> always append the <b>smaller</b> list to the <b>larger</b> one.</p>
+    <p><b>Theorem:</b> any sequence of \(m\) ops with \(n\) MakeSets costs \(O(m + n\log n)\).</p>
+    <p><b>Proof (doubling argument):</b> fix an element \(x\). Each time \(x\)'s set-pointer is updated, \(x\) was in the smaller list, so its new set is at least <b>twice</b> as large. Set sizes are \(\le n\), so \(x\)'s pointer is updated at most \(\log n\) times. Summing over all \(n\) elements: \(O(n\log n)\) pointer updates + \(O(m)\) for everything else. ∎</p>
+
     <h4>Forest implementation + two optimizations</h4>
     <ul>
-      <li><b>Union by rank/size:</b> attach the smaller tree under the larger root → height O(log n).</li>
+      <li><b>Union by rank:</b> attach the root of smaller rank under the root of larger rank; on a tie, pick either and increment the winner's rank.</li>
       <li><b>Path compression:</b> during <code>Find</code>, point every node on the path directly to the root.</li>
     </ul>
+    <div class="note"><b>Why "rank" and not "height"? (exam favorite)</b> Path compression shortens paths, so the <em>true</em> height can silently decrease and cannot be maintained in O(1). Rank is only an <b>upper bound on height</b>: it never decreases, which is all union-by-rank needs.</div>
+    <span class="code-label">Union by rank + path compression</span>
+<pre><span class="kw">MakeSet</span>(x): x.parent ← x;  x.rank ← 0
+
+<span class="kw">FindSet</span>(x):
+    <span class="kw">if</span> x.parent ≠ x:
+        x.parent ← FindSet(x.parent)     <span class="cm">// path compression</span>
+    <span class="kw">return</span> x.parent
+
+<span class="kw">Union</span>(x, y):
+    x ← FindSet(x);  y ← FindSet(y)
+    <span class="kw">if</span> x.rank &gt; y.rank:  y.parent ← x
+    <span class="kw">else</span>:
+        x.parent ← y
+        <span class="kw">if</span> x.rank = y.rank:  y.rank ← y.rank + 1</pre>
     <table>
       <tr><th>Configuration</th><th>Cost of m operations</th></tr>
+      <tr><td>Linked list, naive union</td><td>O(m·n) worst (see pitfall above)</td></tr>
       <tr><td>Linked list + weighted union</td><td>O(m + n log n)</td></tr>
-      <tr><td>Forest, no optimization</td><td>O(m·n) worst</td></tr>
-      <tr><td><b>Both optimizations</b></td><td><span class="tag b-O1">O(m·α(n))</span> ≈ O(m): α = inverse Ackermann, ≤ 4 in practice</td></tr>
+      <tr><td>Forest + union by rank only</td><td>O(m log n) (height stays O(log n): a rank-h tree has ≥ 2^h nodes)</td></tr>
+      <tr><td><b>Rank + path compression</b></td><td><span class="tag b-O1">Θ(m·α(n))</span> ≈ O(m): α = inverse Ackermann, ≤ 4 for any realistic n (α(n)=4 already covers n up to ≫ 2<sup>2048</sup>). A single op is still Θ(log n) worst-case.</td></tr>
     </table>
-    <div class="note"><b>Application:</b> connected components: MakeSet each vertex, then for each edge (u,v) Union their sets. Two vertices are connected ⟺ same Find.</div>
+    <div class="note"><b>Application:</b> connected components: MakeSet each vertex, then for each edge (u,v) Union their sets. Two vertices are connected ⟺ same Find. <b>Pitfall:</b> the representative of a set can change after Union — never cache it across Unions.</div>
 
     <h4>Animator</h4>
     <p style="margin-top:0">Watch <b>Find</b> climb to the root (and compress the path) and <b>Union</b> link trees by rank. Arrows point <em>child → parent</em> (up toward the root).</p>
@@ -245,6 +295,24 @@
     <p><b>Insertion:</b> when node \(v_i\) splits (had \(2t-1\) keys), use its \(3/2\) dollars to pay for the split and put \(1/2\) on each child. If parent \(w\) reaches \(2t-1\) keys, take \(3/2\) from the operation's charge.</p>
     <p><b>Deletion:</b> when two siblings merge, use \(1/2\) dollar from each to pay the merge. Shifts funded from the \(3/2\) charge.</p>
     <div class="note">Amortized cost per insert/delete = <span class="tag b-O1">O(1)</span> for structural ops (tree height still \(O(\log n)\) per search). See <a href="03-trees.html#btree">B-trees</a> for the structure itself.</div>
+  </div>
+
+  <h2 class="section" id="bb-alpha">7.5 BB[α] Trees (amortized rebuilding)</h2>
+  <div class="card">
+    <p>A different way to keep a BST balanced: instead of rotations, occasionally <b>rebuild a whole subtree</b>, and pay for it amortized. (Lecture 18 — never yet asked on an exam, prime Moed B material.)</p>
+    <h4>Definition</h4>
+    <p>\(\mathrm{size}(v)\) = number of vertices in \(v\)'s subtree. Vertex \(v\) has <b>bounded balance \(\alpha\)</b> if
+    \(\ \mathrm{size}(v.\mathrm{left}) \ge \lfloor \alpha\cdot \mathrm{size}(v)\rfloor\ \) and \(\ \mathrm{size}(v.\mathrm{right}) \ge \lfloor \alpha\cdot \mathrm{size}(v)\rfloor\).
+    A <b>BB[α] tree</b> (\(\alpha &lt; 1/2\)) is a BST in which <b>every</b> vertex has bounded balance α. Height \(\le \log_{1/(1-\alpha)} n = O(\log n)\).</p>
+    <h4>Insert / Delete</h4>
+    <p>Do the plain BST insert/delete; then let \(w\) be the <b>highest</b> vertex that lost its balance, and rebuild \(w\)'s subtree into a perfectly balanced BST on the same keys. Worst case \(\Theta(n)\) (rebuilding the root), but rare — that's the point.</p>
+    <h4>Amortized analysis (accounting, α = 1/3)</h4>
+    <ul>
+      <li><b>Charge per insert:</b> \(4(\mathrm{height}+1) = O(\log n)\). Pay \(\mathrm{height}+1\) for walking down; leave <b>$3 on every node along the insertion path</b>.</li>
+      <li><b>Key lemma:</b> when \(w\) (with \(M=\mathrm{size}(w)\)) goes out of balance, at least \(M/3\) inserts passed through \(w\) since the last rebuild involving it — each deposited $3 ⟹ \(w\) holds \(\ge M\) dollars, enough to pay the \(\Theta(M)\) rebuild.</li>
+      <li><b>Result:</b> \(n\) inserts cost \(O(n\log n)\) total ⟹ <span class="tag b-Olog">O(log n)</span> amortized per insert.</li>
+    </ul>
+    <div class="note"><b>Why the lemma holds (α = 1/3):</b> right after a rebuild \(w\) is perfectly balanced (each side ≈ \(M'/2\)); to reach the violating state \(\mathrm{size}(\mathrm{right}) = \lfloor M/3\rfloor - 1\) vs \(\mathrm{size}(\mathrm{left}) = M - \lfloor M/3\rfloor\), at least \(\tfrac13 M\) new keys must have been inserted into \(w\)'s subtree.</div>
   </div>
 
   </div>

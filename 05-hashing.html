@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>5 · Skip Lists &amp; Hashing</title>
-<link rel="stylesheet" href="assets/style.css?v=20260716ux">
+<link rel="stylesheet" href="assets/style.css?v=20260804analysis">
 <script src="assets/theme.js?v=20260716ux"></script>
 <script src="assets/mathjax-init.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
@@ -24,6 +24,7 @@
     <a href="06-graphs.html">6 · Graphs</a>
     <a href="07-advanced.html">7 · Amortized &amp; Union-Find</a>
     <a href="08-exam.html">8 · Exam Reference</a>
+    <a href="09-cram.html">9 · Cram Recap</a>
   </nav>
 </aside>
 <main class="content">
@@ -203,6 +204,24 @@
       Reverse-path right-moves stop on a <b>promote</b> (prob \(q\)) → \(E[R_i]\le 1/q-1\).
       Same number when \(q=\tfrac12\).
     </div>
+
+    <h4 id="sl-proofs">The two lecture proofs (write-them-on-the-exam versions)</h4>
+    <p><b>Expected height \(\le \log n + 2\):</b> let \(X_i\) = indicator that level \(S_i\) is nonempty, so \(h=\sum_{i\ge 1} X_i\). Use <em>both</em> bounds \(E[X_i]\le 1\) and \(E[X_i]\le E[|S_i|]=n/2^i\), splitting the sum at \(\lfloor\log n\rfloor\):</p>
+    <p style="text-align:center">\(E[h] \;\le\; \underbrace{\textstyle\sum_{i=1}^{\lfloor\log n\rfloor} 1}_{\le\, \log n} \;+\; \underbrace{\textstyle\sum_{i>\lfloor\log n\rfloor} n/2^i}_{\le\, 2} \;\le\; \log n + 2.\)</p>
+    <p><b>Expected search \(\le 2\log n + 5\) (backward-search trick):</b> analyze the search path <b>in reverse</b>: from the found node, go <b>up whenever possible, otherwise left</b>. Each left-move at level \(i\) means that node's coin flip was "stop" — so the number of left-moves per level \(R_i\) behaves like a geometric r.v.: \(E[R_i]\le 1\) (and also \(\le n/2^i\)). Total path length \(=h+\sum_i R_i\), so
+    \(E \le (\log n + 2) + (\log n + 1) + 2 = 2\log n + 5\). Same split-the-sum trick as the height proof.</p>
+    <div class="analysis-viz-wrap" data-mode="skippath">
+      <div class="viz-controls">
+        <button class="viz-btn viz-primary viz-play">▶ Play</button>
+        <button class="viz-btn viz-prev">◀ Step</button>
+        <button class="viz-btn viz-next">Step ▶</button>
+        <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1200" step="20"></label>
+      </div>
+      <div class="analysis-stage"></div>
+      <div class="viz-desc">Loading…</div>
+      <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
+    </div>
+    <div class="note"><b>Why reverse?</b> Going forward, where the path drops down depends on future coin flips — hard to analyze. Backwards, each step is determined by one local coin flip, so levels decouple. This trick is a classic "prove it" target.</div>
   </div>
 
   <h2 class="section" id="indexable-skiplist">5.1.1 Indexable Skip List (order statistics)</h2>
@@ -337,6 +356,15 @@
       <li><b>Division:</b> \(h(k)=k \bmod m\). Pick \(m\) a <b>prime</b> not near a power of 2.</li>
       <li><b>Multiplication:</b> \(h(k)=\lfloor m\,(kA\bmod 1)\rfloor\), \(A\approx(\sqrt5-1)/2\). \(m\) can be a power of 2.</li>
     </ul>
+
+    <h4 id="universal">Universal hashing (lecture 9 — definition + proof)</h4>
+    <p><b>Definition:</b> a collection \(\mathcal H\) of hash functions is <b>universal</b> if for every pair of distinct keys \(x\neq y\in U\), a uniformly random \(h\in\mathcal H\) satisfies
+    \(\ \Pr[h(x)=h(y)] \le 1/m\).</p>
+    <p><b>The course's family:</b> pick a prime \(p > u\); \(\ \mathcal H_{p,m} = \{f_{a,b}(x) = ((ax+b)\bmod p)\bmod m \;:\; a\in\{1..p{-}1\},\, b\in\{0..p{-}1\}\}\). Note \(a\neq 0\). One random \(h\) is drawn <b>once</b> and used for all operations.</p>
+    <p><b>Theorem:</b> with a universal family, for <b>any</b> fixed set of \(n\) stored keys and any key \(k\), the expected length of the list \(T[h(k)]\) is \(\le 1+\alpha\).</p>
+    <p><b>Proof (indicators):</b> let \(I_y = 1\) iff \(h(y)=h(k)\) for each stored \(y\). List length \(= \sum_y I_y\) (plus 1 if \(k\) itself is stored). By universality \(E[I_y]=\Pr[h(y)=h(k)]\le 1/m\), so by linearity \(E[\text{length}] \le 1 + n/m = 1+\alpha\). ∎</p>
+    <div class="note"><b>Why this matters (exam phrasing):</b> "random keys + fixed h" and "fixed adversarial keys + random universal h" give the <em>same</em> \(O(1+\alpha)\) expected search — the randomness just moves from the input to the algorithm.</div>
+    <div class="note"><b>Max-bucket fact:</b> even with \(m=\Theta(n)\) and uniform hashing, the <b>largest</b> chain has \(\Theta(\log n/\log\log n)\) keys with probability \(\ge 1-1/n^{\Theta(1)}\) — expected O(1) per bucket does not mean all buckets are O(1).</div>
   </div>
 
   <h2 class="section" id="openaddr">5.3 Open Addressing (Probing)</h2>
@@ -358,7 +386,12 @@
       <tr><td>Rehash (table doubles)</td><td colspan="2"><span class="tag b-On">O(n)</span> one-time: re-insert all n keys into new table of size 2m</td></tr>
     </table>
     <p class="case-hint">Exact probe bounds (exam detail): unsuccessful ≤ \(\frac{1}{1-\alpha}\); successful ≤ \(\frac{1}{\alpha}\ln\frac{1}{1-\alpha}\). Delete probes the chain like search, then marks a tombstone in O(1). <b>Rehash</b> costs <span class="tag b-On">O(n)</span> per event; with doubling, <span class="tag b-O1">O(1) amortized</span> per insert.</p>
-    <div class="pitfall"><b>Deletion is tricky:</b> you can't just empty a slot (breaks probe chains). Use a <b>"deleted"</b> tombstone marker. Tombstones raise probe lengths over time: rehash periodically if many deletes.</div>
+    <div class="pitfall"><b>Deletion is tricky:</b> you can't just empty a slot (breaks probe chains). The lecture gives <b>two</b> methods:
+      <ul style="margin:6px 0 0">
+        <li><b>Method 1 — tombstone:</b> mark <code>DELETED</code>; Insert may reuse it, Search walks past it. Cost Θ(1) worst-case, but the <em>effective</em> load \(\alpha' = n'/m\) (counting tombstones) keeps growing → longer probes, earlier rehashes.</li>
+        <li><b>Method 2 — reinsert the run:</b> empty the slot, then delete + reinsert every element in the occupied run after it. Expected Θ(1) (runs are short when \(\alpha'\le 1-\varepsilon\)), and keeps \(\alpha'=\alpha\).</li>
+      </ul>
+    </div>
 
     <h4>Probing animator</h4>
     <p style="font-size:15px;color:var(--muted);margin-bottom:8px">Linear probing with dynamic <b>h(k) = k mod m</b> (starts at m=11, doubles on rehash). Watch numbered probe steps and tombstones on delete. <span style="color:#6366f1"><b>Purple</b></span> = current probe · <span style="color:#ff6b81"><b>Red ✗</b></span> = tombstone.</p>
@@ -399,5 +432,6 @@
 <script src="assets/hash.js" defer></script>
 <script src="assets/skip-list.js?v=20260712sl-circles" defer></script>
 <script src="assets/indexable-skip-list.js?v=20260713exact" defer></script>
+<script src="assets/analysis-viz.js?v=20260804analysis" defer></script>
 </body>
 </html>
