@@ -378,8 +378,6 @@
       <tr><td>Topological sort</td><td><span class="tag b-On">O(V+E)</span></td><td>DAG</td><td>dependency ordering</td></tr>
       <tr><td>Kruskal MST</td><td><span class="tag b-Onlog">O(E log V)</span></td><td>weighted undirected</td><td>min spanning tree</td></tr>
       <tr><td>Prim MST</td><td><span class="tag b-Onlog">O(E log V)</span></td><td>weighted undirected</td><td>min spanning tree</td></tr>
-      <tr><td>Dijkstra</td><td><span class="tag b-Onlog">O((V+E) log V)</span></td><td>non-negative weights</td><td>single-source shortest path</td></tr>
-      <tr><td>Bellman-Ford</td><td><span class="tag b-On2">O(V·E)</span></td><td>negative weights OK</td><td>SSSP + negative-cycle detection</td></tr>
     </table>
   </div>
 
@@ -668,7 +666,6 @@
         <li><b>Counting</b> linear only if \(k=O(n)\); it is stable.</li>
         <li><b>Radix</b> \(\Theta(d(n+b))\); needs a stable digit sort.</li>
         <li><b>Bucket</b> avg \(O(n)\), worst \(O(n^2)\) (one bucket).</li>
-        <li><b>Dijkstra</b> fails on negative edges → Bellman-Ford.</li>
         <li><b>BFS</b> = shortest hops only (unweighted).</li>
         <li><b>Spanning tree ≠ MST</b> — MST also minimizes weight.</li>
         <li><b>Plain BST</b> worst \(O(n)\); AVL for \(O(\log n)\).</li>
@@ -695,7 +692,6 @@
       <tr><td><b>Universal hash family</b> (\(\Pr[h(x){=}h(y)]\le 1/m\), \(a\neq 0\))</td><td><a href="05-hashing.html#universal">§5.2</a></td><td>never asked — fresh material</td></tr>
       <tr><td>Complete binary tree ("delete consecutive leaves right-to-left"); heap property</td><td><a href="04-heaps.html#heap">§4.1</a></td><td>wording matters in A/S/N questions</td></tr>
       <tr><td>Stable / in-place; <b>average-case vs worst-case-expected</b></td><td><a href="02-sorting.html#bucket-proof">§2.3</a></td><td>conceptual trap the lecture stresses</td></tr>
-      <tr><td>BB[α] bounded balance</td><td><a href="07-advanced.html#bb-alpha">§7.5</a></td><td>never asked — fresh material</td></tr>
     </table>
 
     <h4>Proofs to be able to write start-to-finish</h4>
@@ -711,7 +707,7 @@
       <tr><td>Weighted union O(m + n log n)</td><td>set doubles each time your pointer moves</td><td><a href="07-advanced.html#uf-linkedlist">§7.2</a></td></tr>
       <tr><td>White-path / parenthesis / topo-sort correctness</td><td>interval nesting + "black vertex has no white neighbor"</td><td><a href="06-graphs.html#dfs-theorems">§6.3</a></td></tr>
       <tr><td>Bucket sort expected Θ(n)</td><td>\(E[n_0^2] = 2-1/n\) via indicators</td><td><a href="02-sorting.html#bucket-proof">§2.3.3</a></td></tr>
-      <tr><td>B-tree 3/2m structural ops; BB[α] rebuild</td><td>credit invariants on nodes</td><td><a href="07-advanced.html#btree-amortized">§7.4</a> · <a href="07-advanced.html#bb-alpha">§7.5</a></td></tr>
+      <tr><td>B-tree 3/2m structural ops</td><td>credit invariants on nodes</td><td><a href="07-advanced.html#btree-amortized">§7.4</a></td></tr>
       <tr><td>LZ78 minimum bits Θ(√n log n)</td><td>i-th phrase length ≤ i ⟹ p = Ω(√n)</td><td><a href="04-heaps.html#lz-bits">§4.3</a></td></tr>
     </table>
 

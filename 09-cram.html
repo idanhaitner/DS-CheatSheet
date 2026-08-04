@@ -77,7 +77,6 @@
       <tr><td>Counting / Radix / Bucket</td><td>\(\Theta(n+k)\) / \(\Theta(d(n+b))\) / avg \(\Theta(n)\)</td><td>not comparison</td></tr>
       <tr><td>BFS / DFS / Topo</td><td>\(O(V+E)\)</td><td>unweighted SP / cycle·topo / DAG order</td></tr>
       <tr><td>Kruskal / Prim</td><td>\(O(E\log V)\)</td><td>MST via cut property</td></tr>
-      <tr><td>Dijkstra / BF</td><td>\(O((V+E)\log V)\) / \(O(VE)\)</td><td>nonneg / neg OK + cycle detect</td></tr>
     </table>
     </div>
   </div>
@@ -214,13 +213,11 @@
         </ul>
       </div>
       <div>
-        <h4>MST / SSSP</h4>
+        <h4>MST</h4>
         <ul class="cram-list">
           <li>GenericMST: always add safe edge.</li>
           <li>e in some MST? BFS on lighter edges.</li>
           <li>e in every MST? BFS on ≤w without e.</li>
-          <li>Dijkstra: no neg edges.</li>
-          <li>BF: |V|−1 relax; extra pass = neg cycle.</li>
         </ul>
       </div>
     </div>
@@ -238,7 +235,6 @@
       <li><b>Weighted union:</b> pointer updates ≤log n per elem → \(O(m+n\log n)\).</li>
       <li><b>Rank ≠ height:</b> PC shortens height; rank is upper bound only.</li>
       <li><b>B-tree amort:</b> charge 3/2; credits on thin/full nodes; ≤(3/2)m structural ops.</li>
-      <li><b>BB[α]:</b> rebuild highest unbalanced; α=1/3 charge \(4(h+1)\); ≥M/3 inserts fund rebuild.</li>
       <li><b>Deamort rehash:</b> over m/2 inserts do 3–4 copy steps; every Insert O(1) worst.</li>
     </ul>
   </div>
@@ -265,7 +261,6 @@
       <li>buildHeap is \(\Theta(n)\), not \(n\log n\). Heap order ≠ BST order ≠ sorted array.</li>
       <li>Quicksort \(\Theta(n^2)\) on sorted with fixed pivot. Not stable.</li>
       <li>Bucket worst \(n^2\); don’t claim worst-case linear.</li>
-      <li>Dijkstra fails with negative edges → BF.</li>
       <li>BFS = fewest edges, not weighted SP.</li>
       <li>Spanning tree ≠ MST. Light edge ≠ “any tree edge”.</li>
       <li>Plain BST worst \(O(n)\). AVL insert ≤1 rot ≠ delete.</li>

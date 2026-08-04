@@ -48,18 +48,6 @@
         <td><span class="tag b-On">O(V+E)</span></td>
       </tr>
       <tr>
-        <td>Shortest path, <b>non-negative weights</b></td>
-        <td><a href="#dijkstra">Dijkstra</a></td>
-        <td>Greedy: once a vertex is finalized, its distance is final</td>
-        <td><span class="tag b-Onlog">O((V+E) log V)</span></td>
-      </tr>
-      <tr>
-        <td>Shortest path, <b>negative weights OK</b></td>
-        <td><a href="#bellman">Bellman-Ford</a></td>
-        <td>Relaxes all edges V−1 times; detects negative cycles</td>
-        <td><span class="tag b-On2">O(VE)</span></td>
-      </tr>
-      <tr>
         <td>Is there a cycle? / topological order?</td>
         <td><a href="#dfs">DFS</a></td>
         <td>Back edge to gray vertex = cycle; finish times → topo sort</td>
@@ -90,7 +78,7 @@
         <td><span class="tag b-O1">O(m·α(n))</span></td>
       </tr>
     </table>
-    <div class="note"><b>Real-world mapping:</b> GPS with equal road segments → BFS. GPS with distances → Dijkstra. Flight prices with possible rebates (negative) → Bellman-Ford. Connect cities with minimum cable cost → MST. Course prerequisites → topological sort.</div>
+    <div class="note"><b>Real-world mapping:</b> GPS with equal road segments → BFS. Connect cities with minimum cable cost → MST. Course prerequisites → topological sort.</div>
     <div class="warn"><b>Exam pattern:</b> many questions are not “run BFS” directly: they ask a variant (distance between two <em>sets</em> of vertices, path with color changes, “is edge e in some MST?”). The trick is usually a <b>reduction</b>: build a new graph G′, then run a standard algorithm. See <a href="#reductions">§6.8</a>.</div>
   </div>
 
@@ -196,7 +184,7 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
 
     <h4>When <em>not</em> to use BFS</h4>
     <ul>
-      <li><b>Weighted</b> shortest path → use <b>Dijkstra</b> (non-negative) or Bellman-Ford (negative OK).</li>
+      <li><b>Weighted</b> shortest path → not covered in this course (BFS only gives hop-count / unweighted distance).</li>
       <li><b>Cycle detection in directed graphs</b> → prefer <b>DFS</b> (back edge is easier to spot).</li>
       <li><b>Topological order</b> → DFS finish times (this course) or Kahn’s algorithm (indegree queue, BFS-style).</li>
     </ul>
@@ -503,8 +491,8 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
       </tr>
       <tr>
         <td>Weighted shortest path</td>
-        <td><b>Neither</b></td>
-        <td>Use Dijkstra / Bellman-Ford — not plain BFS/DFS</td>
+        <td><b>Neither</b> (course)</td>
+        <td>BFS/DFS do not minimize edge weights — only hop count / reachability</td>
       </tr>
     </table>
 
@@ -547,7 +535,7 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
     <div class="note"><b>Multiple valid orders:</b> a DAG may have many topological sorts: any order respecting all edges is valid. DFS finish-time order is one canonical choice.</div>
     <div class="warn"><b>Cycle = failure:</b> if DFS finds a back edge, the graph is not a DAG and topological sort is impossible. Always check for cycles first.</div>
     <h4>Longest path in a DAG (exam variant)</h4>
-    <p>On a DAG, the <b>longest path</b> from \(s\) to \(t\) can be found by: (1) topological sort, (2) process vertices in topo order, (3) relax with <b>max</b> instead of min (<code>dist[v] = max(dist[v], dist[u] + w(u,v))</code>). This is <b>DAG DP</b>, not Dijkstra (no priority queue). Time <span class="tag b-On">O(V + E)</span>. Works because topo order guarantees all predecessors of \(v\) are processed before \(v\).</p>
+    <p>On a DAG, the <b>longest path</b> from \(s\) to \(t\) can be found by: (1) topological sort, (2) process vertices in topo order, (3) relax with <b>max</b> instead of min (<code>dist[v] = max(dist[v], dist[u] + w(u,v))</code>). This is <b>DAG DP</b> (no priority queue). Time <span class="tag b-On">O(V + E)</span>. Works because topo order guarantees all predecessors of \(v\) are processed before \(v\).</p>
   </div>
 
   <h2 class="section" id="mst">6.5 Minimum Spanning Tree (MST)</h2>
@@ -710,100 +698,8 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
     <p><b>Exam tip:</b> “connect all, minimize cost” → reduce to MST; cite Kruskal/Prim as a black box and analyze the reduction.</p>
   </div>
 
-  <h2 class="section" id="dijkstra">6.6 Dijkstra: Single-Source Shortest Paths</h2>
-  <div class="card">
-    <p>Non-negative weights: shortest paths from source \(s\). Greedy with a PQ on \(\mathrm{dist}[v]\); repeatedly extract-min and <b>relax</b> outgoing edges. Teal edges = shortest-path tree (not an MST).</p>
-    <div class="note"><b>Relax \((u,v)\):</b> if \(\mathrm{dist}[u]+w(u,v)&lt;\mathrm{dist}[v]\), update \(\mathrm{dist}[v]\) and parent. Demo trap: A→B weight 8 improves to 6 via A→C→D→B.</div>
-    <div class="graph-viz-wrap" data-modes='["dijkstra"]' data-default="dijkstra">
-      <div class="viz-controls">
-        <label class="viz-algo-label" style="display:none">Algorithm: <select class="viz-algo"></select></label>
-        <button class="viz-btn viz-primary viz-play">▶ Play</button>
-        <button class="viz-btn viz-prev">◀ Step</button>
-        <button class="viz-btn viz-next">Step ▶</button>
-        <label>Speed: <input type="range" class="viz-speed" min="100" max="1800" value="1450" step="20"></label>
-      </div>
-      <div class="gviz-legend-compact">
-        <span class="leg-wgb"><span class="sw" style="background:#ffffff;border:1px solid #94a3b8"></span><span class="sw" style="background:#9ca3af;border:1px solid #6b7280"></span><span class="sw" style="background:#1a1a1a;border:1px solid #000"></span> unvisited / in PQ / finalized</span>
-        <span class="leg-tree"><span class="sw" style="background:#57e0c0"></span> shortest-path tree</span>
-        <span class="leg-look"><span class="sw" style="background:#7c9cff"></span> relaxing now</span>
-        <span class="leg-notree"><span class="sw" style="background:#2a3058"></span> not on shortest path</span>
-      </div>
-      <p class="gviz-legend-note"></p>
-      <div class="gviz-main">
-        <div class="gviz-anim-col">
-          <div class="graph-stage"></div>
-          <div class="viz-desc">Loading…</div>
-          <div class="viz-panel"></div>
-          <div class="viz-stats" style="margin-top:8px">Step <b class="viz-step">0</b> / <b class="viz-total">0</b></div>
-        </div>
-        <div class="gviz-pseudo-wrap">
-          <span class="code-label">pseudocode</span>
-          <div class="viz-code" aria-label="Algorithm pseudocode"></div>
-        </div>
-      </div>
-    </div>
-    <table>
-      <tr><th>Priority queue implementation</th><th>Total time</th></tr>
-      <tr><td>Binary heap</td><td><span class="tag b-Onlog">O((V+E) log V)</span></td></tr>
-      <tr><td>Fibonacci heap</td><td>O(E + V log V)</td></tr>
-    </table>
 
-    <h4 id="dijkstra-complexity">Why binary-heap Dijkstra is \(O((V+E)\log V)\)</h4>
-    <p>Dijkstra’s work is dominated by the priority queue. With a <b>binary heap</b>, each heap op (insert / extract-min / decrease-key) costs \(O(\log V)\) because the heap holds at most \(V\) vertices.</p>
-    <table>
-      <tr><th>Operation</th><th>How many times</th><th>Cost each</th><th>Total</th></tr>
-      <tr><td><b>extract-min</b></td><td>\(\le V\) (finalize each vertex once)</td><td>\(O(\log V)\)</td><td>\(O(V\log V)\)</td></tr>
-      <tr><td><b>decrease-key</b> / insert into PQ</td><td>\(\le E\) (at most once per edge, when relaxing)</td><td>\(O(\log V)\)</td><td>\(O(E\log V)\)</td></tr>
-      <tr><td>Init / other \(O(V)\) bookkeeping</td><td>—</td><td>—</td><td>\(O(V)\)</td></tr>
-    </table>
-    <p>Add them up:</p>
-    \[
-      O(V\log V) + O(E\log V) = O\big((V+E)\log V\big).
-    \]
-    <div class="note">
-      <b>Exam wording:</b> same heap accounting as Prim. Sparse graphs (\(E=\Theta(V)\)): \(O(V\log V)\). Dense (\(E=\Theta(V^2)\)): \(O(V^2\log V)\). With a Fibonacci heap, decrease-key is amortized \(O(1)\) → \(O(E + V\log V)\), but the course default answer is the binary-heap bound.
-    </div>
-
-    <h4>Is Dijkstra BFS? DFS? Neither?</h4>
-    <table>
-      <tr><th></th><th>BFS</th><th>DFS</th><th>Dijkstra</th></tr>
-      <tr><td><b>Structure</b></td><td>Queue (FIFO)</td><td>Stack / recursion</td><td><b>Min-heap PQ</b> (by dist)</td></tr>
-      <tr><td><b>Explores next</b></td><td>Smallest hop count</td><td>Deepest unvisited path</td><td><b>Smallest dist from \(s\)</b></td></tr>
-      <tr><td><b>Edge weights</b></td><td>All equal (1)</td><td>Ignores weights</td><td><b>Non-negative weights</b></td></tr>
-      <tr><td><b>Shortest path?</b></td><td>Yes (unweighted)</td><td>No</td><td><b>Yes (weighted ≥ 0)</b></td></tr>
-      <tr><td><b>Relation</b></td><td colspan="3">Unweighted graph → BFS = Dijkstra with all \(w=1\). Dijkstra is <b>not</b> DFS.</td></tr>
-    </table>
-
-    <div class="pitfall"><b>Fails with negative edges!</b> Once a vertex is finalized it's never revisited. Use <b>Bellman-Ford</b> (O(VE)) for negative weights.</div>
-  </div>
-
-  <h2 class="section" id="bellman">6.7 Bellman-Ford: Negative Weights OK</h2>
-  <div class="card">
-    <p><b>Problem it solves:</b> single-source shortest paths when edge weights can be <b>negative</b>. Also detects <b>negative-weight cycles</b> reachable from \(s\) (then shortest paths are undefined).</p>
-    <p><b>Why Dijkstra fails:</b> Dijkstra assumes that once a vertex is extracted from the priority queue, its distance is final. A later negative edge could shorten it: Dijkstra never revisits.</p>
-    <span class="code-label">pseudocode</span>
-<pre><span class="kw">Bellman-Ford</span>(G, w, s):
-    dist[s] = 0, others = infinity
-    <span class="kw">repeat</span> |V| - 1 times:
-        <span class="kw">for each</span> edge (u,v) <span class="kw">in</span> E:
-            <span class="kw">if</span> dist[u] + w(u,v) &lt; dist[v]:
-                dist[v] = dist[u] + w(u,v)
-    <span class="kw">for each</span> edge (u,v):
-        <span class="kw">if</span> dist[u] + w(u,v) &lt; dist[v]:
-            <span class="kw">return</span> "negative cycle"
-    <span class="kw">return</span> dist</pre>
-    <p>Time <span class="tag b-On2">O(VE)</span> · Space <span class="tag b-On">O(V)</span>.</p>
-    <div class="note"><b>Intuition:</b> after \(k\) rounds, \(dist[v]\) is the shortest path using at most \(k\) edges. After \(|V|-1\) rounds, all simple shortest paths are found (a simple path has at most \(|V|-1\) edges).</div>
-    <table>
-      <tr><th>Scenario</th><th>Use</th></tr>
-      <tr><td>All weights ≥ 0</td><td><b>Dijkstra</b>: faster</td></tr>
-      <tr><td>Negative weights, no negative cycle</td><td><b>Bellman-Ford</b></td></tr>
-      <tr><td>Need to detect negative cycle</td><td><b>Bellman-Ford</b> (extra pass)</td></tr>
-      <tr><td>All-pairs shortest paths (small V)</td><td><b>Floyd-Warshall</b> O(V³): beyond scope but know the name</td></tr>
-    </table>
-  </div>
-
-  <h2 class="section" id="reductions">6.8 Graph Reductions: Exam Pattern</h2>
+  <h2 class="section" id="reductions">6.6 Graph Reductions: Exam Pattern</h2>
   <div class="card">
     <p style="margin-top:0">Many exam questions don't ask you to run BFS/DFS directly: they describe a variant. The standard approach: <b>reduce</b> the new problem to a known one by building graph \(G'\), then run the standard algorithm.</p>
 
@@ -813,9 +709,8 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
         <h4>Super-source / super-sink</h4>
       </div>
       <p><b>Problem:</b> find shortest distance between two <b>sets</b> of vertices \(V_1\) and \(V_2\) (not just two vertices).</p>
-      <p><b>Reduction:</b> add dummy vertex \(s\), connect \(s \to u\) for all \(u \in V_1\); add dummy \(t\), connect \(v \to t\) for all \(v \in V_2\). Run BFS (unweighted hops) or Dijkstra (weights) from \(s\).<br>
-      • <b>BFS / hop count:</b> use weight-1 dummies (or treat as unweighted) → answer = \(dist[t] - 2\).<br>
-      • <b>Dijkstra / weighted:</b> use weight-0 dummies → answer = \(dist[t]\) (do <b>not</b> subtract 2).</p>
+      <p><b>Reduction:</b> add dummy vertex \(s\), connect \(s \to u\) for all \(u \in V_1\); add dummy \(t\), connect \(v \to t\) for all \(v \in V_2\). Run <b>BFS</b> from \(s\) (course: unweighted / hop-count).<br>
+      Use weight-1 dummies (or treat as unweighted) → answer = \(dist[t] - 2\).</p>
       <p>Time: building \(G'\) is <span class="tag b-On">O(V + E)</span>; BFS on \(G'\) is <span class="tag b-On">O(V + E)</span>.</p>
     </div>
 
@@ -870,12 +765,12 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
     </div>
   </div>
 
-  <h2 class="section" id="graph-exam">6.9 Exam Tips &amp; Conclusions</h2>
+  <h2 class="section" id="graph-exam">6.7 Exam Tips &amp; Conclusions</h2>
   <div class="card">
     <h4>Before you code: ask these 4 questions</h4>
     <ol>
       <li><b>Directed or undirected?</b> Affects edge types, cycle detection, and whether to use both directions in adjacency list.</li>
-      <li><b>Weighted or unweighted?</b> Unweighted → BFS. Non-negative weights → Dijkstra. Negative OK → Bellman-Ford.</li>
+      <li><b>Weighted or unweighted?</b> Unweighted / hop-count → BFS. (Weighted SSSP not in this course.)</li>
       <li><b>What is the output?</b> Distance? Path? Yes/no (connectivity)? Ordering? Minimum total weight?</li>
       <li><b>Is this a standard problem or a variant?</b> If variant → look for a reduction (super-source, vertex split, reverse graph, MST).</li>
     </ol>
@@ -887,14 +782,11 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
       <tr><td>Topological sort</td><td><span class="tag b-On">O(V + E)</span></td><td>One DFS pass</td></tr>
       <tr><td>Kruskal</td><td><span class="tag b-Onlog">O(E log V)</span></td><td>Sort dominates; counting if weights ∈ [1,V]; radix if weights ∈ [0, E^{3/2}] → O(E·α(E))</td></tr>
       <tr><td>Prim (binary heap)</td><td><span class="tag b-Onlog">O(E log V)</span></td><td>V extract-min + E decrease-key</td></tr>
-      <tr><td>Dijkstra (binary heap)</td><td><span class="tag b-Onlog">O((V+E) log V)</span></td><td>Same heap analysis as Prim</td></tr>
-      <tr><td>Bellman-Ford</td><td><span class="tag b-On2">O(VE)</span></td><td>(V−1) rounds × E edges</td></tr>
     </table>
 
     <h4>Common mistakes (from practice sessions &amp; past exams)</h4>
     <ul>
       <li><b>Using BFS for weighted graphs</b>: BFS only gives shortest hop count, not minimum weight.</li>
-      <li><b>Using Dijkstra with negative edges</b>: greedy finalization breaks; use Bellman-Ford.</li>
       <li><b>Topological sort on a graph with cycles</b>: always check for back edges first.</li>
       <li><b>Confusing spanning tree with MST</b>: any acyclic connected subgraph with \(|V|-1\) edges is a spanning tree; MST additionally minimizes total weight.</li>
       <li><b>Forgetting Union-Find in Kruskal analysis</b>: mention α(V) per operation, not O(1) amortized without justification.</li>
@@ -919,10 +811,10 @@ Adj[3] (D): 1 → 2 → null     <span class="cm"># B, C</span>
       <li><b>Name the algorithm</b> and the data structure (heap, Union-Find, queue).</li>
       <li><b>Write main logic</b>: 5–10 lines of pseudocode; skip boilerplate init unless asked.</li>
       <li><b>Analyze runtime</b>: separate build time from algorithm time; state the dominant term.</li>
-      <li><b>Handle edge cases</b> in one line: disconnected graph, empty graph, negative cycle.</li>
+      <li><b>Handle edge cases</b> in one line: disconnected graph, empty graph.</li>
     </ol>
 
-    <div class="note"><b>Black-box usage:</b> in many exam questions you can treat MST, BFS, or Dijkstra as a subroutine (“run Kruskal on \(G\)”) and only analyze the reduction + black-box cost. Don't re-derive Kruskal unless the question asks for it.</div>
+    <div class="note"><b>Black-box usage:</b> in many exam questions you can treat MST or BFS as a subroutine (“run Kruskal on \(G\)”) and only analyze the reduction + black-box cost. Don't re-derive Kruskal unless the question asks for it.</div>
     <div class="warn"><b>When stuck:</b> draw a small example graph (4–5 vertices), trace the algorithm by hand, then generalize. Most graph exam questions test understanding of <em>what the algorithm preserves</em>, not tricky implementation details.</div>
   </div>
 

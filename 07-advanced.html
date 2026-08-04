@@ -31,7 +31,7 @@
   <div class="pagehead">
     <div class="crumbs"><a href="index.html">Home</a> › Amortized &amp; Union-Find</div>
     <h1>7 · Advanced Analysis</h1>
-    <p>Amortized analysis · deamortization · union-find · BB[α]</p>
+    <p>Amortized analysis · deamortization · union-find</p>
   </div>
   <div class="inner">
 
@@ -297,23 +297,6 @@
     <div class="note">Amortized cost per insert/delete = <span class="tag b-O1">O(1)</span> for structural ops (tree height still \(O(\log n)\) per search). See <a href="03-trees.html#btree">B-trees</a> for the structure itself.</div>
   </div>
 
-  <h2 class="section" id="bb-alpha">7.5 BB[α] Trees (amortized rebuilding)</h2>
-  <div class="card">
-    <p>A different way to keep a BST balanced: instead of rotations, occasionally <b>rebuild a whole subtree</b>, and pay for it amortized. (Lecture 18 — never yet asked on an exam, prime Moed B material.)</p>
-    <h4>Definition</h4>
-    <p>\(\mathrm{size}(v)\) = number of vertices in \(v\)'s subtree. Vertex \(v\) has <b>bounded balance \(\alpha\)</b> if
-    \(\ \mathrm{size}(v.\mathrm{left}) \ge \lfloor \alpha\cdot \mathrm{size}(v)\rfloor\ \) and \(\ \mathrm{size}(v.\mathrm{right}) \ge \lfloor \alpha\cdot \mathrm{size}(v)\rfloor\).
-    A <b>BB[α] tree</b> (\(\alpha &lt; 1/2\)) is a BST in which <b>every</b> vertex has bounded balance α. Height \(\le \log_{1/(1-\alpha)} n = O(\log n)\).</p>
-    <h4>Insert / Delete</h4>
-    <p>Do the plain BST insert/delete; then let \(w\) be the <b>highest</b> vertex that lost its balance, and rebuild \(w\)'s subtree into a perfectly balanced BST on the same keys. Worst case \(\Theta(n)\) (rebuilding the root), but rare — that's the point.</p>
-    <h4>Amortized analysis (accounting, α = 1/3)</h4>
-    <ul>
-      <li><b>Charge per insert:</b> \(4(\mathrm{height}+1) = O(\log n)\). Pay \(\mathrm{height}+1\) for walking down; leave <b>$3 on every node along the insertion path</b>.</li>
-      <li><b>Key lemma:</b> when \(w\) (with \(M=\mathrm{size}(w)\)) goes out of balance, at least \(M/3\) inserts passed through \(w\) since the last rebuild involving it — each deposited $3 ⟹ \(w\) holds \(\ge M\) dollars, enough to pay the \(\Theta(M)\) rebuild.</li>
-      <li><b>Result:</b> \(n\) inserts cost \(O(n\log n)\) total ⟹ <span class="tag b-Olog">O(log n)</span> amortized per insert.</li>
-    </ul>
-    <div class="note"><b>Why the lemma holds (α = 1/3):</b> right after a rebuild \(w\) is perfectly balanced (each side ≈ \(M'/2\)); to reach the violating state \(\mathrm{size}(\mathrm{right}) = \lfloor M/3\rfloor - 1\) vs \(\mathrm{size}(\mathrm{left}) = M - \lfloor M/3\rfloor\), at least \(\tfrac13 M\) new keys must have been inserted into \(w\)'s subtree.</div>
-  </div>
 
   </div>
 </main>
